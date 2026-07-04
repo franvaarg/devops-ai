@@ -1,9 +1,29 @@
+import { useState } from "react";
 import Header from "../components/Header";
 import LogInput from "../components/LogInput";
 import AnalyzeButton from "../components/AnalyzeButton";
 import AnalysisPanel from "../components/AnalysisPanel";
 
 function Home() {
+  const [log, setLog] = useState("");
+  const [summary, setSummary] = useState("");
+  const [recommendation, setRecommendation] = useState("");
+
+  async function handleAnalyze() {
+    const response = await fetch("http://localhost:3000/api/analyze", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ log }),
+    });
+
+    const data = await response.json();
+
+    setSummary(data.summary);
+    setRecommendation(data.recommendation);
+  }
+
   return (
     <main
       style={{
@@ -25,9 +45,9 @@ function Home() {
         }}
       >
         <Header />
-        <LogInput />
-        <AnalyzeButton />
-        <AnalysisPanel />
+        <LogInput log={log} setLog={setLog} />
+        <AnalyzeButton onAnalyze={handleAnalyze} />
+        <AnalysisPanel summary={summary} recommendation={recommendation} />
       </div>
     </main>
   );
