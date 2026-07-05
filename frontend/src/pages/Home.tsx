@@ -6,8 +6,11 @@ import AnalysisPanel from "../components/AnalysisPanel";
 
 function Home() {
   const [log, setLog] = useState("");
+  const [severity, setSeverity] = useState("");
   const [summary, setSummary] = useState("");
+  const [rootCause, setRootCause] = useState("");
   const [recommendation, setRecommendation] = useState("");
+  const [steps, setSteps] = useState<string[]>([]);
 
   async function handleAnalyze() {
     const response = await fetch("http://localhost:3000/api/analyze", {
@@ -20,8 +23,11 @@ function Home() {
 
     const data = await response.json();
 
+    setSeverity(data.severity);
     setSummary(data.summary);
+    setRootCause(data.rootCause);
     setRecommendation(data.recommendation);
+    setSteps(data.steps || []);
   }
 
   return (
@@ -47,7 +53,13 @@ function Home() {
         <Header />
         <LogInput log={log} setLog={setLog} />
         <AnalyzeButton onAnalyze={handleAnalyze} />
-        <AnalysisPanel summary={summary} recommendation={recommendation} />
+        <AnalysisPanel
+          severity={severity}
+          summary={summary}
+          rootCause={rootCause}
+          recommendation={recommendation}
+          steps={steps}
+        />
       </div>
     </main>
   );
