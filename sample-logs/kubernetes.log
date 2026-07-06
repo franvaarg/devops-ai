@@ -1,0 +1,11 @@
+Warning FailedScheduling
+
+0/3 nodes are available.
+
+Insufficient cpu.
+
+Pod:
+devops-api
+
+Namespace:
+production

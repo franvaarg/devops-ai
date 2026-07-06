@@ -1,0 +1,11 @@
+AccessDeniedException
+
+User is not authorized to perform:
+
+s3:GetObject
+
+Bucket:
+devops-backups
+
+IAM Policy:
+Missing permissions.

@@ -1,0 +1,8 @@
+2026/07/04 22:14:12 [error]
+connect() failed (111: Connection refused)
+while connecting to upstream
+
+client: 192.168.1.50
+server: api.example.com
+request: GET /api/users
+upstream: http://127.0.0.1:3000

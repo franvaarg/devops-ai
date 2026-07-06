@@ -1,0 +1,18 @@
+2026-07-04 22:41:15 ERROR Docker
+Container: devops-api
+
+Error:
+Container exited with code 1.
+
+Reason:
+Missing environment variable DATABASE_URL.
+
+Stack Trace:
+Error: DATABASE_URL is undefined
+    at startServer (/usr/src/app/server.js:45)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+Suggested Investigation:
+- Verify .env file
+- Check Docker Compose variables
+- Restart container

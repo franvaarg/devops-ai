@@ -1,0 +1,18 @@
+2026-07-04 ERROR PostgreSQL
+
+Connection timeout after 30 seconds.
+
+Database:
+devops
+
+Host:
+db.internal.local
+
+Port:
+5432
+
+Possible Causes:
+- PostgreSQL service down
+- Firewall
+- DNS issue
+- Wrong credentials

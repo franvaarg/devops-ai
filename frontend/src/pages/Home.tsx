@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Header from "../components/Header";
 import LogInput from "../components/LogInput";
+import FileUpload from "../components/FileUpload";
 import AnalyzeButton from "../components/AnalyzeButton";
 import AnalysisPanel from "../components/AnalysisPanel";
 
@@ -51,8 +52,13 @@ function Home() {
         }}
       >
         <Header />
+
         <LogInput log={log} setLog={setLog} />
+
+        <FileUpload onFileLoaded={setLog} />
+
         <AnalyzeButton onAnalyze={handleAnalyze} />
+
         <AnalysisPanel
           severity={severity}
           summary={summary}
