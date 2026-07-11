@@ -2,7 +2,10 @@ const express = require("express");
 const cors = require("cors");
 
 const { analyzeLog } = require("./services/aiService");
-const { saveAnalysis } = require("./services/analysisService");
+const {
+  saveAnalysis,
+  getHistory,
+} = require("./services/analysisService");
 
 const app = express();
 
@@ -28,7 +31,7 @@ app.post("/api/analyze", async (req, res) => {
     const analysis = await analyzeLog(log);
     const savedAnalysis = await saveAnalysis(analysis, log);
 
-    res.status(201).json({
+    return res.status(201).json({
       id: savedAnalysis.id,
       severity: savedAnalysis.severity,
       summary: savedAnalysis.summary,
@@ -41,12 +44,37 @@ app.post("/api/analyze", async (req, res) => {
   } catch (error) {
     console.error("Analysis error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       severity: "Unknown",
       summary: "Something went wrong while analyzing or saving the log.",
       rootCause: "Backend or database error.",
       recommendation: "Check the backend console for details.",
       steps: [],
+    });
+  }
+});
+
+app.get("/api/history", async (req, res) => {
+  try {
+    const history = await getHistory();
+
+    return res.status(200).json(
+      history.map((analysis) => ({
+        id: analysis.id,
+        severity: analysis.severity,
+        summary: analysis.summary,
+        rootCause: analysis.root_cause,
+        recommendation: analysis.recommendation,
+        steps: analysis.steps,
+        originalLog: analysis.original_log,
+        createdAt: analysis.created_at,
+      }))
+    );
+  } catch (error) {
+    console.error("History error:", error);
+
+    return res.status(500).json({
+      message: "Something went wrong while loading the analysis history.",
     });
   }
 });

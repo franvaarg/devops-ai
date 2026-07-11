@@ -28,6 +28,25 @@ async function saveAnalysis(analysis, originalLog) {
   return result.rows[0];
 }
 
+async function getHistory() {
+  const result = await pool.query(`
+    SELECT
+      id,
+      severity,
+      summary,
+      root_cause,
+      recommendation,
+      steps,
+      original_log,
+      created_at
+    FROM analyses
+    ORDER BY created_at DESC;
+  `);
+
+  return result.rows;
+}
+
 module.exports = {
   saveAnalysis,
+  getHistory,
 };
