@@ -5,6 +5,7 @@ import LogInput from "../components/LogInput";
 import FileUpload from "../components/FileUpload";
 import AnalyzeButton from "../components/AnalyzeButton";
 import AnalysisPanel from "../components/AnalysisPanel";
+import HistoryFilters from "../components/HistoryFilters";
 import HistoryList from "../components/HistoryList";
 
 type HistoryItem = {
@@ -20,6 +21,7 @@ type HistoryItem = {
 
 function Home() {
   const [log, setLog] = useState("");
+
   const [severity, setSeverity] = useState("");
   const [summary, setSummary] = useState("");
   const [rootCause, setRootCause] = useState("");
@@ -27,32 +29,58 @@ function Home() {
   const [steps, setSteps] = useState<string[]>([]);
 
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [historySearch, setHistorySearch] = useState("");
+  const [historySeverity, setHistorySeverity] = useState("");
+
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isHistoryLoading, setIsHistoryLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const loadHistory = useCallback(async () => {
-    try {
-      setIsHistoryLoading(true);
+  const loadHistory = useCallback(
+    async (search = historySearch, severityFilter = historySeverity) => {
+      try {
+        setIsHistoryLoading(true);
 
-      const response = await fetch("http://localhost:3000/api/history");
+        const query = new URLSearchParams();
 
-      if (!response.ok) {
-        throw new Error("Could not load the analysis history.");
+        if (search.trim()) {
+          query.set("search", search.trim());
+        }
+
+        if (severityFilter) {
+          query.set("severity", severityFilter);
+        }
+
+        query.set("limit", "50");
+
+        const response = await fetch(
+          `http://localhost:3000/api/history?${query.toString()}`
+        );
+
+        if (!response.ok) {
+          throw new Error("Could not load the analysis history.");
+        }
+
+        const data: HistoryItem[] = await response.json();
+        setHistory(data);
+      } catch (error) {
+        console.error("History loading error:", error);
+        setErrorMessage("Could not load the analysis history.");
+      } finally {
+        setIsHistoryLoading(false);
       }
-
-      const data: HistoryItem[] = await response.json();
-      setHistory(data);
-    } catch (error) {
-      console.error("History loading error:", error);
-      setErrorMessage("Could not load the analysis history.");
-    } finally {
-      setIsHistoryLoading(false);
-    }
-  }, []);
+    },
+    [historySearch, historySeverity]
+  );
 
   useEffect(() => {
-    void loadHistory();
+    const timeoutId = window.setTimeout(() => {
+      void loadHistory();
+    }, 400);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
   }, [loadHistory]);
 
   async function handleAnalyze() {
@@ -65,13 +93,16 @@ function Home() {
       setIsAnalyzing(true);
       setErrorMessage("");
 
-      const response = await fetch("http://localhost:3000/api/analyze", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ log }),
-      });
+      const response = await fetch(
+        "http://localhost:3000/api/analyze",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ log }),
+        }
+      );
 
       const data = await response.json();
 
@@ -101,6 +132,11 @@ function Home() {
     } finally {
       setIsAnalyzing(false);
     }
+  }
+
+  function handleClearFilters() {
+    setHistorySearch("");
+    setHistorySeverity("");
   }
 
   return (
@@ -133,10 +169,30 @@ function Home() {
           />
         </section>
 
-        <HistoryList
-          history={history}
-          loading={isHistoryLoading}
-        />
+        <section className="mt-10">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">
+              Saved results
+            </p>
+
+            <h2 className="mt-1 text-2xl font-bold text-slate-950">
+              Search Analysis History
+            </h2>
+          </div>
+
+          <HistoryFilters
+            search={historySearch}
+            severity={historySeverity}
+            onSearchChange={setHistorySearch}
+            onSeverityChange={setHistorySeverity}
+            onClear={handleClearFilters}
+          />
+
+          <HistoryList
+            history={history}
+            loading={isHistoryLoading}
+          />
+        </section>
       </div>
     </main>
   );
