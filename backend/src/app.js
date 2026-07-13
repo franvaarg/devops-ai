@@ -56,7 +56,22 @@ app.post("/api/analyze", async (req, res) => {
 
 app.get("/api/history", async (req, res) => {
   try {
-    const history = await getHistory();
+    const { severity, search, limit } = req.query;
+
+    const history = await getHistory({
+      severity:
+        typeof severity === "string" && severity.trim()
+          ? severity.trim()
+          : undefined,
+      search:
+        typeof search === "string" && search.trim()
+          ? search.trim()
+          : undefined,
+      limit:
+        typeof limit === "string"
+          ? limit
+          : undefined,
+    });
 
     return res.status(200).json(
       history.map((analysis) => ({
