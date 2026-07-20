@@ -5,6 +5,7 @@ import LogInput from "../components/LogInput";
 import FileUpload from "../components/FileUpload";
 import AnalyzeButton from "../components/AnalyzeButton";
 import AnalysisPanel from "../components/AnalysisPanel";
+import DashboardStats from "../components/DashboardStats";
 import HistoryFilters from "../components/HistoryFilters";
 import HistoryList from "../components/HistoryList";
 
@@ -93,16 +94,13 @@ function Home() {
       setIsAnalyzing(true);
       setErrorMessage("");
 
-      const response = await fetch(
-        "http://localhost:3000/api/analyze",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ log }),
-        }
-      );
+      const response = await fetch("http://localhost:3000/api/analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ log }),
+      });
 
       const data = await response.json();
 
@@ -168,6 +166,11 @@ function Home() {
             steps={steps}
           />
         </section>
+
+        <DashboardStats
+          history={history}
+          loading={isHistoryLoading}
+        />
 
         <section className="mt-10">
           <div>
