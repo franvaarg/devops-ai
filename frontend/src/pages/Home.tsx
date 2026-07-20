@@ -6,6 +6,7 @@ import FileUpload from "../components/FileUpload";
 import AnalyzeButton from "../components/AnalyzeButton";
 import AnalysisPanel from "../components/AnalysisPanel";
 import DashboardStats from "../components/DashboardStats";
+import SeverityChart from "../components/SeverityChart";
 import HistoryFilters from "../components/HistoryFilters";
 import HistoryList from "../components/HistoryList";
 
@@ -168,6 +169,11 @@ function Home() {
         </section>
 
         <DashboardStats
+          history={history}
+          loading={isHistoryLoading}
+        />
+
+        <SeverityChart
           history={history}
           loading={isHistoryLoading}
         />
