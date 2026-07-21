@@ -1,12 +1,19 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Backend API for DevOps AI log analysis",
+  "main": "src/server.js",
   "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "devops",
+    "ai",
+    "express",
+    "logs"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
@@ -15,7 +22,6 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "expresss": "^0.0.0",
     "pg": "^8.22.0"
   }
 }
