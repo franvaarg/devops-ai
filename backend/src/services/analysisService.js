@@ -55,6 +55,7 @@ async function getHistory(filters = {}) {
   }
 
   const parsedLimit = Number(limit);
+
   const safeLimit =
     Number.isInteger(parsedLimit) && parsedLimit > 0
       ? Math.min(parsedLimit, 100)
@@ -88,7 +89,28 @@ async function getHistory(filters = {}) {
   return result.rows;
 }
 
+async function deleteAnalysis(id) {
+  const query = `
+    DELETE FROM analyses
+    WHERE id = $1
+    RETURNING
+      id,
+      severity,
+      summary,
+      root_cause,
+      recommendation,
+      steps,
+      original_log,
+      created_at;
+  `;
+
+  const result = await pool.query(query, [id]);
+
+  return result.rows[0] ?? null;
+}
+
 module.exports = {
   saveAnalysis,
   getHistory,
+  deleteAnalysis,
 };

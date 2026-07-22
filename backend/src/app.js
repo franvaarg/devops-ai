@@ -5,6 +5,7 @@ const { analyzeLog } = require("./services/aiService");
 const {
   saveAnalysis,
   getHistory,
+  deleteAnalysis,
 } = require("./services/analysisService");
 
 const app = express();
@@ -67,10 +68,7 @@ app.get("/api/history", async (req, res) => {
         typeof search === "string" && search.trim()
           ? search.trim()
           : undefined,
-      limit:
-        typeof limit === "string"
-          ? limit
-          : undefined,
+      limit: typeof limit === "string" ? limit : undefined,
     });
 
     return res.status(200).json(
@@ -90,6 +88,46 @@ app.get("/api/history", async (req, res) => {
 
     return res.status(500).json({
       message: "Something went wrong while loading the analysis history.",
+    });
+  }
+});
+
+app.delete("/api/history/:id", async (req, res) => {
+  try {
+    const analysisId = Number(req.params.id);
+
+    if (!Number.isInteger(analysisId) || analysisId <= 0) {
+      return res.status(400).json({
+        message: "A valid analysis ID is required.",
+      });
+    }
+
+    const deletedAnalysis = await deleteAnalysis(analysisId);
+
+    if (!deletedAnalysis) {
+      return res.status(404).json({
+        message: "Analysis not found.",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Analysis deleted successfully.",
+      deletedAnalysis: {
+        id: deletedAnalysis.id,
+        severity: deletedAnalysis.severity,
+        summary: deletedAnalysis.summary,
+        rootCause: deletedAnalysis.root_cause,
+        recommendation: deletedAnalysis.recommendation,
+        steps: deletedAnalysis.steps,
+        originalLog: deletedAnalysis.original_log,
+        createdAt: deletedAnalysis.created_at,
+      },
+    });
+  } catch (error) {
+    console.error("Delete analysis error:", error);
+
+    return res.status(500).json({
+      message: "Something went wrong while deleting the analysis.",
     });
   }
 });
