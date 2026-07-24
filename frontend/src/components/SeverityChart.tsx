@@ -2,6 +2,10 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -22,6 +26,13 @@ type HistoryItem = {
 type SeverityChartProps = {
   history: HistoryItem[];
   loading: boolean;
+};
+
+const severityColors: Record<string, string> = {
+  Critical: "#dc2626",
+  High: "#f97316",
+  Medium: "#eab308",
+  Low: "#16a34a",
 };
 
 function SeverityChart({ history, loading }: SeverityChartProps) {
@@ -52,7 +63,22 @@ function SeverityChart({ history, loading }: SeverityChartProps) {
     },
   ];
 
-  const hasData = chartData.some((item) => item.total > 0);
+  const pieData = chartData.filter((item) => item.total > 0);
+
+  const hasData = pieData.length > 0;
+
+  const totalAnalyses = chartData.reduce(
+    (total, item) => total + item.total,
+    0
+  );
+
+  function calculatePercentage(value: number) {
+    if (totalAnalyses === 0) {
+      return 0;
+    }
+
+    return Math.round((value / totalAnalyses) * 100);
+  }
 
   return (
     <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
@@ -66,13 +92,14 @@ function SeverityChart({ history, loading }: SeverityChartProps) {
         </h3>
 
         <p className="mt-2 text-sm text-slate-500">
-          Distribution of the analyses currently displayed.
+          Compare the number and percentage of incidents in each severity
+          category.
         </p>
       </div>
 
       {loading ? (
         <div className="mt-6 flex h-80 items-center justify-center rounded-xl bg-slate-50 text-sm text-slate-500">
-          Loading chart...
+          Loading charts...
         </div>
       ) : !hasData ? (
         <div className="mt-6 flex h-80 items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 text-center">
@@ -87,44 +114,136 @@ function SeverityChart({ history, loading }: SeverityChartProps) {
           </div>
         </div>
       ) : (
-        <div className="mt-6 h-80 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={chartData}
-              margin={{
-                top: 10,
-                right: 10,
-                left: -20,
-                bottom: 0,
-              }}
-            >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+        <div className="mt-6 grid gap-6 lg:grid-cols-2">
+          <article className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div>
+              <h4 className="font-bold text-slate-900">
+                Incident Count
+              </h4>
 
-              <XAxis
-                dataKey="severity"
-                tickLine={false}
-                axisLine={false}
-              />
+              <p className="mt-1 text-sm text-slate-500">
+                Total analyses grouped by severity.
+              </p>
+            </div>
 
-              <YAxis
-                allowDecimals={false}
-                tickLine={false}
-                axisLine={false}
-              />
+            <div className="mt-4 h-80 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={chartData}
+                  margin={{
+                    top: 10,
+                    right: 10,
+                    left: -20,
+                    bottom: 0,
+                  }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                  />
 
-              <Tooltip
-                cursor={{ fill: "rgba(148, 163, 184, 0.12)" }}
-                formatter={(value) => [value, "Analyses"]}
-              />
+                  <XAxis
+                    dataKey="severity"
+                    tickLine={false}
+                    axisLine={false}
+                  />
 
-              <Bar
-                dataKey="total"
-                name="Analyses"
-                fill="#2563eb"
-                radius={[8, 8, 0, 0]}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+                  <YAxis
+                    allowDecimals={false}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+
+                  <Tooltip
+                    cursor={{
+                      fill: "rgba(148, 163, 184, 0.12)",
+                    }}
+                    formatter={(value) => [
+                      Number(value),
+                      "Analyses",
+                    ]}
+                  />
+
+                  <Bar
+                    dataKey="total"
+                    name="Analyses"
+                    radius={[8, 8, 0, 0]}
+                  >
+                    {chartData.map((item) => (
+                      <Cell
+                        key={item.severity}
+                        fill={severityColors[item.severity]}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </article>
+
+          <article className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div>
+              <h4 className="font-bold text-slate-900">
+                Percentage Distribution
+              </h4>
+
+              <p className="mt-1 text-sm text-slate-500">
+                Percentage of the total represented by each severity.
+              </p>
+            </div>
+
+            <div className="mt-4 h-80 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    dataKey="total"
+                    nameKey="severity"
+                    cx="50%"
+                    cy="45%"
+                    innerRadius={65}
+                    outerRadius={105}
+                    paddingAngle={3}
+                  >
+                    {pieData.map((item) => (
+                      <Cell
+                        key={item.severity}
+                        fill={severityColors[item.severity]}
+                      />
+                    ))}
+                  </Pie>
+
+                  <Tooltip
+                    formatter={(value, _name, item) => {
+                      const numericValue = Number(value);
+
+                      return [
+                        `${numericValue} analyses (${calculatePercentage(
+                          numericValue
+                        )}%)`,
+                        item.payload.severity,
+                      ];
+                    }}
+                  />
+
+                  <Legend
+                    verticalAlign="bottom"
+                    formatter={(value) => {
+                      const item = chartData.find(
+                        (entry) => entry.severity === value
+                      );
+
+                      const percentage = item
+                        ? calculatePercentage(item.total)
+                        : 0;
+
+                      return `${value} — ${percentage}%`;
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </article>
         </div>
       )}
     </section>
