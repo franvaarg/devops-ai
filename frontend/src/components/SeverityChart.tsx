@@ -12,6 +12,8 @@ import {
   YAxis,
 } from "recharts";
 
+import { useTheme } from "../context/ThemeContext";
+
 type HistoryItem = {
   id: number;
   severity: string;
@@ -32,38 +34,93 @@ const severityColors: Record<string, string> = {
   Critical: "#dc2626",
   High: "#f97316",
   Medium: "#eab308",
-  Low: "#16a34a",
+  Low: "#10b981",
 };
 
-function SeverityChart({ history, loading }: SeverityChartProps) {
+function ChartIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      className="h-5 w-5"
+      aria-hidden="true"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4 19V9m6 10V5m6 14v-7m4 7H2"
+      />
+    </svg>
+  );
+}
+
+function SeverityChart({
+  history,
+  loading,
+}: SeverityChartProps) {
+  const { theme } = useTheme();
+
+  const isDark = theme === "dark";
+
+  const gridColor = isDark ? "#334155" : "#e2e8f0";
+  const axisColor = isDark ? "#94a3b8" : "#64748b";
+  const secondaryAxisColor = isDark
+    ? "#64748b"
+    : "#94a3b8";
+  const pieStrokeColor = isDark
+    ? "#0f172a"
+    : "#ffffff";
+
+  const tooltipStyles = {
+    borderRadius: "16px",
+    border: `1px solid ${
+      isDark ? "#334155" : "#e2e8f0"
+    }`,
+    backgroundColor: isDark
+      ? "#0f172a"
+      : "#ffffff",
+    boxShadow: isDark
+      ? "0 12px 32px rgba(0, 0, 0, 0.35)"
+      : "0 12px 32px rgba(15, 23, 42, 0.12)",
+    padding: "12px 14px",
+  };
+
   const chartData = [
     {
       severity: "Critical",
       total: history.filter(
-        (item) => item.severity.toLowerCase() === "critical"
+        (item) =>
+          item.severity.toLowerCase() === "critical"
       ).length,
     },
     {
       severity: "High",
       total: history.filter(
-        (item) => item.severity.toLowerCase() === "high"
+        (item) =>
+          item.severity.toLowerCase() === "high"
       ).length,
     },
     {
       severity: "Medium",
       total: history.filter(
-        (item) => item.severity.toLowerCase() === "medium"
+        (item) =>
+          item.severity.toLowerCase() === "medium"
       ).length,
     },
     {
       severity: "Low",
       total: history.filter(
-        (item) => item.severity.toLowerCase() === "low"
+        (item) =>
+          item.severity.toLowerCase() === "low"
       ).length,
     },
   ];
 
-  const pieData = chartData.filter((item) => item.total > 0);
+  const pieData = chartData.filter(
+    (item) => item.total > 0
+  );
 
   const hasData = pieData.length > 0;
 
@@ -77,175 +134,303 @@ function SeverityChart({ history, loading }: SeverityChartProps) {
       return 0;
     }
 
-    return Math.round((value / totalAnalyses) * 100);
+    return Math.round(
+      (value / totalAnalyses) * 100
+    );
   }
 
   return (
-    <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-      <div>
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">
-          Severity distribution
-        </p>
+    <section className="mt-8 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/20">
+      <div className="border-b border-slate-100 bg-gradient-to-r from-emerald-50/80 via-white to-teal-50/80 p-6 dark:border-slate-800 dark:from-emerald-950/40 dark:via-slate-900 dark:to-teal-950/40 sm:p-7">
+        <div className="flex items-start gap-4">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-teal-100 text-teal-700 dark:bg-teal-950/70 dark:text-teal-300">
+            <ChartIcon />
+          </div>
 
-        <h3 className="mt-1 text-xl font-bold text-slate-950">
-          Analyses by Severity
-        </h3>
-
-        <p className="mt-2 text-sm text-slate-500">
-          Compare the number and percentage of incidents in each severity
-          category.
-        </p>
-      </div>
-
-      {loading ? (
-        <div className="mt-6 flex h-80 items-center justify-center rounded-xl bg-slate-50 text-sm text-slate-500">
-          Loading charts...
-        </div>
-      ) : !hasData ? (
-        <div className="mt-6 flex h-80 items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 text-center">
           <div>
-            <p className="font-semibold text-slate-700">
-              No chart data available
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-teal-700 dark:text-teal-300">
+              Severity distribution
             </p>
 
-            <p className="mt-1 text-sm text-slate-500">
-              Analyze a log or clear the current filters.
+            <h3 className="mt-2 text-xl font-black tracking-tight text-slate-950 dark:text-white sm:text-2xl">
+              Analyses by Severity
+            </h3>
+
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
+              Compare the number and percentage of
+              incidents across every severity category.
             </p>
           </div>
         </div>
-      ) : (
-        <div className="mt-6 grid gap-6 lg:grid-cols-2">
-          <article className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <div>
-              <h4 className="font-bold text-slate-900">
-                Incident Count
-              </h4>
+      </div>
 
-              <p className="mt-1 text-sm text-slate-500">
-                Total analyses grouped by severity.
+      <div className="p-5 sm:p-7">
+        {loading ? (
+          <div className="grid gap-6 lg:grid-cols-2">
+            {[1, 2].map((item) => (
+              <div
+                key={item}
+                className="rounded-3xl border border-slate-200 bg-slate-50/70 p-5 dark:border-slate-800 dark:bg-slate-950/40"
+              >
+                <div className="h-5 w-36 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
+
+                <div className="mt-3 h-4 w-52 animate-pulse rounded bg-slate-100 dark:bg-slate-800" />
+
+                <div className="mt-8 h-64 animate-pulse rounded-2xl bg-slate-200/70 dark:bg-slate-800/80" />
+              </div>
+            ))}
+          </div>
+        ) : !hasData ? (
+          <div className="flex min-h-80 items-center justify-center rounded-3xl border border-dashed border-emerald-200 bg-emerald-50/50 px-6 text-center dark:border-emerald-900 dark:bg-emerald-950/20">
+            <div>
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-emerald-600 shadow-sm dark:bg-slate-900 dark:text-emerald-400 dark:shadow-black/20">
+                <ChartIcon />
+              </div>
+
+              <p className="mt-5 font-bold text-slate-800 dark:text-slate-100">
+                No chart data available
+              </p>
+
+              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500 dark:text-slate-400">
+                Analyze a log or clear the current
+                filters to generate severity metrics.
               </p>
             </div>
+          </div>
+        ) : (
+          <div className="grid gap-6 lg:grid-cols-2">
+            <article className="rounded-3xl border border-slate-200 bg-slate-50/60 p-5 transition duration-300 hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/50 dark:border-slate-800 dark:bg-slate-950/40 dark:hover:border-slate-700 dark:hover:shadow-black/30 sm:p-6">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <h4 className="font-black tracking-tight text-slate-900 dark:text-white">
+                    Incident Count
+                  </h4>
 
-            <div className="mt-4 h-80 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={chartData}
-                  margin={{
-                    top: 10,
-                    right: 10,
-                    left: -20,
-                    bottom: 0,
-                  }}
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    Total analyses grouped by severity.
+                  </p>
+                </div>
+
+                <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 dark:border-emerald-900/70 dark:bg-emerald-950/50 dark:text-emerald-300">
+                  {totalAnalyses} total
+                </span>
+              </div>
+
+              <div className="mt-5 h-80 w-full">
+                <ResponsiveContainer
+                  width="100%"
+                  height="100%"
                 >
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    vertical={false}
-                  />
-
-                  <XAxis
-                    dataKey="severity"
-                    tickLine={false}
-                    axisLine={false}
-                  />
-
-                  <YAxis
-                    allowDecimals={false}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-
-                  <Tooltip
-                    cursor={{
-                      fill: "rgba(148, 163, 184, 0.12)",
+                  <BarChart
+                    data={chartData}
+                    margin={{
+                      top: 10,
+                      right: 8,
+                      left: -22,
+                      bottom: 0,
                     }}
-                    formatter={(value) => [
-                      Number(value),
-                      "Analyses",
-                    ]}
-                  />
-
-                  <Bar
-                    dataKey="total"
-                    name="Analyses"
-                    radius={[8, 8, 0, 0]}
                   >
-                    {chartData.map((item) => (
-                      <Cell
-                        key={item.severity}
-                        fill={severityColors[item.severity]}
-                      />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </article>
+                    <CartesianGrid
+                      stroke={gridColor}
+                      strokeDasharray="4 4"
+                      vertical={false}
+                    />
 
-          <article className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <div>
-              <h4 className="font-bold text-slate-900">
-                Percentage Distribution
-              </h4>
+                    <XAxis
+                      dataKey="severity"
+                      tickLine={false}
+                      axisLine={false}
+                      tick={{
+                        fill: axisColor,
+                        fontSize: 12,
+                        fontWeight: 600,
+                      }}
+                    />
 
-              <p className="mt-1 text-sm text-slate-500">
-                Percentage of the total represented by each severity.
-              </p>
-            </div>
+                    <YAxis
+                      allowDecimals={false}
+                      tickLine={false}
+                      axisLine={false}
+                      tick={{
+                        fill: secondaryAxisColor,
+                        fontSize: 12,
+                      }}
+                    />
 
-            <div className="mt-4 h-80 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    dataKey="total"
-                    nameKey="severity"
-                    cx="50%"
-                    cy="45%"
-                    innerRadius={65}
-                    outerRadius={105}
-                    paddingAngle={3}
-                  >
-                    {pieData.map((item) => (
-                      <Cell
-                        key={item.severity}
-                        fill={severityColors[item.severity]}
-                      />
-                    ))}
-                  </Pie>
+                    <Tooltip
+                      cursor={{
+                        fill: isDark
+                          ? "rgba(16, 185, 129, 0.1)"
+                          : "rgba(16, 185, 129, 0.06)",
+                      }}
+                      contentStyle={tooltipStyles}
+                      labelStyle={{
+                        color: isDark
+                          ? "#f8fafc"
+                          : "#0f172a",
+                        fontWeight: 700,
+                        marginBottom: "4px",
+                      }}
+                      itemStyle={{
+                        color: isDark
+                          ? "#cbd5e1"
+                          : "#475569",
+                        fontWeight: 600,
+                      }}
+                      formatter={(value) => [
+                        Number(value),
+                        "Analyses",
+                      ]}
+                    />
 
-                  <Tooltip
-                    formatter={(value, _name, item) => {
-                      const numericValue = Number(value);
+                    <Bar
+                      dataKey="total"
+                      name="Analyses"
+                      radius={[10, 10, 4, 4]}
+                      maxBarSize={58}
+                    >
+                      {chartData.map((item) => (
+                        <Cell
+                          key={item.severity}
+                          fill={
+                            severityColors[
+                              item.severity
+                            ]
+                          }
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </article>
 
-                      return [
-                        `${numericValue} analyses (${calculatePercentage(
-                          numericValue
-                        )}%)`,
-                        item.payload.severity,
-                      ];
-                    }}
-                  />
+            <article className="rounded-3xl border border-slate-200 bg-slate-50/60 p-5 transition duration-300 hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/50 dark:border-slate-800 dark:bg-slate-950/40 dark:hover:border-slate-700 dark:hover:shadow-black/30 sm:p-6">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <h4 className="font-black tracking-tight text-slate-900 dark:text-white">
+                    Percentage Distribution
+                  </h4>
 
-                  <Legend
-                    verticalAlign="bottom"
-                    formatter={(value) => {
-                      const item = chartData.find(
-                        (entry) => entry.severity === value
-                      );
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    Share represented by each category.
+                  </p>
+                </div>
 
-                      const percentage = item
-                        ? calculatePercentage(item.total)
-                        : 0;
+                <span className="rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-bold text-teal-700 dark:border-teal-900/70 dark:bg-teal-950/50 dark:text-teal-300">
+                  100% coverage
+                </span>
+              </div>
 
-                      return `${value} — ${percentage}%`;
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </article>
-        </div>
-      )}
+              <div className="relative mt-5 h-80 w-full">
+                <div className="pointer-events-none absolute left-1/2 top-[42%] z-10 -translate-x-1/2 -translate-y-1/2 text-center">
+                  <p className="text-3xl font-black tracking-tight text-slate-950 dark:text-white">
+                    {totalAnalyses}
+                  </p>
+
+                  <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+                    Analyses
+                  </p>
+                </div>
+
+                <ResponsiveContainer
+                  width="100%"
+                  height="100%"
+                >
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      dataKey="total"
+                      nameKey="severity"
+                      cx="50%"
+                      cy="42%"
+                      innerRadius={68}
+                      outerRadius={108}
+                      paddingAngle={4}
+                      cornerRadius={7}
+                      stroke={pieStrokeColor}
+                      strokeWidth={3}
+                    >
+                      {pieData.map((item) => (
+                        <Cell
+                          key={item.severity}
+                          fill={
+                            severityColors[
+                              item.severity
+                            ]
+                          }
+                        />
+                      ))}
+                    </Pie>
+
+                    <Tooltip
+                      contentStyle={tooltipStyles}
+                      labelStyle={{
+                        color: isDark
+                          ? "#f8fafc"
+                          : "#0f172a",
+                        fontWeight: 700,
+                      }}
+                      itemStyle={{
+                        color: isDark
+                          ? "#cbd5e1"
+                          : "#475569",
+                        fontWeight: 600,
+                      }}
+                      formatter={(
+                        value,
+                        _name,
+                        item
+                      ) => {
+                        const numericValue =
+                          Number(value);
+
+                        return [
+                          `${numericValue} ${
+                            numericValue === 1
+                              ? "analysis"
+                              : "analyses"
+                          } (${calculatePercentage(
+                            numericValue
+                          )}%)`,
+                          item.payload.severity,
+                        ];
+                      }}
+                    />
+
+                    <Legend
+                      verticalAlign="bottom"
+                      iconType="circle"
+                      iconSize={9}
+                      formatter={(value) => {
+                        const item = chartData.find(
+                          (entry) =>
+                            entry.severity === value
+                        );
+
+                        const percentage = item
+                          ? calculatePercentage(
+                              item.total
+                            )
+                          : 0;
+
+                        return `${value} · ${percentage}%`;
+                      }}
+                      wrapperStyle={{
+                        color: isDark
+                          ? "#cbd5e1"
+                          : "#475569",
+                        fontSize: "12px",
+                        fontWeight: 600,
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </article>
+          </div>
+        )}
+      </div>
     </section>
   );
 }

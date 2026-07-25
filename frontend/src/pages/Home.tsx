@@ -3,6 +3,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import toast from "react-hot-toast";
 
 import Header from "../components/Header";
 import LogInput from "../components/LogInput";
@@ -20,6 +21,36 @@ import {
   getHistory,
   type HistoryItem,
 } from "../services/api";
+
+import type { SeverityName } from "../components/dashboard/dashboardUtils";
+
+function HistoryIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      className="h-5 w-5"
+      aria-hidden="true"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4 5h16v15H4V5Zm4-2v4m8-4v4M8 11h8m-8 4h5"
+      />
+    </svg>
+  );
+}
+
+function getErrorMessage(
+  error: unknown,
+  fallbackMessage: string
+) {
+  return error instanceof Error
+    ? error.message
+    : fallbackMessage;
+}
 
 function Home() {
   const [log, setLog] = useState("");
@@ -51,9 +82,6 @@ function Home() {
     number | null
   >(null);
 
-  const [errorMessage, setErrorMessage] =
-    useState("");
-
   const hasActiveFilters = Boolean(
     historySearch.trim() || historySeverity
   );
@@ -79,10 +107,11 @@ function Home() {
           error
         );
 
-        setErrorMessage(
-          error instanceof Error
-            ? error.message
-            : "Could not load the analysis history."
+        toast.error(
+          getErrorMessage(
+            error,
+            "Could not load the analysis history."
+          )
         );
       } finally {
         setIsHistoryLoading(false);
@@ -103,16 +132,19 @@ function Home() {
 
   async function handleAnalyze() {
     if (!log.trim()) {
-      setErrorMessage(
+      toast.error(
         "Paste or upload a log before analyzing."
       );
 
       return;
     }
 
+    const loadingToast = toast.loading(
+      "Analyzing log..."
+    );
+
     try {
       setIsAnalyzing(true);
-      setErrorMessage("");
 
       const data = await analyzeLog(log);
 
@@ -125,13 +157,24 @@ function Home() {
       setSteps(data.steps ?? []);
 
       await loadHistory();
+
+      toast.success(
+        "Log analyzed successfully.",
+        {
+          id: loadingToast,
+        }
+      );
     } catch (error) {
       console.error("Analysis error:", error);
 
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Something went wrong during the analysis."
+      toast.error(
+        getErrorMessage(
+          error,
+          "Something went wrong during the analysis."
+        ),
+        {
+          id: loadingToast,
+        }
       );
     } finally {
       setIsAnalyzing(false);
@@ -139,9 +182,12 @@ function Home() {
   }
 
   async function handleDeleteAnalysis(id: number) {
+    const loadingToast = toast.loading(
+      "Deleting analysis..."
+    );
+
     try {
       setDeletingId(id);
-      setErrorMessage("");
 
       await deleteAnalysis(id);
 
@@ -150,20 +196,44 @@ function Home() {
           (item) => item.id !== id
         )
       );
+
+      toast.success(
+        "Analysis deleted successfully.",
+        {
+          id: loadingToast,
+        }
+      );
     } catch (error) {
       console.error(
         "Delete analysis error:",
         error
       );
 
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Something went wrong while deleting the analysis."
+      toast.error(
+        getErrorMessage(
+          error,
+          "Something went wrong while deleting the analysis."
+        ),
+        {
+          id: loadingToast,
+        }
       );
+
+      throw error;
     } finally {
       setDeletingId(null);
     }
+  }
+
+  function handleDashboardSeverityClick(
+    selectedSeverity: SeverityName
+  ) {
+    setHistorySeverity((currentSeverity) =>
+      currentSeverity.toLowerCase() ===
+      selectedSeverity
+        ? ""
+        : selectedSeverity
+    );
   }
 
   function handleSearchSubmit() {
@@ -179,42 +249,55 @@ function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-5xl">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/60 sm:p-10">
-          <Header />
+    <main className="relative min-h-screen overflow-hidden bg-slate-50 px-4 py-8 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100 sm:px-6 sm:py-10 lg:px-8">
+      <div
+        className="pointer-events-none absolute left-0 top-0 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-200/30 blur-3xl dark:bg-emerald-900/20"
+        aria-hidden="true"
+      />
 
-          <LogInput
-            log={log}
-            setLog={setLog}
-          />
+      <div
+        className="pointer-events-none absolute right-0 top-72 h-96 w-96 translate-x-1/2 rounded-full bg-teal-200/30 blur-3xl dark:bg-teal-900/20"
+        aria-hidden="true"
+      />
 
-          <FileUpload onFileLoaded={setLog} />
+      <div className="relative mx-auto max-w-6xl">
+        <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl shadow-slate-200/70 transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/30">
+          <div className="h-1.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-400" />
 
-          <AnalyzeButton
-            onAnalyze={handleAnalyze}
-            isLoading={isAnalyzing}
-          />
+          <div className="p-6 sm:p-10">
+            <Header />
 
-          {errorMessage && (
-            <div className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-              <strong>Error:</strong>{" "}
-              {errorMessage}
-            </div>
-          )}
+            <LogInput
+              log={log}
+              setLog={setLog}
+            />
 
-          <AnalysisPanel
-            severity={severity}
-            summary={summary}
-            rootCause={rootCause}
-            recommendation={recommendation}
-            steps={steps}
-          />
+            <FileUpload
+              onFileLoaded={setLog}
+            />
+
+            <AnalyzeButton
+              onAnalyze={handleAnalyze}
+              isLoading={isAnalyzing}
+            />
+
+            <AnalysisPanel
+              severity={severity}
+              summary={summary}
+              rootCause={rootCause}
+              recommendation={recommendation}
+              steps={steps}
+            />
+          </div>
         </section>
 
         <DashboardStats
           history={history}
           loading={isHistoryLoading}
+          selectedSeverity={historySeverity}
+          onSeverityClick={
+            handleDashboardSeverityClick
+          }
         />
 
         <SeverityChart
@@ -222,20 +305,26 @@ function Home() {
           loading={isHistoryLoading}
         />
 
-        <section className="mt-10">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">
-              Saved results
-            </p>
+        <section className="mt-12 pb-12">
+          <div className="flex items-start gap-4">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
+              <HistoryIcon />
+            </div>
 
-            <h2 className="mt-1 text-2xl font-bold text-slate-950">
-              Analysis History
-            </h2>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-400">
+                Saved results
+              </p>
 
-            <p className="mt-2 text-sm text-slate-500">
-              Search, filter, inspect, and manage
-              previously analyzed logs.
-            </p>
+              <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">
+                Analysis History
+              </h2>
+
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
+                Search, filter, inspect, export,
+                and manage previously analyzed logs.
+              </p>
+            </div>
           </div>
 
           <HistoryFilters

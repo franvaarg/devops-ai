@@ -1,1 +1,28 @@
 @import "tailwindcss";
+
+/* Dark mode basado en la clase "dark" del elemento <html> */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Transiciones globales suaves */
+@layer base {
+  html,
+  body {
+    min-height: 100%;
+  }
+
+  * {
+    transition:
+      background-color 180ms ease,
+      color 180ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900;
+  }
+
+  html.dark body {
+    @apply bg-slate-950 text-slate-100;
+  }
+}
