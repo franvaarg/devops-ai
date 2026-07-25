@@ -8,14 +8,25 @@ const {
   deleteAnalysis,
 } = require("./services/analysisService");
 
+const authRoutes = require("./routes/authRoutes");
+const authenticateToken = require("./middleware/authenticateToken");
+
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
+app.use("/api/auth", authRoutes);
+
 app.get("/", (req, res) => {
   res.json({
     message: "DevOps AI Backend Running 🚀",
+  });
+});
+
+app.get("/api/auth/me", authenticateToken, (req, res) => {
+  return res.status(200).json({
+    user: req.user,
   });
 });
 
