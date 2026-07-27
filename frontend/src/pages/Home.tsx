@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import toast from "react-hot-toast";
@@ -24,6 +25,12 @@ import {
 
 import type { SeverityName } from "../components/dashboard/dashboardUtils";
 
+type StoredUser = {
+  id?: number;
+  name?: string;
+  email?: string;
+};
+
 function HistoryIcon() {
   return (
     <svg
@@ -43,6 +50,62 @@ function HistoryIcon() {
   );
 }
 
+function LogoutIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      className="h-4 w-4"
+      aria-hidden="true"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M10 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4"
+      />
+
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="m15 16 4-4-4-4"
+      />
+
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M19 12H9"
+      />
+    </svg>
+  );
+}
+
+function UserIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      className="h-5 w-5"
+      aria-hidden="true"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"
+      />
+
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4 21a8 8 0 0 1 16 0"
+      />
+    </svg>
+  );
+}
+
 function getErrorMessage(
   error: unknown,
   fallbackMessage: string
@@ -50,6 +113,39 @@ function getErrorMessage(
   return error instanceof Error
     ? error.message
     : fallbackMessage;
+}
+
+function getStoredUser(): StoredUser | null {
+  const storedUser = localStorage.getItem("user");
+
+  if (!storedUser) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(storedUser) as StoredUser;
+  } catch {
+    localStorage.removeItem("user");
+
+    return null;
+  }
+}
+
+function isAuthenticationError(error: unknown) {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  const message = error.message.toLowerCase();
+
+  return (
+    message.includes("unauthorized") ||
+    message.includes("invalid token") ||
+    message.includes("expired") ||
+    message.includes("authentication") ||
+    message.includes("401") ||
+    message.includes("403")
+  );
 }
 
 function Home() {
@@ -82,20 +178,70 @@ function Home() {
     number | null
   >(null);
 
+  const user = useMemo(() => getStoredUser(), []);
+
+  const displayName =
+    user?.name?.trim() ||
+    user?.email?.split("@")[0] ||
+    "User";
+
+  const userInitial =
+    displayName.charAt(0).toUpperCase() || "U";
+
   const hasActiveFilters = Boolean(
     historySearch.trim() || historySeverity
+  );
+
+  const clearSession = useCallback(() => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+  }, []);
+
+  const redirectToLogin = useCallback(() => {
+    clearSession();
+    window.location.reload();
+  }, [clearSession]);
+
+  const handleRequestError = useCallback(
+    (
+      error: unknown,
+      fallbackMessage: string,
+      showToast = true
+    ) => {
+      if (isAuthenticationError(error)) {
+        clearSession();
+
+        toast.error(
+          "Your session has expired. Please sign in again."
+        );
+
+        window.setTimeout(() => {
+          window.location.reload();
+        }, 700);
+
+        return;
+      }
+
+      if (showToast) {
+        toast.error(
+          getErrorMessage(error, fallbackMessage)
+        );
+      }
+    },
+    [clearSession]
   );
 
   const loadHistory = useCallback(
     async (
       search = historySearch,
-      severityFilter = historySeverity
+      severityFilter = historySeverity,
+      showErrorToast = true
     ) => {
       try {
         setIsHistoryLoading(true);
 
         const data = await getHistory({
-          search,
+          search: search.trim(),
           severity: severityFilter,
           limit: 50,
         });
@@ -107,31 +253,44 @@ function Home() {
           error
         );
 
-        toast.error(
-          getErrorMessage(
-            error,
-            "Could not load the analysis history."
-          )
+        handleRequestError(
+          error,
+          "Could not load the analysis history.",
+          showErrorToast
         );
       } finally {
         setIsHistoryLoading(false);
       }
     },
-    [historySearch, historySeverity]
+    [
+      historySearch,
+      historySeverity,
+      handleRequestError,
+    ]
   );
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
-      void loadHistory();
+      void loadHistory(
+        historySearch,
+        historySeverity,
+        true
+      );
     }, 400);
 
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [loadHistory]);
+  }, [
+    historySearch,
+    historySeverity,
+    loadHistory,
+  ]);
 
   async function handleAnalyze() {
-    if (!log.trim()) {
+    const normalizedLog = log.trim();
+
+    if (!normalizedLog) {
       toast.error(
         "Paste or upload a log before analyzing."
       );
@@ -146,7 +305,7 @@ function Home() {
     try {
       setIsAnalyzing(true);
 
-      const data = await analyzeLog(log);
+      const data = await analyzeLog(normalizedLog);
 
       setSeverity(data.severity ?? "");
       setSummary(data.summary ?? "");
@@ -156,7 +315,11 @@ function Home() {
       );
       setSteps(data.steps ?? []);
 
-      await loadHistory();
+      await loadHistory(
+        historySearch,
+        historySeverity,
+        false
+      );
 
       toast.success(
         "Log analyzed successfully.",
@@ -166,6 +329,17 @@ function Home() {
       );
     } catch (error) {
       console.error("Analysis error:", error);
+
+      if (isAuthenticationError(error)) {
+        toast.dismiss(loadingToast);
+
+        handleRequestError(
+          error,
+          "Your session has expired."
+        );
+
+        return;
+      }
 
       toast.error(
         getErrorMessage(
@@ -209,6 +383,17 @@ function Home() {
         error
       );
 
+      if (isAuthenticationError(error)) {
+        toast.dismiss(loadingToast);
+
+        handleRequestError(
+          error,
+          "Your session has expired."
+        );
+
+        return;
+      }
+
       toast.error(
         getErrorMessage(
           error,
@@ -218,8 +403,6 @@ function Home() {
           id: loadingToast,
         }
       );
-
-      throw error;
     } finally {
       setDeletingId(null);
     }
@@ -230,7 +413,7 @@ function Home() {
   ) {
     setHistorySeverity((currentSeverity) =>
       currentSeverity.toLowerCase() ===
-      selectedSeverity
+      selectedSeverity.toLowerCase()
         ? ""
         : selectedSeverity
     );
@@ -248,6 +431,16 @@ function Home() {
     setHistorySeverity("");
   }
 
+  function handleLogout() {
+    clearSession();
+
+    toast.success("Signed out successfully.");
+
+    window.setTimeout(() => {
+      window.location.reload();
+    }, 400);
+  }
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-slate-50 px-4 py-8 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100 sm:px-6 sm:py-10 lg:px-8">
       <div
@@ -261,6 +454,40 @@ function Home() {
       />
 
       <div className="relative mx-auto max-w-6xl">
+        <div className="mb-5 flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white/80 p-4 shadow-lg shadow-slate-200/40 backdrop-blur transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-black/20 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-sm font-black text-white shadow-lg shadow-emerald-600/20">
+              {userInitial}
+            </div>
+
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-emerald-600 dark:text-emerald-400">
+                  <UserIcon />
+                </span>
+
+                <p className="truncate text-sm font-black text-slate-950 dark:text-white">
+                  {displayName}
+                </p>
+              </div>
+
+              <p className="mt-0.5 truncate text-xs font-medium text-slate-500 dark:text-slate-400">
+                {user?.email ||
+                  "Authenticated workspace"}
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:-translate-y-0.5 hover:border-red-200 hover:bg-red-50 hover:text-red-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-red-900 dark:hover:bg-red-950/40 dark:hover:text-red-300"
+          >
+            <LogoutIcon />
+            Sign out
+          </button>
+        </div>
+
         <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl shadow-slate-200/70 transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/30">
           <div className="h-1.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-400" />
 
@@ -322,7 +549,8 @@ function Home() {
 
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
                 Search, filter, inspect, export,
-                and manage previously analyzed logs.
+                and manage your previously analyzed
+                logs.
               </p>
             </div>
           </div>

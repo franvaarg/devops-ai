@@ -17,6 +17,24 @@ export type AnalysisResult = {
   steps: string[];
 };
 
+export type AuthResponse = {
+  message: string;
+  token: string;
+  user: {
+    id: number;
+    name: string;
+    email: string;
+    createdAt?: string;
+  };
+};
+
+export type CurrentUserResponse = {
+  user: {
+    id: number;
+    email: string;
+  };
+};
+
 type ApiErrorResponse = {
   message?: string;
   summary?: string;
@@ -35,13 +53,31 @@ type GetHistoryParams = {
 
 const API_BASE_URL = "http://localhost:3000";
 
-async function getResponseData<T>(response: Response): Promise<T> {
-  const data = (await response.json()) as T & ApiErrorResponse;
+function getAuthHeaders(): HeadersInit {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    return {
+      "Content-Type": "application/json",
+    };
+  }
+
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  };
+}
+
+async function getResponseData<T>(
+  response: Response
+): Promise<T> {
+  const data = (await response.json()) as T &
+    ApiErrorResponse;
 
   if (!response.ok) {
     throw new Error(
-      data.message ||
-        data.summary ||
+      data.message ??
+        data.summary ??
         "The server could not complete the request."
     );
   }
@@ -49,16 +85,68 @@ async function getResponseData<T>(response: Response): Promise<T> {
   return data;
 }
 
+export async function register(
+  name: string,
+  email: string,
+  password: string
+): Promise<AuthResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/auth/register`,
+    {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        name,
+        email,
+        password,
+      }),
+    }
+  );
+
+  return getResponseData<AuthResponse>(response);
+}
+
+export async function login(
+  email: string,
+  password: string
+): Promise<AuthResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/auth/login`,
+    {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    }
+  );
+
+  return getResponseData<AuthResponse>(response);
+}
+
+export async function getCurrentUser(): Promise<CurrentUserResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/auth/me`,
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+
+  return getResponseData<CurrentUserResponse>(response);
+}
+
 export async function analyzeLog(
   log: string
 ): Promise<AnalysisResult> {
-  const response = await fetch(`${API_BASE_URL}/api/analyze`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ log }),
-  });
+  const response = await fetch(
+    `${API_BASE_URL}/api/analyze`,
+    {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ log }),
+    }
+  );
 
   return getResponseData<AnalysisResult>(response);
 }
@@ -81,7 +169,10 @@ export async function getHistory({
   query.set("limit", String(limit));
 
   const response = await fetch(
-    `${API_BASE_URL}/api/history?${query.toString()}`
+    `${API_BASE_URL}/api/history?${query.toString()}`,
+    {
+      headers: getAuthHeaders(),
+    }
   );
 
   return getResponseData<HistoryItem[]>(response);
@@ -94,6 +185,7 @@ export async function deleteAnalysis(
     `${API_BASE_URL}/api/history/${id}`,
     {
       method: "DELETE",
+      headers: getAuthHeaders(),
     }
   );
 
