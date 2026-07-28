@@ -1,6 +1,6 @@
 const pool = require("../database/db");
 
-async function saveAnalysis(analysis, originalLog) {
+async function saveAnalysis(analysis, originalLog, userId) {
   const query = `
     INSERT INTO analyses (
       severity,
@@ -8,10 +8,20 @@ async function saveAnalysis(analysis, originalLog) {
       root_cause,
       recommendation,
       steps,
-      original_log
+      original_log,
+      user_id
     )
-    VALUES ($1, $2, $3, $4, $5, $6)
-    RETURNING *;
+    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    RETURNING
+      id,
+      severity,
+      summary,
+      root_cause,
+      recommendation,
+      steps,
+      original_log,
+      user_id,
+      created_at;
   `;
 
   const values = [
@@ -21,6 +31,7 @@ async function saveAnalysis(analysis, originalLog) {
     analysis.recommendation,
     analysis.steps,
     originalLog,
+    userId,
   ];
 
   const result = await pool.query(query, values);
@@ -28,11 +39,14 @@ async function saveAnalysis(analysis, originalLog) {
   return result.rows[0];
 }
 
-async function getHistory(filters = {}) {
+async function getHistory(userId, filters = {}) {
   const { severity, search, limit = 50 } = filters;
 
   const conditions = [];
   const values = [];
+
+  values.push(userId);
+  conditions.push(`user_id = $${values.length}`);
 
   if (severity) {
     values.push(severity);
@@ -63,11 +77,6 @@ async function getHistory(filters = {}) {
 
   values.push(safeLimit);
 
-  const whereClause =
-    conditions.length > 0
-      ? `WHERE ${conditions.join(" AND ")}`
-      : "";
-
   const query = `
     SELECT
       id,
@@ -77,9 +86,10 @@ async function getHistory(filters = {}) {
       recommendation,
       steps,
       original_log,
+      user_id,
       created_at
     FROM analyses
-    ${whereClause}
+    WHERE ${conditions.join(" AND ")}
     ORDER BY created_at DESC
     LIMIT $${values.length};
   `;
@@ -89,10 +99,11 @@ async function getHistory(filters = {}) {
   return result.rows;
 }
 
-async function deleteAnalysis(id) {
+async function deleteAnalysis(id, userId) {
   const query = `
     DELETE FROM analyses
     WHERE id = $1
+      AND user_id = $2
     RETURNING
       id,
       severity,
@@ -101,10 +112,11 @@ async function deleteAnalysis(id) {
       recommendation,
       steps,
       original_log,
+      user_id,
       created_at;
   `;
 
-  const result = await pool.query(query, [id]);
+  const result = await pool.query(query, [id, userId]);
 
   return result.rows[0] ?? null;
 }

@@ -30,7 +30,7 @@ app.get("/api/auth/me", authenticateToken, (req, res) => {
   });
 });
 
-app.post("/api/analyze", async (req, res) => {
+app.post("/api/analyze", authenticateToken, async (req, res) => {
   try {
     const { log } = req.body;
 
@@ -41,7 +41,12 @@ app.post("/api/analyze", async (req, res) => {
     }
 
     const analysis = await analyzeLog(log);
-    const savedAnalysis = await saveAnalysis(analysis, log);
+
+    const savedAnalysis = await saveAnalysis(
+      analysis,
+      log,
+      req.user.id
+    );
 
     return res.status(201).json({
       id: savedAnalysis.id,
@@ -66,11 +71,11 @@ app.post("/api/analyze", async (req, res) => {
   }
 });
 
-app.get("/api/history", async (req, res) => {
+app.get("/api/history", authenticateToken, async (req, res) => {
   try {
     const { severity, search, limit } = req.query;
 
-    const history = await getHistory({
+    const history = await getHistory(req.user.id, {
       severity:
         typeof severity === "string" && severity.trim()
           ? severity.trim()
@@ -103,7 +108,7 @@ app.get("/api/history", async (req, res) => {
   }
 });
 
-app.delete("/api/history/:id", async (req, res) => {
+app.delete("/api/history/:id", authenticateToken, async (req, res) => {
   try {
     const analysisId = Number(req.params.id);
 
@@ -113,7 +118,10 @@ app.delete("/api/history/:id", async (req, res) => {
       });
     }
 
-    const deletedAnalysis = await deleteAnalysis(analysisId);
+    const deletedAnalysis = await deleteAnalysis(
+      analysisId,
+      req.user.id
+    );
 
     if (!deletedAnalysis) {
       return res.status(404).json({
