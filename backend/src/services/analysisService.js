@@ -11,7 +11,7 @@ async function saveAnalysis(analysis, originalLog, userId) {
       original_log,
       user_id
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    VALUES ($1, $2, $3, $4, $5::jsonb, $6, $7)
     RETURNING
       id,
       severity,
@@ -29,7 +29,7 @@ async function saveAnalysis(analysis, originalLog, userId) {
     analysis.summary,
     analysis.rootCause,
     analysis.recommendation,
-    analysis.steps,
+    JSON.stringify(analysis.steps ?? []),
     originalLog,
     userId,
   ];

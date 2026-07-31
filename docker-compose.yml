@@ -1,0 +1,67 @@
+services:
+  database:
+    image: postgres:16
+    container_name: devops-db
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: fran
+      POSTGRES_DB: devops_ai
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U postgres -d devops_ai",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    container_name: devops-backend
+    restart: unless-stopped
+
+    depends_on:
+      database:
+        condition: service_healthy
+
+    env_file:
+      - ./backend/.env
+
+    environment:
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: fran
+      DB_NAME: devops_ai
+
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+
+    ports:
+      - "3000:3000"
+
+  frontend:
+    build: ./frontend
+    container_name: devops-frontend
+    restart: unless-stopped
+
+    depends_on:
+      - backend
+
+    ports:
+      - "5173:5173"
+
+volumes:
+  postgres_data:
