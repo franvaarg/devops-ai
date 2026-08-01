@@ -5,4 +5,4 @@ dist/
 !.env.example
 *.log
 coverage/
-.DS_Store
+.DS_Storedocs/demo/
