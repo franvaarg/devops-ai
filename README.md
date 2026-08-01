@@ -1,56 +1,196 @@
-# DevOps AI
+# 🚀 DevOps AI
 
-> AI-powered DevOps platform for modern engineering teams.
+> AI-powered platform for analyzing infrastructure logs using Google Gemini.
 
-## 🚀 Vision
+![React](https://img.shields.io/badge/React-19-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![Node.js](https://img.shields.io/badge/Node.js-22-green)
+![Express](https://img.shields.io/badge/Express-5-black)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ED)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-DevOps AI is an intelligent platform that helps engineers analyze logs, troubleshoot deployment issues, automate operational tasks, and centralize technical knowledge using artificial intelligence.
+---
 
-## 🎯 Mission
+## 📖 Overview
 
-Reduce the time engineers spend diagnosing infrastructure problems by combining AI, automation, and cloud-native technologies into a single platform.
+DevOps AI is a full-stack SaaS application that leverages Google's Gemini AI to analyze infrastructure and application logs.
 
-## ✨ Planned Features
+The platform automatically classifies incidents by severity, identifies the most likely root cause, provides actionable recommendations, and stores analysis history for authenticated users.
 
-- AI Log Analyzer
-- Deployment Troubleshooting
-- Incident Timeline
-- AI Runbooks
-- Infrastructure Dashboard
-- Knowledge Base
-- AI Assistant for DevOps
+---
+
+## ✨ Features
+
+- 🔐 JWT Authentication
+- 🤖 AI-powered log analysis
+- 📊 Interactive dashboard
+- 📁 Analysis history
+- 🔍 Search and filtering
+- 🗑 Delete analyses
+- 🐳 Docker & Docker Compose
+- 📈 Severity statistics
+- ⚡ Fast React + Vite frontend
+- 🗄 PostgreSQL persistence
+
+---
+
+## 🏗 Architecture
+
+```text
+                React + TypeScript
+                       │
+                       ▼
+                Express REST API
+                       │
+         ┌─────────────┴─────────────┐
+         ▼                           ▼
+     PostgreSQL                Google Gemini
+                       │
+                       ▼
+                 Docker Compose
+```
+
+---
 
 ## 🛠 Tech Stack
 
 ### Frontend
+
 - React
 - TypeScript
+- Vite
 - Tailwind CSS
 
 ### Backend
+
 - Node.js
-- Express
+- Express.js
 
 ### Database
+
 - PostgreSQL
 
-### Infrastructure
-- Ubuntu
-- Docker
-- AWS
+### AI
+
+- Google Gemini API
 
 ### DevOps
-- Git
-- GitHub Actions
-- CI/CD
 
-### Artificial Intelligence
-- OpenAI API
+- Docker
+- Docker Compose
 
-## 📅 Current Status
+---
 
-🚧 Sprint 0 - Project Setup
+## 📸 Screenshots
 
-Project structure created.
-Ubuntu development environment configured.
-Ready to begin frontend development.
+Coming soon...
+
+---
+
+## 🚀 Getting Started
+
+### Clone the repository
+
+```bash
+git clone https://github.com/yourusername/devops-ai.git
+cd devops-ai
+```
+
+### Configure environment variables
+
+```bash
+cp backend/.env.example backend/.env
+```
+
+Fill your credentials.
+
+### Run with Docker
+
+```bash
+docker compose up -d --build
+```
+
+---
+
+## 🌐 Application
+
+| Service | URL |
+|----------|-----|
+| Frontend | http://localhost:5173 |
+| Backend | http://localhost:3000 |
+| PostgreSQL | localhost:5433 |
+
+---
+
+## 📂 Project Structure
+
+```text
+backend/
+frontend/
+database/
+docker-compose.yml
+README.md
+```
+
+---
+
+## 🧪 Roadmap
+
+- [x] JWT Authentication
+- [x] Gemini AI Integration
+- [x] Docker Support
+- [x] Dashboard
+- [x] Analysis History
+
+### Next Version
+
+- [ ] Deploy to Production
+- [ ] CI/CD Pipeline
+- [ ] Monitoring
+- [ ] Export Reports
+- [ ] Role-Based Access Control
+
+---
+
+## 📸 Screenshots
+
+### 🔐 Login
+
+![Login](docs/screenshots/login.png)
+
+### 📊 Dashboard
+
+![Dashboard](docs/screenshots/dashboard.png)
+
+### 🤖 AI Analysis
+
+![Analysis](docs/screenshots/analysis.png)
+
+### 📚 History
+
+![History](docs/screenshots/history.png)
+
+
+## 🎥 Demo
+
+A complete walkthrough of the application is available in:
+
+`docs/demo/devops-ai-demo.mp4`
+
+
+## 👨‍💻 Author
+
+Francisco Vargas
+
+Backend • Frontend • DevOps • AI
+
+---
+
+## 📄 License
+
+## 📄 License
+
+MIT License
+
+Copyright (c) 2026 Francisco (Fran) Vargas
