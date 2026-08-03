@@ -191,6 +191,5 @@ Backend • Frontend • DevOps • AI
 
 ## 📄 License
 
-MIT License
-
-Copyright (c) 2026 Francisco (Fran) Vargas
+Copyright © 2026 Francisco Vargas
+All rights reserved.
