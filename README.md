@@ -179,6 +179,9 @@ A complete walkthrough of the application is available in:
 `docs/demo/devops-ai-demo.mp4`
 
 
+
+## Source code available upon request for recruitment purposes.###
+
 ## 👨‍💻 Author
 
 Francisco Vargas
