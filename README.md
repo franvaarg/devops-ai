@@ -192,7 +192,10 @@ Backend • Frontend • DevOps • AI
 
 ## 📄 License
 
-## 📄 License
+Copyright © 2026 Francisco (Fran) Vargas
 
-Copyright © 2026 Francisco Vargas
 All rights reserved.
+
+This software and its source code are the intellectual property of Francisco (Fran) Vargas.
+
+No part of this project may be copied, modified, distributed, sublicensed, or used for commercial purposes without prior written permission from the author.
