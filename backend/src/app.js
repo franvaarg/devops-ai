@@ -34,7 +34,7 @@ app.post("/api/analyze", authenticateToken, async (req, res) => {
   try {
     const { log } = req.body;
 
-    if (!log || !log.trim()) {
+    if (typeof log !== "string" || !log.trim()) {
       return res.status(400).json({
         message: "A log is required.",
       });
