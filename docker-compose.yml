@@ -39,6 +39,7 @@ services:
       - ./backend/.env
 
     environment:
+      DATABASE_URL: ""
       DB_HOST: database
       DB_PORT: 5432
       DB_USER: postgres
