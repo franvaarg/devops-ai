@@ -179,6 +179,15 @@ function Home() {
     }
   }
 
+  function handleClearAnalysis() {
+    setLog("");
+    setSeverity("");
+    setSummary("");
+    setRootCause("");
+    setRecommendation("");
+    setSteps([]);
+  }
+
   async function handleDeleteAnalysis(id: number) {
     const loadingToast = toast.loading("Deleting analysis...");
 
@@ -257,7 +266,11 @@ function Home() {
             <Header />
             <LogInput log={log} setLog={setLog} />
             <FileUpload onFileLoaded={setLog} />
-            <AnalyzeButton onAnalyze={handleAnalyze} isLoading={isAnalyzing} />
+            <AnalyzeButton
+              onAnalyze={handleAnalyze}
+              onClear={handleClearAnalysis}
+              isLoading={isAnalyzing}
+            />
             <AnalysisPanel
               severity={severity}
               summary={summary}
