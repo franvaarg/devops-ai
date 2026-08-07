@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
+const pool = require("../database/db");
 
-function authenticateToken(req, res, next) {
+async function authenticateToken(req, res, next) {
   const authorizationHeader = req.headers.authorization;
 
   if (!authorizationHeader) {
@@ -17,8 +18,27 @@ function authenticateToken(req, res, next) {
     });
   }
 
+  let decodedToken;
+
   try {
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+  } catch (error) {
+    return res.status(401).json({
+      message: "Invalid or expired authentication token.",
+    });
+  }
+
+  try {
+    const userResult = await pool.query(
+      "SELECT 1 FROM users WHERE id = $1;",
+      [decodedToken.userId]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(401).json({
+        message: "Invalid or expired authentication token.",
+      });
+    }
 
     req.user = {
       id: decodedToken.userId,
@@ -27,8 +47,10 @@ function authenticateToken(req, res, next) {
 
     next();
   } catch (error) {
-    return res.status(401).json({
-      message: "Invalid or expired authentication token.",
+    console.error("Authentication database error:", error);
+
+    return res.status(500).json({
+      message: "Something went wrong while authenticating the user.",
     });
   }
 }
