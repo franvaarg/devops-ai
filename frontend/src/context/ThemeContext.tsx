@@ -1,29 +1,15 @@
 import {
-  createContext,
-  useContext,
   useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
 
-type Theme = "light" | "dark";
-
-type ThemeContextValue = {
-  theme: Theme;
-  isDarkMode: boolean;
-  toggleTheme: () => void;
-  setTheme: (theme: Theme) => void;
-};
+import { ThemeContext, type Theme } from "./themeContextValue";
 
 type ThemeProviderProps = {
   children: ReactNode;
 };
-
-const ThemeContext =
-  createContext<ThemeContextValue | undefined>(
-    undefined
-  );
 
 const THEME_STORAGE_KEY = "devops-ai-theme";
 
@@ -94,16 +80,4 @@ export function ThemeProvider({
       {children}
     </ThemeContext.Provider>
   );
-}
-
-export function useTheme() {
-  const context = useContext(ThemeContext);
-
-  if (!context) {
-    throw new Error(
-      "useTheme must be used inside ThemeProvider."
-    );
-  }
-
-  return context;
 }

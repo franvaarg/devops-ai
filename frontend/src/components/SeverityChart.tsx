@@ -12,7 +12,7 @@ import {
   YAxis,
 } from "recharts";
 
-import { useTheme } from "../context/ThemeContext";
+import { useTheme } from "../context/useTheme";
 
 type HistoryItem = {
   id: number;
