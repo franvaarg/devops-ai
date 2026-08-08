@@ -21,6 +21,7 @@ const modulePaths = {
   analysisService: require.resolve(
     "../src/services/analysisService"
   ),
+  rateLimiters: require.resolve("../src/middleware/rateLimiters"),
 };
 
 function mockModule(modulePath, exports) {
@@ -244,6 +245,40 @@ test("registration validates input before querying the database", async (t) => {
   }
 });
 
+test("login rate limiting returns JSON after 10 requests in 15 minutes", async () => {
+  const { app, calls } = createHarness();
+
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const response = await request(app).post("/api/auth/login").send({});
+    assert.equal(response.status, 400);
+  }
+
+  const response = await request(app).post("/api/auth/login").send({});
+
+  assert.equal(response.status, 429);
+  assert.deepEqual(response.body, {
+    message: "Too many requests. Please try again later.",
+  });
+  assert.equal(calls.database.length, 0);
+});
+
+test("registration rate limiting returns JSON after 5 requests in one hour", async () => {
+  const { app, calls } = createHarness();
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const response = await request(app).post("/api/auth/register").send({});
+    assert.equal(response.status, 400);
+  }
+
+  const response = await request(app).post("/api/auth/register").send({});
+
+  assert.equal(response.status, 429);
+  assert.deepEqual(response.body, {
+    message: "Too many requests. Please try again later.",
+  });
+  assert.equal(calls.database.length, 0);
+});
+
 test("analysis rejects missing, blank, and non-string logs without external calls", async (t) => {
   const cases = [
     { name: "missing log", body: {} },
@@ -270,6 +305,31 @@ test("analysis rejects missing, blank, and non-string logs without external call
       assert.equal(calls.saveAnalysis.length, 0);
     });
   }
+});
+
+test("analysis rate limiting returns JSON after 20 requests without external calls", async () => {
+  const { app, calls } = createHarness();
+  const authorization = authorize(createToken());
+
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const response = await request(app)
+      .post("/api/analyze")
+      .set("Authorization", authorization)
+      .send({});
+    assert.equal(response.status, 400);
+  }
+
+  const response = await request(app)
+    .post("/api/analyze")
+    .set("Authorization", authorization)
+    .send({});
+
+  assert.equal(response.status, 429);
+  assert.deepEqual(response.body, {
+    message: "Too many requests. Please try again later.",
+  });
+  assert.equal(calls.analyzeLog.length, 0);
+  assert.equal(calls.saveAnalysis.length, 0);
 });
 
 test("history passes the authenticated user ID to the service", async () => {

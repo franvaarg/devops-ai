@@ -10,6 +10,7 @@ const {
 
 const authRoutes = require("./routes/authRoutes");
 const authenticateToken = require("./middleware/authenticateToken");
+const { analyzeRateLimiter } = require("./middleware/rateLimiters");
 
 const app = express();
 
@@ -30,7 +31,7 @@ app.get("/api/auth/me", authenticateToken, (req, res) => {
   });
 });
 
-app.post("/api/analyze", authenticateToken, async (req, res) => {
+app.post("/api/analyze", authenticateToken, analyzeRateLimiter, async (req, res) => {
   try {
     const { log } = req.body;
 
