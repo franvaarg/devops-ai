@@ -30,11 +30,15 @@ async function authenticateToken(req, res, next) {
 
   try {
     const userResult = await pool.query(
-      "SELECT 1 FROM users WHERE id = $1;",
+      "SELECT token_version FROM users WHERE id = $1;",
       [decodedToken.userId]
     );
 
-    if (userResult.rows.length === 0) {
+    if (
+      userResult.rows.length === 0 ||
+      (decodedToken.tokenVersion ?? 0) !==
+        userResult.rows[0].token_version
+    ) {
       return res.status(401).json({
         message: "Invalid or expired authentication token.",
       });

@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
 
 const { analyzeLog } = require("./services/aiService");
 const {
@@ -9,15 +10,42 @@ const {
 } = require("./services/analysisService");
 
 const authRoutes = require("./routes/authRoutes");
+const accountRoutes = require("./routes/accountRoutes");
 const authenticateToken = require("./middleware/authenticateToken");
 const { analyzeRateLimiter } = require("./middleware/rateLimiters");
+const {
+  getAnalysisUsage,
+  runWithAnalysisQuota,
+} = require("./services/quotaService");
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+const allowedOrigins = (process.env.CORS_ORIGINS || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+if (process.env.TRUST_PROXY_HOPS) {
+  app.set("trust proxy", Number(process.env.TRUST_PROXY_HOPS));
+}
+
+app.disable("x-powered-by");
+app.use(helmet());
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Origin is not allowed by CORS."));
+    },
+  })
+);
+app.use(express.json({ limit: "256kb" }));
 
 app.use("/api/auth", authRoutes);
+app.use("/api/account", accountRoutes);
 
 app.get("/", (req, res) => {
   res.json({
@@ -41,13 +69,28 @@ app.post("/api/analyze", authenticateToken, analyzeRateLimiter, async (req, res)
       });
     }
 
+    const currentUsage = await getAnalysisUsage(req.user.id);
+
+    if (currentUsage.remaining === 0) {
+      return res.status(429).json({
+        message: "Monthly analysis quota exceeded.",
+      });
+    }
+
     const analysis = await analyzeLog(log);
 
-    const savedAnalysis = await saveAnalysis(
-      analysis,
-      log,
-      req.user.id
+    const quotaResult = await runWithAnalysisQuota(
+      req.user.id,
+      (client) => saveAnalysis(analysis, log, req.user.id, client)
     );
+
+    if (!quotaResult.allowed) {
+      return res.status(429).json({
+        message: "Monthly analysis quota exceeded.",
+      });
+    }
+
+    const savedAnalysis = quotaResult.value;
 
     return res.status(201).json({
       id: savedAnalysis.id,
@@ -150,6 +193,32 @@ app.delete("/api/history/:id", authenticateToken, async (req, res) => {
       message: "Something went wrong while deleting the analysis.",
     });
   }
+});
+
+app.use((error, req, res, next) => {
+  if (error.message === "Origin is not allowed by CORS.") {
+    return res.status(403).json({
+      message: "Request origin is not allowed.",
+    });
+  }
+
+  if (error.type === "entity.too.large") {
+    return res.status(413).json({
+      message: "Request body is too large.",
+    });
+  }
+
+  if (error instanceof SyntaxError && error.status === 400 && "body" in error) {
+    return res.status(400).json({
+      message: "Request body must contain valid JSON.",
+    });
+  }
+
+  console.error("Unhandled request error:", error);
+
+  return res.status(500).json({
+    message: "Something went wrong while processing the request.",
+  });
 });
 
 module.exports = app;

@@ -125,6 +125,35 @@ export async function login(
   return getResponseData<AuthResponse>(response);
 }
 
+export async function requestPasswordReset(email: string): Promise<{ message: string }> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/auth/forgot-password`,
+    {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ email }),
+    }
+  );
+
+  return getResponseData<{ message: string }>(response);
+}
+
+export async function resetPassword(
+  token: string,
+  password: string
+): Promise<{ message: string }> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/auth/reset-password`,
+    {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ password, token }),
+    }
+  );
+
+  return getResponseData<{ message: string }>(response);
+}
+
 export async function getCurrentUser(): Promise<CurrentUserResponse> {
   const response = await fetch(
     `${API_BASE_URL}/api/auth/me`,

@@ -22,6 +22,11 @@ const modulePaths = {
     "../src/services/analysisService"
   ),
   rateLimiters: require.resolve("../src/middleware/rateLimiters"),
+  quotaService: require.resolve("../src/services/quotaService"),
+  passwordResetService: require.resolve(
+    "../src/services/passwordResetService"
+  ),
+  accountRoutes: require.resolve("../src/routes/accountRoutes"),
 };
 
 function mockModule(modulePath, exports) {
@@ -33,7 +38,16 @@ function mockModule(modulePath, exports) {
   };
 }
 
-function createHarness({ existingUserIds = [EXISTING_USER.id] } = {}) {
+function createHarness({
+  aiFailure = false,
+  existingUserIds = [EXISTING_USER.id],
+  invalidAiResponse = false,
+  quotaAllowed = true,
+  resetRequestFailure = false,
+  resetPasswordResult = true,
+  saveFailure = false,
+  tokenVersion = 0,
+} = {}) {
   Object.values(modulePaths).forEach((modulePath) => {
     delete require.cache[modulePath];
   });
@@ -46,15 +60,37 @@ function createHarness({ existingUserIds = [EXISTING_USER.id] } = {}) {
     saveAnalysis: [],
     getHistory: [],
     deleteAnalysis: [],
+    getAnalysisUsage: [],
+    runWithAnalysisQuota: [],
+    requestPasswordReset: [],
+    resetPassword: [],
   };
 
   const pool = {
     async query(sql, parameters = []) {
       calls.database.push({ sql, parameters });
 
-      if (/SELECT 1 FROM users WHERE id/i.test(sql)) {
+      if (/SELECT token_version FROM users WHERE id/i.test(sql)) {
         return {
-          rows: existingUserIds.includes(parameters[0]) ? [{}] : [],
+          rows: existingUserIds.includes(parameters[0])
+            ? [{ token_version: tokenVersion }]
+            : [],
+        };
+      }
+
+      if (/SELECT\s+id,\s+name,\s+email,\s+plan,/i.test(sql)) {
+        return {
+          rows: [
+            {
+              id: EXISTING_USER.id,
+              name: "Existing User",
+              email: EXISTING_USER.email,
+              plan: "free",
+              subscription_status: "inactive",
+              current_period_end: null,
+              created_at: "2026-01-01T00:00:00.000Z",
+            },
+          ],
         };
       }
 
@@ -65,14 +101,41 @@ function createHarness({ existingUserIds = [EXISTING_USER.id] } = {}) {
   const aiService = {
     async analyzeLog(log) {
       calls.analyzeLog.push(log);
-      throw new Error("Unexpected Gemini call in isolated test.");
+      if (aiFailure) {
+        throw new Error("Provider failed.");
+      }
+
+      if (invalidAiResponse) {
+        throw new Error("Provider returned an invalid response.");
+      }
+
+      return {
+        severity: "High",
+        summary: "Service unavailable",
+        rootCause: "Dependency failure",
+        recommendation: "Restore the dependency",
+        steps: ["Check dependency health"],
+      };
     },
   };
 
   const analysisService = {
     async saveAnalysis(...parameters) {
       calls.saveAnalysis.push(parameters);
-      throw new Error("Unexpected analysis save in isolated test.");
+      if (saveFailure) {
+        throw new Error("Persistence failed.");
+      }
+
+      return {
+        id: 501,
+        severity: parameters[0].severity,
+        summary: parameters[0].summary,
+        root_cause: parameters[0].rootCause,
+        recommendation: parameters[0].recommendation,
+        steps: parameters[0].steps,
+        original_log: parameters[1],
+        created_at: "2026-08-10T00:00:00.000Z",
+      };
     },
     async getHistory(...parameters) {
       calls.getHistory.push(parameters);
@@ -84,9 +147,49 @@ function createHarness({ existingUserIds = [EXISTING_USER.id] } = {}) {
     },
   };
 
+  const quotaService = {
+    async runWithAnalysisQuota(userId, operation) {
+      calls.runWithAnalysisQuota.push(userId);
+
+      if (!quotaAllowed) {
+        return { allowed: false, limit: 50, plan: "free", used: 50 };
+      }
+
+      const value = await operation({ query() {} });
+      return {
+        allowed: true,
+        limit: 50,
+        plan: "free",
+        used: 1,
+        value,
+      };
+    },
+    async getAnalysisUsage(userId) {
+      calls.getAnalysisUsage.push(userId);
+      return quotaAllowed
+        ? { limit: 50, plan: "free", remaining: 50, used: 0 }
+        : { limit: 50, plan: "free", remaining: 0, used: 50 };
+    },
+  };
+
+  const passwordResetService = {
+    async requestPasswordReset(email) {
+      calls.requestPasswordReset.push(email);
+      if (resetRequestFailure) {
+        throw new Error("SMTP delivery failed.");
+      }
+    },
+    async resetPassword(...parameters) {
+      calls.resetPassword.push(parameters);
+      return resetPasswordResult;
+    },
+  };
+
   mockModule(modulePaths.db, pool);
   mockModule(modulePaths.aiService, aiService);
   mockModule(modulePaths.analysisService, analysisService);
+  mockModule(modulePaths.quotaService, quotaService);
+  mockModule(modulePaths.passwordResetService, passwordResetService);
 
   return {
     app: require(modulePaths.app),
@@ -172,6 +275,53 @@ test("authentication rejects a missing Authorization header", async () => {
     message: "Authentication token is required.",
   });
   assert.equal(calls.database.length, 0);
+});
+
+test("authentication rejects tokens revoked by a password reset", async () => {
+  const { app } = createHarness({ tokenVersion: 1 });
+  const response = await request(app)
+    .get("/api/auth/me")
+    .set("Authorization", authorize(createToken()));
+
+  assert.equal(response.status, 401);
+  assert.deepEqual(response.body, {
+    message: "Invalid or expired authentication token.",
+  });
+});
+
+test("HTTP hardening hides Express and sets security headers", async () => {
+  const { app } = createHarness();
+  const response = await request(app).get("/");
+
+  assert.equal(response.status, 200);
+  assert.equal(response.headers["x-powered-by"], undefined);
+  assert.equal(response.headers["x-content-type-options"], "nosniff");
+  assert.equal(response.headers["x-frame-options"], "SAMEORIGIN");
+});
+
+test("malformed JSON receives a safe JSON error", async () => {
+  const { app } = createHarness();
+  const response = await request(app)
+    .post("/api/auth/login")
+    .set("Content-Type", "application/json")
+    .send('{"email":');
+
+  assert.equal(response.status, 400);
+  assert.deepEqual(response.body, {
+    message: "Request body must contain valid JSON.",
+  });
+});
+
+test("oversized request bodies receive a safe JSON error", async () => {
+  const { app } = createHarness();
+  const response = await request(app)
+    .post("/api/auth/login")
+    .send({ padding: "x".repeat(257 * 1024) });
+
+  assert.equal(response.status, 413);
+  assert.deepEqual(response.body, {
+    message: "Request body is too large.",
+  });
 });
 
 test("login validates required credentials before querying the database", async (t) => {
@@ -279,6 +429,67 @@ test("registration rate limiting returns JSON after 5 requests in one hour", asy
   assert.equal(calls.database.length, 0);
 });
 
+test("password recovery returns the same response without exposing account existence", async (t) => {
+  for (const testCase of [
+    { email: "existing@example.test", expectedCall: true },
+    { email: "invalid-email", expectedCall: false },
+  ]) {
+    await t.test(testCase.email, async () => {
+      const { app, calls } = createHarness();
+      const response = await request(app)
+        .post("/api/auth/forgot-password")
+        .send({ email: testCase.email });
+
+      assert.equal(response.status, 202);
+      assert.deepEqual(response.body, {
+        message:
+          "If an account exists for that email, a password reset link will be sent.",
+      });
+      assert.equal(
+        calls.requestPasswordReset.length,
+        testCase.expectedCall ? 1 : 0
+      );
+    });
+  }
+});
+
+test("password recovery preserves its generic response when delivery fails", async () => {
+  const { app, calls } = createHarness({ resetRequestFailure: true });
+  const response = await request(app)
+    .post("/api/auth/forgot-password")
+    .send({ email: "existing@example.test" });
+
+  assert.equal(response.status, 202);
+  assert.deepEqual(response.body, {
+    message:
+      "If an account exists for that email, a password reset link will be sent.",
+  });
+  assert.deepEqual(calls.requestPasswordReset, ["existing@example.test"]);
+});
+
+test("password reset accepts a valid token without external services", async () => {
+  const { app, calls } = createHarness();
+  const token = "a".repeat(64);
+  const response = await request(app)
+    .post("/api/auth/reset-password")
+    .send({ password: "new-password-123", token });
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(calls.resetPassword, [[token, "new-password-123"]]);
+});
+
+test("password reset rejects an expired or used token", async () => {
+  const { app } = createHarness({ resetPasswordResult: false });
+  const response = await request(app)
+    .post("/api/auth/reset-password")
+    .send({ password: "new-password-123", token: "b".repeat(64) });
+
+  assert.equal(response.status, 400);
+  assert.deepEqual(response.body, {
+    message: "The password reset link is invalid or has expired.",
+  });
+});
+
 test("analysis rejects missing, blank, and non-string logs without external calls", async (t) => {
   const cases = [
     { name: "missing log", body: {} },
@@ -330,6 +541,98 @@ test("analysis rate limiting returns JSON after 20 requests without external cal
   });
   assert.equal(calls.analyzeLog.length, 0);
   assert.equal(calls.saveAnalysis.length, 0);
+});
+
+test("successful analysis is persisted within the quota transaction", async () => {
+  const { app, calls } = createHarness();
+  const response = await request(app)
+    .post("/api/analyze")
+    .set("Authorization", authorize(createToken()))
+    .send({ log: "production service unavailable" });
+
+  assert.equal(response.status, 201);
+  assert.equal(response.body.id, 501);
+  assert.deepEqual(calls.getAnalysisUsage, [EXISTING_USER.id]);
+  assert.deepEqual(calls.analyzeLog, ["production service unavailable"]);
+  assert.deepEqual(calls.runWithAnalysisQuota, [EXISTING_USER.id]);
+  assert.equal(calls.saveAnalysis.length, 1);
+  assert.equal(calls.saveAnalysis[0][2], EXISTING_USER.id);
+  assert.ok(calls.saveAnalysis[0][3]);
+});
+
+test("provider failure does not enter the quota transaction or persist", async () => {
+  const { app, calls } = createHarness({ aiFailure: true });
+  const response = await request(app)
+    .post("/api/analyze")
+    .set("Authorization", authorize(createToken()))
+    .send({ log: "production service unavailable" });
+
+  assert.equal(response.status, 500);
+  assert.deepEqual(calls.runWithAnalysisQuota, []);
+  assert.equal(calls.saveAnalysis.length, 0);
+});
+
+test("invalid AI response does not enter the quota transaction or persist", async () => {
+  const { app, calls } = createHarness({ invalidAiResponse: true });
+  const response = await request(app)
+    .post("/api/analyze")
+    .set("Authorization", authorize(createToken()))
+    .send({ log: "production service unavailable" });
+
+  assert.equal(response.status, 500);
+  assert.deepEqual(calls.runWithAnalysisQuota, []);
+  assert.equal(calls.saveAnalysis.length, 0);
+});
+
+test("persistence failure is propagated from the quota transaction", async () => {
+  const { app, calls } = createHarness({ saveFailure: true });
+  const response = await request(app)
+    .post("/api/analyze")
+    .set("Authorization", authorize(createToken()))
+    .send({ log: "production service unavailable" });
+
+  assert.equal(response.status, 500);
+  assert.deepEqual(calls.runWithAnalysisQuota, [EXISTING_USER.id]);
+  assert.equal(calls.saveAnalysis.length, 1);
+});
+
+test("analysis quota exhaustion blocks Gemini and database saves", async () => {
+  const { app, calls } = createHarness({ quotaAllowed: false });
+  const response = await request(app)
+    .post("/api/analyze")
+    .set("Authorization", authorize(createToken()))
+    .send({ log: "production service unavailable" });
+
+  assert.equal(response.status, 429);
+  assert.deepEqual(response.body, {
+    message: "Monthly analysis quota exceeded.",
+  });
+  assert.deepEqual(calls.getAnalysisUsage, [EXISTING_USER.id]);
+  assert.deepEqual(calls.runWithAnalysisQuota, []);
+  assert.equal(calls.analyzeLog.length, 0);
+  assert.equal(calls.saveAnalysis.length, 0);
+});
+
+test("account summary exposes safe billing state and monthly usage", async () => {
+  const { app, calls } = createHarness();
+  const response = await request(app)
+    .get("/api/account")
+    .set("Authorization", authorize(createToken()));
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(response.body, {
+    account: {
+      createdAt: "2026-01-01T00:00:00.000Z",
+      currentPeriodEnd: null,
+      email: EXISTING_USER.email,
+      id: EXISTING_USER.id,
+      name: "Existing User",
+      plan: "free",
+      subscriptionStatus: "inactive",
+    },
+    usage: { limit: 50, plan: "free", remaining: 50, used: 0 },
+  });
+  assert.deepEqual(calls.getAnalysisUsage, [EXISTING_USER.id]);
 });
 
 test("history passes the authenticated user ID to the service", async () => {

@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 
 import {
   getCurrentUser,
@@ -10,6 +11,7 @@ import {
 } from "./services/api";
 
 function App() {
+  const resetToken = new URLSearchParams(window.location.search).get("token");
   const [isAuthenticated, setIsAuthenticated] =
     useState(false);
 
@@ -63,6 +65,22 @@ function App() {
     );
 
     setIsAuthenticated(true);
+  }
+
+  function handlePasswordResetComplete() {
+    window.history.replaceState({}, "", window.location.pathname);
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setIsAuthenticated(false);
+  }
+
+  if (resetToken) {
+    return (
+      <ResetPassword
+        token={resetToken}
+        onComplete={handlePasswordResetComplete}
+      />
+    );
   }
 
   if (isLoading) {

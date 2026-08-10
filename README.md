@@ -32,6 +32,10 @@ The platform automatically classifies incidents by severity, identifies the most
 - 📈 Severity statistics
 - ⚡ Fast React + Vite frontend
 - 🗄 PostgreSQL persistence
+- 🛡 Rate limits and hardened HTTP headers
+- 📈 Per-user monthly AI usage quotas
+- 🔑 Secure password-recovery API
+- 💳 Billing-ready individual account model
 
 ---
 
@@ -104,6 +108,35 @@ cp backend/.env.example backend/.env
 ```
 
 Fill your credentials.
+
+For password recovery, configure the SMTP variables and `FRONTEND_URL` in
+`backend/.env`. In production, set `CORS_ORIGINS` to the exact frontend origin
+and `TRUST_PROXY_HOPS` to the number of trusted proxies in front of Express.
+
+### Upgrade an existing database
+
+Docker initialization scripts only run for a new PostgreSQL volume. Apply the
+idempotent SaaS migration to an existing database before deploying this version:
+
+```bash
+psql "$DATABASE_URL" -f database/migrations/001_saas_foundations.sql
+```
+
+New databases receive the same schema from `database/init.sql`.
+
+### Individual account plans
+
+- `free`: 50 AI analyses per calendar month
+- `pro`: 500 AI analyses per calendar month when the subscription status is
+  `active` or `trialing`
+
+`GET /api/account` returns the authenticated user's safe subscription summary
+and current monthly usage. Provider customer/subscription identifiers remain
+server-side. Checkout and webhooks are intentionally deferred until a billing
+provider is selected.
+
+Password-reset links expire after one hour, are stored only as SHA-256 hashes,
+can be used once, and revoke existing sessions when successfully used.
 
 ### Run with Docker
 

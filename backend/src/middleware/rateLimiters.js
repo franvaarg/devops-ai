@@ -27,6 +27,16 @@ const registerRateLimiter = createRateLimiter({
   limit: 5,
 });
 
+const passwordRecoveryRateLimiter = createRateLimiter({
+  windowMs: 60 * 60 * 1000,
+  limit: 5,
+});
+
+const passwordResetRateLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+});
+
 const analyzeRateLimiter = createRateLimiter({
   windowMs: 60 * 60 * 1000,
   limit: 20,
@@ -36,5 +46,7 @@ const analyzeRateLimiter = createRateLimiter({
 module.exports = {
   analyzeRateLimiter,
   loginRateLimiter,
+  passwordRecoveryRateLimiter,
+  passwordResetRateLimiter,
   registerRateLimiter,
 };

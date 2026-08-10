@@ -7,10 +7,11 @@ import toast from "react-hot-toast";
 import {
   login,
   register,
+  requestPasswordReset,
   type AuthResponse,
 } from "../services/api";
 
-type AuthMode = "login" | "register";
+type AuthMode = "login" | "register" | "forgot";
 
 type AuthProps = {
   onAuthenticated: (
@@ -177,6 +178,7 @@ function Auth({
     useState(false);
 
   const isLogin = mode === "login";
+  const isForgot = mode === "forgot";
 
   function resetForm() {
     setName("");
@@ -195,7 +197,7 @@ function Auth({
       email.trim().toLowerCase();
 
     if (
-      !isLogin &&
+      mode === "register" &&
       name.trim().length < 2
     ) {
       toast.error(
@@ -224,7 +226,7 @@ function Auth({
       return false;
     }
 
-    if (password.length < 8) {
+    if (!isForgot && password.length < 8) {
       toast.error(
         "Password must contain at least 8 characters."
       );
@@ -233,7 +235,7 @@ function Auth({
     }
 
     if (
-      !isLogin &&
+      mode === "register" &&
       password !== confirmPassword
     ) {
       toast.error(
@@ -257,7 +259,9 @@ function Auth({
 
     const loadingToast =
       toast.loading(
-        isLogin
+        isForgot
+          ? "Sending reset link..."
+          : isLogin
           ? "Signing in..."
           : "Creating account..."
       );
@@ -267,6 +271,13 @@ function Auth({
 
       const normalizedEmail =
         email.trim().toLowerCase();
+
+      if (isForgot) {
+        const response = await requestPasswordReset(normalizedEmail);
+        toast.success(response.message, { id: loadingToast });
+        changeMode("login");
+        return;
+      }
 
       const authData = isLogin
         ? await login(
@@ -405,13 +416,17 @@ function Auth({
             <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950 dark:text-white">
               {isLogin
                 ? "Welcome back"
-                : "Create your account"}
+                : isForgot
+                  ? "Reset your password"
+                  : "Create your account"}
             </h2>
 
             <p className="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-400">
               {isLogin
                 ? "Sign in to access your analysis dashboard and saved history."
-                : "Register to start analyzing logs and saving private results."}
+                : isForgot
+                  ? "Enter your email and we will send a secure reset link if the account exists."
+                  : "Register to start analyzing logs and saving private results."}
             </p>
 
             <div className="mt-8 grid grid-cols-2 rounded-2xl bg-slate-100 p-1 dark:bg-slate-800">
@@ -448,7 +463,7 @@ function Auth({
               onSubmit={handleSubmit}
               className="mt-8 space-y-5"
             >
-              {!isLogin && (
+              {mode === "register" && (
                 <div>
                   <label
                     htmlFor="name"
@@ -510,7 +525,7 @@ function Auth({
                 </div>
               </div>
 
-              <div>
+              {!isForgot && <div>
                 <label
                   htmlFor="password"
                   className="mb-2 block text-sm font-bold text-slate-700 dark:text-slate-200"
@@ -542,9 +557,9 @@ function Auth({
                     className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-emerald-400 dark:focus:bg-slate-950"
                   />
                 </div>
-              </div>
+              </div>}
 
-              {!isLogin && (
+              {mode === "register" && (
                 <div>
                   <label
                     htmlFor="confirm-password"
@@ -586,17 +601,33 @@ function Auth({
                 )}
 
                 {isSubmitting
-                  ? isLogin
+                  ? isForgot
+                    ? "Sending reset link..."
+                    : isLogin
                     ? "Signing in..."
                     : "Creating account..."
-                  : isLogin
+                  : isForgot
+                    ? "Send reset link"
+                    : isLogin
                     ? "Sign in"
                     : "Create account"}
               </button>
             </form>
 
+            {isLogin && (
+              <button
+                type="button"
+                onClick={() => changeMode("forgot")}
+                className="mt-5 w-full text-center text-sm font-bold text-emerald-700 dark:text-emerald-400"
+              >
+                Forgot your password?
+              </button>
+            )}
+
             <p className="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">
-              {isLogin
+              {isForgot
+                ? "Remembered your password?"
+                : isLogin
                 ? "New to DevOps AI?"
                 : "Already have an account?"}{" "}
               <button
@@ -610,7 +641,9 @@ function Auth({
                 }
                 className="font-bold text-emerald-700 transition hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300"
               >
-                {isLogin
+                {isForgot
+                  ? "Back to sign in"
+                  : isLogin
                   ? "Create an account"
                   : "Sign in"}
               </button>

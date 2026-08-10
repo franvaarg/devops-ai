@@ -5,8 +5,14 @@ const jwt = require("jsonwebtoken");
 const pool = require("../database/db");
 const {
   loginRateLimiter,
+  passwordRecoveryRateLimiter,
+  passwordResetRateLimiter,
   registerRateLimiter,
 } = require("../middleware/rateLimiters");
+const {
+  requestPasswordReset,
+  resetPassword,
+} = require("../services/passwordResetService");
 
 const router = express.Router();
 
@@ -15,6 +21,7 @@ function createToken(user) {
     {
       userId: user.id,
       email: user.email,
+      tokenVersion: user.token_version ?? 0,
     },
     process.env.JWT_SECRET,
     {
@@ -84,6 +91,7 @@ router.post("/register", registerRateLimiter, async (req, res) => {
           id,
           name,
           email,
+          token_version,
           created_at;
       `,
       [cleanName, cleanEmail, passwordHash]
@@ -137,6 +145,7 @@ router.post("/login", loginRateLimiter, async (req, res) => {
           name,
           email,
           password,
+          token_version,
           created_at
         FROM users
         WHERE email = $1;
@@ -180,5 +189,68 @@ router.post("/login", loginRateLimiter, async (req, res) => {
     });
   }
 });
+
+router.post(
+  "/forgot-password",
+  passwordRecoveryRateLimiter,
+  async (req, res) => {
+    const cleanEmail =
+      typeof req.body.email === "string"
+        ? req.body.email.trim().toLowerCase()
+        : "";
+
+    if (cleanEmail && cleanEmail.includes("@")) {
+      try {
+        await requestPasswordReset(cleanEmail);
+      } catch (error) {
+        console.error("Password reset request error:", error);
+      }
+    }
+
+    return res.status(202).json({
+      message:
+        "If an account exists for that email, a password reset link will be sent.",
+    });
+  }
+);
+
+router.post(
+  "/reset-password",
+  passwordResetRateLimiter,
+  async (req, res) => {
+    const { password, token } = req.body;
+
+    if (
+      typeof token !== "string" ||
+      !/^[a-f0-9]{64}$/i.test(token) ||
+      typeof password !== "string" ||
+      password.length < 8
+    ) {
+      return res.status(400).json({
+        message: "A valid reset token and password are required.",
+      });
+    }
+
+    try {
+      const passwordWasReset = await resetPassword(token, password);
+
+      if (!passwordWasReset) {
+        return res.status(400).json({
+          message: "The password reset link is invalid or has expired.",
+        });
+      }
+
+      return res.status(200).json({
+        message: "Password reset successfully. You can now sign in.",
+      });
+    } catch (error) {
+      console.error("Password reset error:", error);
+
+      return res.status(500).json({
+        message: "Something went wrong while resetting the password.",
+      });
+    }
+  }
+);
 
 module.exports = router;

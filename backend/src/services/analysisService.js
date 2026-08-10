@@ -1,6 +1,6 @@
 const pool = require("../database/db");
 
-async function saveAnalysis(analysis, originalLog, userId) {
+async function saveAnalysis(analysis, originalLog, userId, database = pool) {
   const query = `
     INSERT INTO analyses (
       severity,
@@ -34,7 +34,7 @@ async function saveAnalysis(analysis, originalLog, userId) {
     userId,
   ];
 
-  const result = await pool.query(query, values);
+  const result = await database.query(query, values);
 
   return result.rows[0];
 }
