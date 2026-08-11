@@ -14,7 +14,7 @@ function Header() {
           </span>
 
           <span className="text-xs font-bold uppercase tracking-[0.18em] text-teal-800 dark:text-teal-300">
-            AI-powered troubleshooting
+            AI Log Intelligence
           </span>
         </div>
 
@@ -34,17 +34,13 @@ function Header() {
       </div>
 
       <h1 className="text-4xl font-black tracking-tight text-slate-950 dark:text-white sm:text-5xl">
-        DevOps{" "}
         <span className="text-emerald-600">
-          AI
+          KANYI
         </span>
       </h1>
 
       <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-300">
-        Analyze infrastructure logs, identify
-        likely root causes, and receive
-        practical troubleshooting steps
-        powered by artificial intelligence.
+        We find what hides in your logs.
       </p>
     </header>
   );

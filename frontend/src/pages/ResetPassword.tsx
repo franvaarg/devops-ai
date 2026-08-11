@@ -44,7 +44,7 @@ function ResetPassword({ token, onComplete }: ResetPasswordProps) {
     <main className="flex min-h-screen items-center justify-center bg-slate-950 px-4 text-slate-100">
       <section className="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900 p-8 shadow-2xl">
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-400">
-          DevOps AI
+          KANYI
         </p>
         <h1 className="mt-3 text-3xl font-black">Choose a new password</h1>
         <p className="mt-3 text-sm leading-6 text-slate-400">

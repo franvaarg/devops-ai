@@ -1,6 +1,8 @@
-# 🚀 DevOps AI
+# 🚀 KANYI
 
-> AI-powered platform for analyzing infrastructure logs using Google Gemini.
+> AI Log Intelligence
+>
+> We find what hides in your logs.
 
 ![React](https://img.shields.io/badge/React-19-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
@@ -14,7 +16,7 @@
 
 ## 📖 Overview
 
-DevOps AI is a full-stack SaaS application that leverages Google's Gemini AI to analyze infrastructure and application logs.
+KANYI is an AI Log Intelligence platform that uses Google's Gemini AI to uncover severity, root causes, and actionable insights in infrastructure and application logs.
 
 The platform automatically classifies incidents by severity, identifies the most likely root cause, provides actionable recommendations, and stores analysis history for authenticated users.
 

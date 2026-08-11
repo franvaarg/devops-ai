@@ -90,7 +90,7 @@ function App() {
           <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent" />
 
           <p className="mt-6 text-lg font-semibold">
-            Loading DevOps AI...
+            Loading KANYI...
           </p>
         </div>
       </main>

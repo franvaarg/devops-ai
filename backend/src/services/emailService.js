@@ -24,9 +24,9 @@ async function sendPasswordResetEmail({ email, name, token }) {
   resetUrl.searchParams.set("token", token);
 
   await createTransport().sendMail({
-    from: process.env.EMAIL_FROM || "DevOps AI <no-reply@example.com>",
+    from: process.env.EMAIL_FROM || "KANYI <no-reply@example.com>",
     to: email,
-    subject: "Reset your DevOps AI password",
+    subject: "Reset your KANYI password",
     text: [
       `Hello ${name},`,
       "",

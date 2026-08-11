@@ -367,11 +367,11 @@ function Auth({
             </div>
 
             <p className="mt-8 text-xs font-bold uppercase tracking-[0.22em] text-emerald-300">
-              DevOps intelligence
+              AI Log Intelligence
             </p>
 
             <h1 className="mt-4 max-w-md text-4xl font-black tracking-tight">
-              Analyze infrastructure logs with AI.
+              We find what hides in your logs.
             </h1>
 
             <p className="mt-5 max-w-md text-base leading-7 text-slate-300">
@@ -410,7 +410,7 @@ function Auth({
             </div>
 
             <p className="mt-6 text-xs font-bold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-400 lg:mt-0">
-              DevOps AI
+              KANYI
             </p>
 
             <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950 dark:text-white">
@@ -628,7 +628,7 @@ function Auth({
               {isForgot
                 ? "Remembered your password?"
                 : isLogin
-                ? "New to DevOps AI?"
+                ? "New to KANYI?"
                 : "Already have an account?"}{" "}
               <button
                 type="button"

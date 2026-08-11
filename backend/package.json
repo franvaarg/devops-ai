@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "Backend API for DevOps AI log analysis",
+  "description": "Backend API for KANYI AI Log Intelligence",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",

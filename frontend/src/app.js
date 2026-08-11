@@ -4,7 +4,7 @@ const app = express();
 
 app.get("/", (req, res) => {
   res.json({
-    message: "DevOps AI Backend Running 🚀",
+    message: "KANYI Backend Running 🚀",
   });
 });
 
