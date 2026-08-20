@@ -11,7 +11,9 @@ import {
 } from "./services/api";
 
 function App() {
-  const resetToken = new URLSearchParams(window.location.search).get("token");
+  const [resetToken, setResetToken] = useState(() =>
+    new URLSearchParams(window.location.search).get("token")
+  );
   const [isAuthenticated, setIsAuthenticated] =
     useState(false);
 
@@ -71,6 +73,7 @@ function App() {
     window.history.replaceState({}, "", window.location.pathname);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    setResetToken(null);
     setIsAuthenticated(false);
   }
 
