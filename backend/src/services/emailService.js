@@ -1,41 +1,75 @@
-const nodemailer = require("nodemailer");
+const BREVO_EMAIL_API_URL = "https://api.brevo.com/v3/smtp/email";
+const BREVO_REQUEST_TIMEOUT_MS = 10_000;
+const DEFAULT_EMAIL_FROM = "KANYI <no-reply@example.com>";
 
-function createTransport() {
-  const { SMTP_HOST, SMTP_PASSWORD, SMTP_PORT, SMTP_USER } = process.env;
+function parseSender(value) {
+  const sender = value.trim();
+  const match = sender.match(/^(.*?)\s*<([^<>]+)>$/);
 
-  if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASSWORD) {
-    throw new Error("SMTP is not configured.");
+  if (match) {
+    return {
+      name: match[1].trim(),
+      email: match[2].trim(),
+    };
   }
 
-  return nodemailer.createTransport({
-    host: SMTP_HOST,
-    port: Number(SMTP_PORT),
-    secure: Number(SMTP_PORT) === 465,
-    auth: {
-      pass: SMTP_PASSWORD,
-      user: SMTP_USER,
-    },
-  });
+  return { email: sender };
 }
 
 async function sendPasswordResetEmail({ email, name, token }) {
+  const apiKey = process.env.BREVO_API_KEY;
+
+  if (!apiKey) {
+    throw new Error("Brevo email delivery is not configured.");
+  }
+
   const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
   const resetUrl = new URL("/reset-password", frontendUrl);
   resetUrl.searchParams.set("token", token);
 
-  await createTransport().sendMail({
-    from: process.env.EMAIL_FROM || "KANYI <no-reply@example.com>",
-    to: email,
-    subject: "Reset your KANYI password",
-    text: [
-      `Hello ${name},`,
-      "",
-      "Use the link below to reset your password. It expires in one hour.",
-      resetUrl.toString(),
-      "",
-      "If you did not request this, you can ignore this email.",
-    ].join("\n"),
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), BREVO_REQUEST_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(BREVO_EMAIL_API_URL, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "api-key": apiKey,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        sender: parseSender(process.env.EMAIL_FROM || DEFAULT_EMAIL_FROM),
+        to: [{ email, name }],
+        subject: "Reset your KANYI password",
+        textContent: [
+          `Hello ${name},`,
+          "",
+          "Use the link below to reset your password. It expires in one hour.",
+          resetUrl.toString(),
+          "",
+          "If you did not request this, you can ignore this email.",
+        ].join("\n"),
+      }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Brevo email delivery failed with status ${response.status}.`);
+    }
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      throw new Error("Brevo email delivery timed out.");
+    }
+
+    if (error?.message?.startsWith("Brevo email delivery failed with status ")) {
+      throw error;
+    }
+
+    throw new Error("Brevo email delivery failed.");
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 module.exports = {

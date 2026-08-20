@@ -176,7 +176,7 @@ function createHarness({
     async requestPasswordReset(email) {
       calls.requestPasswordReset.push(email);
       if (resetRequestFailure) {
-        throw new Error("SMTP delivery failed.");
+        throw new Error("Email delivery failed.");
       }
     },
     async resetPassword(...parameters) {

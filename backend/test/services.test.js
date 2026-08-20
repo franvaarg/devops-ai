@@ -26,6 +26,145 @@ function clearServiceModules() {
   });
 }
 
+test("password-reset email is sent through Brevo with the configured sender", async (t) => {
+  clearServiceModules();
+  const originalFetch = global.fetch;
+  const originalEnvironment = {
+    BREVO_API_KEY: process.env.BREVO_API_KEY,
+    EMAIL_FROM: process.env.EMAIL_FROM,
+    FRONTEND_URL: process.env.FRONTEND_URL,
+  };
+  const requests = [];
+
+  t.after(() => {
+    global.fetch = originalFetch;
+    for (const [key, value] of Object.entries(originalEnvironment)) {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
+    clearServiceModules();
+  });
+
+  process.env.BREVO_API_KEY = "test-api-key";
+  process.env.EMAIL_FROM = "KANYI Support <support@example.test>";
+  process.env.FRONTEND_URL = "https://app.example.test";
+  global.fetch = async (...args) => {
+    requests.push(args);
+    return { ok: true, status: 201 };
+  };
+
+  const { sendPasswordResetEmail } = require(modulePaths.emailService);
+  await sendPasswordResetEmail({
+    email: "recipient@example.test",
+    name: "Test User",
+    token: "reset-token",
+  });
+
+  assert.equal(requests.length, 1);
+  const [url, options] = requests[0];
+  assert.equal(url, "https://api.brevo.com/v3/smtp/email");
+  assert.equal(options.method, "POST");
+  assert.equal(options.headers["api-key"], "test-api-key");
+  assert.equal(options.headers["content-type"], "application/json");
+  assert.ok(options.signal instanceof AbortSignal);
+  assert.deepEqual(JSON.parse(options.body), {
+    sender: {
+      name: "KANYI Support",
+      email: "support@example.test",
+    },
+    to: [{ email: "recipient@example.test", name: "Test User" }],
+    subject: "Reset your KANYI password",
+    textContent: [
+      "Hello Test User,",
+      "",
+      "Use the link below to reset your password. It expires in one hour.",
+      "https://app.example.test/reset-password?token=reset-token",
+      "",
+      "If you did not request this, you can ignore this email.",
+    ].join("\n"),
+  });
+});
+
+test("password-reset email reports Brevo failures without exposing response data", async (t) => {
+  clearServiceModules();
+  const originalFetch = global.fetch;
+  const originalApiKey = process.env.BREVO_API_KEY;
+
+  t.after(() => {
+    global.fetch = originalFetch;
+    if (originalApiKey === undefined) {
+      delete process.env.BREVO_API_KEY;
+    } else {
+      process.env.BREVO_API_KEY = originalApiKey;
+    }
+    clearServiceModules();
+  });
+
+  process.env.BREVO_API_KEY = "secret-test-api-key";
+  global.fetch = async () => ({ ok: false, status: 400 });
+
+  const { sendPasswordResetEmail } = require(modulePaths.emailService);
+  await assert.rejects(
+    sendPasswordResetEmail({
+      email: "recipient@example.test",
+      name: "Test User",
+      token: "reset-token",
+    }),
+    (error) => {
+      assert.equal(error.message, "Brevo email delivery failed with status 400.");
+      assert.doesNotMatch(error.message, /secret-test-api-key/);
+      return true;
+    }
+  );
+});
+
+test("password-reset email aborts a timed-out Brevo request", async (t) => {
+  clearServiceModules();
+  const originalApiKey = process.env.BREVO_API_KEY;
+  const originalFetch = global.fetch;
+  const originalSetTimeout = global.setTimeout;
+
+  t.after(() => {
+    global.fetch = originalFetch;
+    global.setTimeout = originalSetTimeout;
+    if (originalApiKey === undefined) {
+      delete process.env.BREVO_API_KEY;
+    } else {
+      process.env.BREVO_API_KEY = originalApiKey;
+    }
+    clearServiceModules();
+  });
+
+  process.env.BREVO_API_KEY = "test-api-key";
+  global.setTimeout = (callback, delay) => {
+    assert.equal(delay, 10_000);
+    queueMicrotask(callback);
+    return 1;
+  };
+  global.fetch = async (_url, { signal }) => {
+    await new Promise((resolve, reject) => {
+      signal.addEventListener("abort", () => {
+        const error = new Error("request aborted");
+        error.name = "AbortError";
+        reject(error);
+      });
+    });
+  };
+
+  const { sendPasswordResetEmail } = require(modulePaths.emailService);
+  await assert.rejects(
+    sendPasswordResetEmail({
+      email: "recipient@example.test",
+      name: "Test User",
+      token: "reset-token",
+    }),
+    { message: "Brevo email delivery timed out." }
+  );
+});
+
 function createQuotaPool({ plan = "free", status = "inactive", limitUsed = 0 } = {}) {
   const calls = [];
   let analysesUsed = limitUsed;
@@ -291,21 +430,21 @@ test("successful password-reset issuance stores only the emailed token hash", as
   assert.ok(database.calls.some(({ sql }) => sql === "COMMIT"));
 });
 
-test("SMTP failure rolls back the new token and preserves the previous token", async () => {
+test("email delivery failure rolls back the new token and preserves the previous token", async () => {
   clearServiceModules();
   const previousToken = { hash: "previous", userId: 101, used: false };
   const database = createPasswordResetPool([previousToken]);
   mockModule(modulePaths.db, database.pool);
   mockModule(modulePaths.emailService, {
     async sendPasswordResetEmail() {
-      throw new Error("SMTP delivery failed.");
+      throw new Error("Email delivery failed.");
     },
   });
 
   const { requestPasswordReset } = require(modulePaths.passwordResetService);
   await assert.rejects(
     requestPasswordReset("existing@example.test"),
-    /SMTP delivery failed/
+    /Email delivery failed/
   );
 
   assert.deepEqual(validResetTokens(database), [previousToken]);
