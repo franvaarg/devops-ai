@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 
 const pool = require("../database/db");
 const { sendPasswordResetEmail } = require("./emailService");
+const { validatePassword } = require("../security/credentialValidation");
 
 const RESET_TOKEN_LIFETIME_MS = 60 * 60 * 1000;
 
@@ -77,11 +78,15 @@ async function resetPassword(token, password) {
 
     const tokenResult = await client.query(
       `
-        SELECT id, user_id
+        SELECT password_reset_tokens.id,
+               password_reset_tokens.user_id,
+               users.name,
+               users.email
         FROM password_reset_tokens
-        WHERE token_hash = $1
-          AND used_at IS NULL
-          AND expires_at > CURRENT_TIMESTAMP
+        JOIN users ON users.id = password_reset_tokens.user_id
+        WHERE password_reset_tokens.token_hash = $1
+          AND password_reset_tokens.used_at IS NULL
+          AND password_reset_tokens.expires_at > CURRENT_TIMESTAMP
         FOR UPDATE;
       `,
       [hashToken(token)]
@@ -89,6 +94,11 @@ async function resetPassword(token, password) {
     const resetToken = tokenResult.rows[0];
 
     if (!resetToken) {
+      await client.query("ROLLBACK");
+      return false;
+    }
+
+    if (validatePassword(password, resetToken)) {
       await client.query("ROLLBACK");
       return false;
     }

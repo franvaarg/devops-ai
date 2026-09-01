@@ -5,18 +5,22 @@ async function saveAnalysis(analysis, originalLog, userId, database = pool) {
     INSERT INTO analyses (
       severity,
       summary,
+      evidence,
       root_cause,
+      confidence,
       recommendation,
       steps,
       original_log,
       user_id
     )
-    VALUES ($1, $2, $3, $4, $5::jsonb, $6, $7)
+    VALUES ($1, $2, $3::jsonb, $4, $5, $6, $7::jsonb, $8, $9)
     RETURNING
       id,
       severity,
       summary,
+      evidence,
       root_cause,
+      confidence,
       recommendation,
       steps,
       original_log,
@@ -27,7 +31,9 @@ async function saveAnalysis(analysis, originalLog, userId, database = pool) {
   const values = [
     analysis.severity,
     analysis.summary,
+    JSON.stringify(analysis.evidence ?? []),
     analysis.rootCause,
+    analysis.confidence,
     analysis.recommendation,
     JSON.stringify(analysis.steps ?? []),
     originalLog,
@@ -82,7 +88,9 @@ async function getHistory(userId, filters = {}) {
       id,
       severity,
       summary,
+      evidence,
       root_cause,
+      confidence,
       recommendation,
       steps,
       original_log,
@@ -108,7 +116,9 @@ async function deleteAnalysis(id, userId) {
       id,
       severity,
       summary,
+      evidence,
       root_cause,
+      confidence,
       recommendation,
       steps,
       original_log,

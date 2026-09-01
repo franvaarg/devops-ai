@@ -358,7 +358,22 @@ function HistoryList({
                 <div className="grid gap-5">
                   <section className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
                     <h3 className="text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-                      Root Cause
+                      Observed Evidence
+                    </h3>
+                    {item.evidence?.length ? (
+                      <ul className="mt-3 list-disc space-y-2 pl-5 leading-7 text-slate-800 dark:text-slate-100">
+                        {item.evidence.map((evidence, index) => (
+                          <li key={`${item.id}-evidence-${index}`}>{evidence}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="mt-3 text-slate-600 dark:text-slate-400">No supporting evidence was recorded.</p>
+                    )}
+                  </section>
+
+                  <section className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+                    <h3 className="text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+                      Likely Root Cause · {item.confidence || "Low"} confidence
                     </h3>
 
                     <p className="mt-3 leading-7 text-slate-800 dark:text-slate-100">

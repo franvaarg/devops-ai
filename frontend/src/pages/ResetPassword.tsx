@@ -17,8 +17,8 @@ function ResetPassword({ token, onComplete }: ResetPasswordProps) {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (password.length < 8) {
-      toast.error("Password must contain at least 8 characters.");
+    if (password.length < 10) {
+      toast.error("Password must contain at least 10 characters.");
       return;
     }
 
@@ -67,7 +67,7 @@ function ResetPassword({ token, onComplete }: ResetPasswordProps) {
               autoComplete="new-password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              placeholder="New password"
+              placeholder="10+ characters; avoid common passwords"
               disabled={isSubmitting}
               className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3.5 outline-none focus:border-emerald-400"
             />

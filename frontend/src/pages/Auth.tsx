@@ -226,9 +226,9 @@ function Auth({
       return false;
     }
 
-    if (!isForgot && password.length < 8) {
+    if (!isForgot && password.length < 10) {
       toast.error(
-        "Password must contain at least 8 characters."
+        "Password must contain at least 10 characters."
       );
 
       return false;
@@ -487,7 +487,7 @@ function Auth({
                           event.target.value
                         )
                       }
-                      placeholder="Francisco Vargas"
+                      placeholder="Your full name"
                       disabled={isSubmitting}
                       className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-emerald-400 dark:focus:bg-slate-950"
                     />
@@ -552,7 +552,7 @@ function Auth({
                         event.target.value
                       )
                     }
-                    placeholder="At least 8 characters"
+                    placeholder="10+ characters; avoid common passwords"
                     disabled={isSubmitting}
                     className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-emerald-400 dark:focus:bg-slate-950"
                   />

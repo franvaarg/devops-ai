@@ -2,7 +2,9 @@ export type HistoryItem = {
   id: number;
   severity: string;
   summary: string;
+  evidence: string[];
   rootCause: string;
+  confidence: string;
   recommendation: string;
   steps: string[];
   originalLog: string;
@@ -12,7 +14,9 @@ export type HistoryItem = {
 export type AnalysisResult = {
   severity: string;
   summary: string;
+  evidence: string[];
   rootCause: string;
+  confidence: string;
   recommendation: string;
   steps: string[];
 };

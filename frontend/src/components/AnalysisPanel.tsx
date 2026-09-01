@@ -3,7 +3,9 @@ import type { ReactNode } from "react";
 type AnalysisPanelProps = {
   severity: string;
   summary: string;
+  evidence: string[];
   rootCause: string;
+  confidence: string;
   recommendation: string;
   steps: string[];
 };
@@ -50,14 +52,18 @@ function AnalysisSection({
 function AnalysisPanel({
   severity,
   summary,
+  evidence,
   rootCause,
+  confidence,
   recommendation,
   steps,
 }: AnalysisPanelProps) {
   const hasAnalysis = Boolean(
     severity ||
       summary ||
+      evidence.length > 0 ||
       rootCause ||
+      confidence ||
       recommendation ||
       steps.length > 0
   );
@@ -122,7 +128,19 @@ function AnalysisPanel({
           <p>{summary || "No summary available."}</p>
         </AnalysisSection>
 
-        <AnalysisSection title="Root Cause">
+        <AnalysisSection title="Observed Evidence">
+          {evidence.length > 0 ? (
+            <ul className="list-disc space-y-2 pl-5">
+              {evidence.map((item, index) => (
+                <li key={`${item}-${index}`}>{item}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>No supporting evidence was identified.</p>
+          )}
+        </AnalysisSection>
+
+        <AnalysisSection title={`Likely Root Cause · ${confidence || "Low"} confidence`}>
           <p>{rootCause || "No root cause available."}</p>
         </AnalysisSection>
 

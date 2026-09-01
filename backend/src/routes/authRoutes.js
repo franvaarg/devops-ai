@@ -13,8 +13,14 @@ const {
   requestPasswordReset,
   resetPassword,
 } = require("../services/passwordResetService");
+const {
+  isValidEmail,
+  validatePassword,
+} = require("../security/credentialValidation");
 
 const router = express.Router();
+const DUMMY_PASSWORD_HASH =
+  "$2b$12$B1kX1Aasm9ZFDDzuaFFY4.ni2OFxO8RpRGJyVsp08wwBoNqGp4pF.";
 
 function createToken(user) {
   return jwt.sign(
@@ -44,21 +50,26 @@ router.post("/register", registerRateLimiter, async (req, res) => {
       });
     }
 
-    if (cleanName.length < 2) {
+    if (cleanName.length < 2 || cleanName.length > 100) {
       return res.status(400).json({
-        message: "Name must contain at least 2 characters.",
+        message: "Name must contain between 2 and 100 characters.",
       });
     }
 
-    if (!cleanEmail.includes("@")) {
+    if (!isValidEmail(cleanEmail)) {
       return res.status(400).json({
         message: "A valid email address is required.",
       });
     }
 
-    if (typeof password !== "string" || password.length < 8) {
+    const passwordError = validatePassword(password, {
+      email: cleanEmail,
+      name: cleanName,
+    });
+
+    if (passwordError) {
       return res.status(400).json({
-        message: "Password must contain at least 8 characters.",
+        message: passwordError,
       });
     }
 
@@ -73,7 +84,7 @@ router.post("/register", registerRateLimiter, async (req, res) => {
 
     if (existingUserResult.rows.length > 0) {
       return res.status(409).json({
-        message: "An account with this email already exists.",
+        message: "Unable to create an account with the provided details.",
       });
     }
 
@@ -115,7 +126,7 @@ router.post("/register", registerRateLimiter, async (req, res) => {
 
     if (error.code === "23505") {
       return res.status(409).json({
-        message: "An account with this email already exists.",
+        message: "Unable to create an account with the provided details.",
       });
     }
 
@@ -155,15 +166,14 @@ router.post("/login", loginRateLimiter, async (req, res) => {
 
     const user = userResult.rows[0];
 
-    if (!user) {
-      return res.status(401).json({
-        message: "Invalid email or password.",
-      });
-    }
+    // Always perform a bcrypt comparison so nonexistent accounts do not have
+    // an obviously faster response than accounts with a wrong password.
+    const passwordMatches = await bcrypt.compare(
+      password,
+      user?.password || DUMMY_PASSWORD_HASH
+    );
 
-    const passwordMatches = await bcrypt.compare(password, user.password);
-
-    if (!passwordMatches) {
+    if (!user || !passwordMatches) {
       return res.status(401).json({
         message: "Invalid email or password.",
       });
@@ -199,7 +209,7 @@ router.post(
         ? req.body.email.trim().toLowerCase()
         : "";
 
-    if (cleanEmail && cleanEmail.includes("@")) {
+    if (isValidEmail(cleanEmail)) {
       try {
         await requestPasswordReset(cleanEmail);
       } catch (error) {
@@ -220,15 +230,16 @@ router.post(
   async (req, res) => {
     const { password, token } = req.body;
 
-    if (
-      typeof token !== "string" ||
-      !/^[a-f0-9]{64}$/i.test(token) ||
-      typeof password !== "string" ||
-      password.length < 8
-    ) {
+    const passwordError = validatePassword(password);
+
+    if (typeof token !== "string" || !/^[a-f0-9]{64}$/i.test(token)) {
       return res.status(400).json({
-        message: "A valid reset token and password are required.",
+        message: "A valid password reset request is required.",
       });
+    }
+
+    if (passwordError) {
+      return res.status(400).json({ message: passwordError });
     }
 
     try {

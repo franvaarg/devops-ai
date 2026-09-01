@@ -383,7 +383,21 @@ export function exportAnalysisToPdf(
 
   currentY = addSectionTitle(
     doc,
-    "Root Cause",
+    "Observed Evidence",
+    currentY
+  );
+
+  currentY = addSteps(
+    doc,
+    analysis.evidence ?? [],
+    currentY
+  );
+
+  currentY += 7;
+
+  currentY = addSectionTitle(
+    doc,
+    `Likely Root Cause (${analysis.confidence || "Low"} confidence)`,
     currentY
   );
 

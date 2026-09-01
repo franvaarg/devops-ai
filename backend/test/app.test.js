@@ -43,6 +43,7 @@ function createHarness({
   existingUserIds = [EXISTING_USER.id],
   invalidAiResponse = false,
   quotaAllowed = true,
+  registrationEmailExists = false,
   resetRequestFailure = false,
   resetPasswordResult = true,
   saveFailure = false,
@@ -75,6 +76,22 @@ function createHarness({
           rows: existingUserIds.includes(parameters[0])
             ? [{ token_version: tokenVersion }]
             : [],
+        };
+      }
+
+      if (/SELECT id[\s\S]*FROM users[\s\S]*WHERE email = \$1/i.test(sql)) {
+        return { rows: registrationEmailExists ? [{ id: 101 }] : [] };
+      }
+
+      if (/INSERT INTO users/i.test(sql)) {
+        return {
+          rows: [{
+            id: 202,
+            name: parameters[0],
+            email: parameters[1],
+            token_version: 0,
+            created_at: "2026-08-29T00:00:00.000Z",
+          }],
         };
       }
 
@@ -112,7 +129,9 @@ function createHarness({
       return {
         severity: "High",
         summary: "Service unavailable",
-        rootCause: "Dependency failure",
+        evidence: ["upstream returned 503"],
+        rootCause: "A dependency failure is likely.",
+        confidence: "Medium",
         recommendation: "Restore the dependency",
         steps: ["Check dependency health"],
       };
@@ -130,7 +149,9 @@ function createHarness({
         id: 501,
         severity: parameters[0].severity,
         summary: parameters[0].summary,
+        evidence: parameters[0].evidence,
         root_cause: parameters[0].rootCause,
+        confidence: parameters[0].confidence,
         recommendation: parameters[0].recommendation,
         steps: parameters[0].steps,
         original_log: parameters[1],
@@ -355,16 +376,16 @@ test("registration validates input before querying the database", async (t) => {
       body: {
         name: "A",
         email: "user@example.test",
-        password: "password123",
+        password: "safe-long-password",
       },
-      message: "Name must contain at least 2 characters.",
+      message: "Name must contain between 2 and 100 characters.",
     },
     {
       name: "invalid email",
       body: {
         name: "Test User",
         email: "invalid-email",
-        password: "password123",
+        password: "safe-long-password",
       },
       message: "A valid email address is required.",
     },
@@ -375,7 +396,25 @@ test("registration validates input before querying the database", async (t) => {
         email: "user@example.test",
         password: "short",
       },
-      message: "Password must contain at least 8 characters.",
+      message: "Password must contain at least 10 characters.",
+    },
+    {
+      name: "common password",
+      body: {
+        name: "Test User",
+        email: "user@example.test",
+        password: "password123",
+      },
+      message: "Choose a password that is not common or based on your name or email.",
+    },
+    {
+      name: "password based on email",
+      body: {
+        name: "Test User",
+        email: "exampleuser@example.test",
+        password: "example-user",
+      },
+      message: "Choose a password that is not common or based on your name or email.",
     },
   ];
 
@@ -410,6 +449,43 @@ test("login rate limiting returns JSON after 10 requests in 15 minutes", async (
     message: "Too many requests. Please try again later.",
   });
   assert.equal(calls.database.length, 0);
+});
+
+test("registration returns only safe user fields and stores a password hash", async () => {
+  const { app, calls } = createHarness();
+  const response = await request(app).post("/api/auth/register").send({
+    name: "Test User",
+    email: "new@example.test",
+    password: "correct-horse-battery",
+  });
+
+  assert.equal(response.status, 201);
+  assert.equal(typeof response.body.token, "string");
+  assert.deepEqual(response.body.user, {
+    id: 202,
+    name: "Test User",
+    email: "new@example.test",
+    createdAt: "2026-08-29T00:00:00.000Z",
+  });
+  assert.equal(response.body.password, undefined);
+  assert.equal(response.body.passwordHash, undefined);
+  const insert = calls.database.find(({ sql }) => /INSERT INTO users/i.test(sql));
+  assert.match(insert.parameters[2], /^\$2[aby]\$12\$/);
+  assert.notEqual(insert.parameters[2], "correct-horse-battery");
+});
+
+test("duplicate registration does not disclose account existence", async () => {
+  const { app } = createHarness({ registrationEmailExists: true });
+  const response = await request(app).post("/api/auth/register").send({
+    name: "Test User",
+    email: "existing@example.test",
+    password: "correct-horse-battery",
+  });
+
+  assert.equal(response.status, 409);
+  assert.deepEqual(response.body, {
+    message: "Unable to create an account with the provided details.",
+  });
 });
 
 test("registration rate limiting returns JSON after 5 requests in one hour", async () => {
@@ -488,6 +564,19 @@ test("password reset rejects an expired or used token", async () => {
   assert.deepEqual(response.body, {
     message: "The password reset link is invalid or has expired.",
   });
+});
+
+test("password reset enforces the server-side password policy", async () => {
+  const { app, calls } = createHarness();
+  const response = await request(app)
+    .post("/api/auth/reset-password")
+    .send({ password: "password123", token: "c".repeat(64) });
+
+  assert.equal(response.status, 400);
+  assert.deepEqual(response.body, {
+    message: "Choose a password that is not common or based on your name or email.",
+  });
+  assert.deepEqual(calls.resetPassword, []);
 });
 
 test("analysis rejects missing, blank, and non-string logs without external calls", async (t) => {
@@ -570,6 +659,30 @@ test("provider failure does not enter the quota transaction or persist", async (
   assert.equal(response.status, 500);
   assert.deepEqual(calls.runWithAnalysisQuota, []);
   assert.equal(calls.saveAnalysis.length, 0);
+});
+
+test("analysis preserves plain text, stack traces, and JSON formatting", async (t) => {
+  const inputs = {
+    "plain text": "2026-08-29 service unavailable",
+    "multiline stack trace":
+      "Error: connection failed\n    at connect (/app/db.js:12:4)\nCaused by: timeout",
+    "structured JSON":
+      "{\n  \"level\": \"error\",\n  \"context\": {\n    \"status\": 503\n  }\n}\n",
+  };
+
+  for (const [name, log] of Object.entries(inputs)) {
+    await t.test(name, async () => {
+      const { app, calls } = createHarness();
+      const response = await request(app)
+        .post("/api/analyze")
+        .set("Authorization", authorize(createToken()))
+        .send({ log });
+
+      assert.equal(response.status, 201);
+      assert.deepEqual(calls.analyzeLog, [log]);
+      assert.equal(calls.saveAnalysis[0][1], log);
+    });
+  }
 });
 
 test("invalid AI response does not enter the quota transaction or persist", async () => {

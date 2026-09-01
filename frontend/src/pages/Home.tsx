@@ -78,7 +78,9 @@ function Home() {
   const [log, setLog] = useState("");
   const [severity, setSeverity] = useState("");
   const [summary, setSummary] = useState("");
+  const [evidence, setEvidence] = useState<string[]>([]);
   const [rootCause, setRootCause] = useState("");
+  const [confidence, setConfidence] = useState("");
   const [recommendation, setRecommendation] = useState("");
   const [steps, setSteps] = useState<string[]>([]);
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -141,9 +143,7 @@ function Home() {
   }, [loadHistory]);
 
   async function handleAnalyze() {
-    const normalizedLog = log.trim();
-
-    if (!normalizedLog) {
+    if (!log.trim()) {
       toast.error("Paste or upload a log before analyzing.");
       return;
     }
@@ -152,11 +152,13 @@ function Home() {
 
     try {
       setIsAnalyzing(true);
-      const data = await analyzeLog(normalizedLog);
+      const data = await analyzeLog(log);
 
       setSeverity(data.severity ?? "");
       setSummary(data.summary ?? "");
+      setEvidence(data.evidence ?? []);
       setRootCause(data.rootCause ?? "");
+      setConfidence(data.confidence ?? "");
       setRecommendation(data.recommendation ?? "");
       setSteps(data.steps ?? []);
 
@@ -183,7 +185,9 @@ function Home() {
     setLog("");
     setSeverity("");
     setSummary("");
+    setEvidence([]);
     setRootCause("");
+    setConfidence("");
     setRecommendation("");
     setSteps([]);
   }
@@ -274,7 +278,9 @@ function Home() {
             <AnalysisPanel
               severity={severity}
               summary={summary}
+              evidence={evidence}
               rootCause={rootCause}
+              confidence={confidence}
               recommendation={recommendation}
               steps={steps}
             />
