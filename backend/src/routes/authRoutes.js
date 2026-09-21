@@ -1,3 +1,4 @@
+const { log, logFailure } = require("../operations/logger");
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -36,9 +37,9 @@ function createToken(user) {
   );
 }
 
-router.post("/register", registerRateLimiter, async (req, res) => {
+router.post("/register", registerRateLimiter, async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password } = req.body || {};
 
     const cleanName = typeof name === "string" ? name.trim() : "";
     const cleanEmail =
@@ -110,6 +111,7 @@ router.post("/register", registerRateLimiter, async (req, res) => {
 
     const user = createdUserResult.rows[0];
     const token = createToken(user);
+    log("authentication_succeeded");
 
     return res.status(201).json({
       message: "User registered successfully.",
@@ -122,28 +124,24 @@ router.post("/register", registerRateLimiter, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Register error:", error);
-
     if (error.code === "23505") {
       return res.status(409).json({
         message: "Unable to create an account with the provided details.",
       });
     }
 
-    return res.status(500).json({
-      message: "Something went wrong while registering the user.",
-    });
+    return next(error);
   }
 });
 
-router.post("/login", loginRateLimiter, async (req, res) => {
+router.post("/login", loginRateLimiter, async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body || {};
 
     const cleanEmail =
       typeof email === "string" ? email.trim().toLowerCase() : "";
 
-    if (!cleanEmail || !password) {
+    if (!cleanEmail || typeof password !== "string" || !password || Buffer.byteLength(password, "utf8") > 72) {
       return res.status(400).json({
         message: "Email and password are required.",
       });
@@ -174,12 +172,14 @@ router.post("/login", loginRateLimiter, async (req, res) => {
     );
 
     if (!user || !passwordMatches) {
+      log("authentication_rejected", { code: "AUTHENTICATION_REQUIRED", expected: true });
       return res.status(401).json({
         message: "Invalid email or password.",
       });
     }
 
     const token = createToken(user);
+    log("authentication_succeeded");
 
     return res.status(200).json({
       message: "Login successful.",
@@ -192,11 +192,7 @@ router.post("/login", loginRateLimiter, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Login error:", error);
-
-    return res.status(500).json({
-      message: "Something went wrong while logging in.",
-    });
+    return next(error);
   }
 });
 
@@ -205,7 +201,7 @@ router.post(
   passwordRecoveryRateLimiter,
   async (req, res) => {
     const cleanEmail =
-      typeof req.body.email === "string"
+      typeof req.body?.email === "string"
         ? req.body.email.trim().toLowerCase()
         : "";
 
@@ -213,7 +209,7 @@ router.post(
       try {
         await requestPasswordReset(cleanEmail);
       } catch (error) {
-        console.error("Password reset request error:", error);
+        logFailure("password_reset_delivery_failed", error);
       }
     }
 
@@ -227,8 +223,8 @@ router.post(
 router.post(
   "/reset-password",
   passwordResetRateLimiter,
-  async (req, res) => {
-    const { password, token } = req.body;
+  async (req, res, next) => {
+    const { password, token } = req.body || {};
 
     const passwordError = validatePassword(password);
 
@@ -255,11 +251,7 @@ router.post(
         message: "Password reset successfully. You can now sign in.",
       });
     } catch (error) {
-      console.error("Password reset error:", error);
-
-      return res.status(500).json({
-        message: "Something went wrong while resetting the password.",
-      });
+      return next(error);
     }
   }
 );

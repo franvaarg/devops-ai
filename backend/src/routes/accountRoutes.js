@@ -6,7 +6,7 @@ const { getAnalysisUsage } = require("../services/quotaService");
 
 const router = express.Router();
 
-router.get("/", authenticateToken, async (req, res) => {
+router.get("/", authenticateToken, async (req, res, next) => {
   try {
     const accountResult = await pool.query(
       `
@@ -39,11 +39,7 @@ router.get("/", authenticateToken, async (req, res) => {
       usage,
     });
   } catch (error) {
-    console.error("Account error:", error);
-
-    return res.status(500).json({
-      message: "Something went wrong while loading the account.",
-    });
+    return next(error);
   }
 });
 

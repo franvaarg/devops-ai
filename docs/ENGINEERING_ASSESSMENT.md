@@ -105,3 +105,25 @@ smoke tests; safe structured logging beyond analysis; durable quota reservation;
 real PostgreSQL transaction/migration tests. Redaction remains heuristic, evidence
 matching does not prove causation, old stored logs may contain secrets, and the
 initial frontend bundle remains oversized. The rest of the roadmap is pending.
+
+
+## Milestone 2: operational reliability
+
+Durable reservations now precede AI calls; the successful persistence commit is
+the billable point. Same-key retries replay completed work without another charge.
+The new additive migration preserves historical usage and analyses. Real PostgreSQL
+coverage replaces four mocked quota tests and exercises constraints, concurrency,
+auth persistence, HTTP analysis/replay and migration reapplication.
+
+Structured metadata logs, request IDs, error taxonomy and provider outcome timing
+are implemented. Brevo rejects redirects and closes unused response streams.
+See OPERATIONS.md, API.md and backend/TESTING.md for consistency semantics,
+privacy limitations, deployment gates and test isolation. Remaining work includes
+staging provider/TLS checks, distributed request rate limits, reset email outbox,
+log-sink retention, frontend bundle reduction, then tenant/incident development.
+No production migration or deployment occurred.
+
+Local milestone validation: 78 unit/API tests and 13 isolated PostgreSQL integration
+tests pass. Frontend ESLint and TypeScript/production build pass. The existing
+large-bundle warning remains. No runtime dependencies were added or changed.
+GitHub Actions/PostgreSQL 16 is configured but has not been run remotely here.

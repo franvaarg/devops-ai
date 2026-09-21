@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+### Operational reliability milestone
+
+- Reserve analysis capacity durably before AI calls; atomically commit analysis,
+  usage and idempotency completion. Release failures and expire crash reservations.
+- Add migration 003 without rewriting existing usage/history. Drain old analysis
+  writers for rollout; see OPERATIONS.md.
+- Return safe structured errors and correlation IDs; log HTTP/provider latency,
+  auth outcomes and storage/quota/email failures without request content.
+- Harden Brevo redirects and response cleanup; preserve bounded provider attempts.
+- Add disposable real PostgreSQL integration tests and a validation CI workflow.
+- Reuse browser request keys on ambiguous in-session retries.
+
+### Initial security milestone
+
 - Audit and prioritized incident-response product roadmap recorded.
 - Redact common credentials before AI analysis and new log storage; disclose
   provider transmission and detection limitations in the analysis form.

@@ -114,7 +114,7 @@ test("password-reset email reports Brevo failures without exposing response data
       token: "reset-token",
     }),
     (error) => {
-      assert.equal(error.message, "Brevo email delivery failed with status 400.");
+      assert.equal(error.code, "EMAIL_PROVIDER_ERROR");
       assert.doesNotMatch(error.message, /secret-test-api-key/);
       return true;
     }
@@ -161,165 +161,12 @@ test("password-reset email aborts a timed-out Brevo request", async (t) => {
       name: "Test User",
       token: "reset-token",
     }),
-    { message: "Brevo email delivery timed out." }
+    { code: "EMAIL_PROVIDER_ERROR" }
   );
 });
 
-function createQuotaPool({ plan = "free", status = "inactive", limitUsed = 0 } = {}) {
-  const calls = [];
-  let analysesUsed = limitUsed;
-
-  const client = {
-    async query(sql, parameters = []) {
-      calls.push({ parameters, sql });
-
-      if (/^BEGIN|^COMMIT|^ROLLBACK/.test(sql)) {
-        return { rows: [] };
-      }
-
-      if (/SELECT plan, subscription_status/i.test(sql)) {
-        return { rows: [{ plan, subscription_status: status }] };
-      }
-
-      if (/INSERT INTO monthly_usage/i.test(sql)) {
-        if (analysesUsed >= parameters[1]) {
-          return { rows: [] };
-        }
-
-        analysesUsed += 1;
-        return { rows: [{ analyses_used: analysesUsed }] };
-      }
-
-      throw new Error("Unexpected query.");
-    },
-    release() {
-      calls.push({ parameters: [], sql: "RELEASE" });
-    },
-  };
-
-  return {
-    calls,
-    client,
-    get analysesUsed() {
-      return analysesUsed;
-    },
-    pool: {
-      async connect() {
-        return client;
-      },
-    },
-  };
-}
-
-test("successful persistence commits active pro quota atomically", async () => {
-  clearServiceModules();
-  const quotaDatabase = createQuotaPool({
-    plan: "pro",
-    status: "active",
-    limitUsed: 26,
-  });
-  mockModule(modulePaths.db, quotaDatabase.pool);
-
-  const { runWithAnalysisQuota } = require(modulePaths.quotaService);
-  const usage = await runWithAnalysisQuota(101, async (client) => {
-    assert.equal(client, quotaDatabase.client);
-    return { id: 501 };
-  });
-
-  assert.deepEqual(usage, {
-    allowed: true,
-    limit: 500,
-    plan: "pro",
-    used: 27,
-    value: { id: 501 },
-  });
-  assert.ok(quotaDatabase.calls.some(({ sql }) => sql === "BEGIN"));
-  assert.ok(quotaDatabase.calls.some(({ sql }) => sql === "COMMIT"));
-  assert.equal(quotaDatabase.analysesUsed, 27);
-});
-
-test("inactive paid accounts receive the free quota", async () => {
-  clearServiceModules();
-  const quotaDatabase = createQuotaPool({
-    plan: "pro",
-    status: "past_due",
-    limitUsed: 50,
-  });
-  mockModule(modulePaths.db, quotaDatabase.pool);
-
-  const { runWithAnalysisQuota } = require(modulePaths.quotaService);
-  const usage = await runWithAnalysisQuota(101, async () => {
-    throw new Error("Operation must not run when quota is exhausted.");
-  });
-
-  assert.deepEqual(usage, {
-    allowed: false,
-    limit: 50,
-    plan: "free",
-    used: 50,
-  });
-  assert.ok(quotaDatabase.calls.some(({ sql }) => sql === "ROLLBACK"));
-  assert.ok(!quotaDatabase.calls.some(({ sql }) => sql === "COMMIT"));
-});
-
-test("persistence failure rolls back quota consumption", async () => {
-  clearServiceModules();
-  const quotaDatabase = createQuotaPool({ limitUsed: 12 });
-  const originalQuery = quotaDatabase.client.query.bind(quotaDatabase.client);
-  let transactionStartUsage = quotaDatabase.analysesUsed;
-
-  quotaDatabase.client.query = async (sql, parameters) => {
-    if (sql === "BEGIN") {
-      transactionStartUsage = quotaDatabase.analysesUsed;
-    }
-
-    const result = await originalQuery(sql, parameters);
-
-    if (sql === "ROLLBACK") {
-      while (quotaDatabase.analysesUsed > transactionStartUsage) {
-        // The mock restores transactional state; PostgreSQL performs this rollback.
-        quotaDatabase.client.decrementUsage();
-      }
-    }
-
-    return result;
-  };
-  quotaDatabase.client.decrementUsage = () => {
-    Object.defineProperty(quotaDatabase, "analysesUsed", {
-      configurable: true,
-      value: quotaDatabase.analysesUsed - 1,
-    });
-  };
-
-  mockModule(modulePaths.db, quotaDatabase.pool);
-  const { runWithAnalysisQuota } = require(modulePaths.quotaService);
-
-  await assert.rejects(
-    runWithAnalysisQuota(101, async () => {
-      throw new Error("Analysis insert failed.");
-    }),
-    /Analysis insert failed/
-  );
-
-  assert.ok(quotaDatabase.calls.some(({ sql }) => sql === "ROLLBACK"));
-  assert.ok(!quotaDatabase.calls.some(({ sql }) => sql === "COMMIT"));
-});
-
-test("simultaneous quota transactions cannot exceed the free limit", async () => {
-  clearServiceModules();
-  const quotaDatabase = createQuotaPool({ limitUsed: 49 });
-  mockModule(modulePaths.db, quotaDatabase.pool);
-  const { runWithAnalysisQuota } = require(modulePaths.quotaService);
-
-  const results = await Promise.all([
-    runWithAnalysisQuota(101, async () => "first"),
-    runWithAnalysisQuota(101, async () => "second"),
-  ]);
-
-  assert.equal(results.filter(({ allowed }) => allowed).length, 1);
-  assert.equal(results.filter(({ allowed }) => !allowed).length, 1);
-  assert.equal(quotaDatabase.analysesUsed, 50);
-});
+// Quota transaction, failure and concurrency behavior is covered against real
+// PostgreSQL by integration/postgres.test.cjs.
 
 function createPasswordResetPool(initialTokens = []) {
   const calls = [];

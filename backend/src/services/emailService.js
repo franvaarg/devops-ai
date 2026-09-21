@@ -1,3 +1,4 @@
+const { providerCall } = require("../operations/provider");
 const BREVO_EMAIL_API_URL = "https://api.brevo.com/v3/smtp/email";
 const BREVO_REQUEST_TIMEOUT_MS = 10_000;
 const DEFAULT_EMAIL_FROM = "KANYI <no-reply@example.com>";
@@ -33,6 +34,7 @@ async function sendPasswordResetEmail({ email, name, token }) {
   try {
     const response = await fetch(BREVO_EMAIL_API_URL, {
       method: "POST",
+      redirect: "error",
       headers: {
         accept: "application/json",
         "api-key": apiKey,
@@ -54,6 +56,8 @@ async function sendPasswordResetEmail({ email, name, token }) {
       signal: controller.signal,
     });
 
+    // We do not consume provider response data; release its stream promptly.
+    await response.body?.cancel();
     if (!response.ok) {
       throw new Error(`Brevo email delivery failed with status ${response.status}.`);
     }
@@ -73,5 +77,5 @@ async function sendPasswordResetEmail({ email, name, token }) {
 }
 
 module.exports = {
-  sendPasswordResetEmail,
+  sendPasswordResetEmail: (message) => providerCall("brevo", () => sendPasswordResetEmail(message)),
 };

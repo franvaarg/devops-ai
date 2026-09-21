@@ -42,7 +42,18 @@ export type CurrentUserResponse = {
 type ApiErrorResponse = {
   message?: string;
   summary?: string;
+  error?: { code: string; message: string; requestId?: string };
 };
+
+export class ApiError extends Error {
+  status: number;
+  code?: string;
+  constructor(message: string, status: number, code?: string) {
+    super(message);
+    this.status = status;
+    this.code = code;
+  }
+}
 
 type DeleteAnalysisResponse = {
   message: string;
@@ -79,10 +90,9 @@ async function getResponseData<T>(
     ApiErrorResponse;
 
   if (!response.ok) {
-    throw new Error(
-      data.message ??
-        data.summary ??
-        "The server could not complete the request."
+    throw new ApiError(
+      data.error?.message ?? data.message ?? data.summary ?? "The server could not complete the request.",
+      response.status, data.error?.code
     );
   }
 
@@ -170,13 +180,14 @@ export async function getCurrentUser(): Promise<CurrentUserResponse> {
 }
 
 export async function analyzeLog(
-  log: string
+  log: string,
+  requestKey: string = crypto.randomUUID()
 ): Promise<AnalysisResult> {
   const response = await fetch(
     `${API_BASE_URL}/api/analyze`,
     {
       method: "POST",
-      headers: getAuthHeaders(),
+      headers: { ...getAuthHeaders(), "Idempotency-Key": requestKey },
       body: JSON.stringify({ log }),
     }
   );

@@ -1,5 +1,16 @@
 const assert = require("node:assert/strict");
 const test = require("node:test");
+const { AppError } = require("../src/operations/errors");
+function assertLegacyBody(actual, expected) {
+  if (Array.isArray(actual)) return assert.deepEqual(actual, expected);
+  const { error, ...body } = actual;
+  if (error) {
+    assert.equal(typeof error.code, "string");
+    assert.match(error.requestId, /^[a-f0-9-]{36}$/);
+    assert.equal(error.message, body.message || body.summary);
+  }
+  assert.deepEqual(body, expected);
+}
 
 const jwt = require("jsonwebtoken");
 const request = require("supertest");
@@ -62,7 +73,8 @@ function createHarness({
     getHistory: [],
     deleteAnalysis: [],
     getAnalysisUsage: [],
-    runWithAnalysisQuota: [],
+    reserveAnalysis: [],
+    releaseAnalysis: [],
     requestPasswordReset: [],
     resetPassword: [],
   };
@@ -119,11 +131,11 @@ function createHarness({
     async analyzeLog(log) {
       calls.analyzeLog.push(log);
       if (aiFailure) {
-        throw new Error("Provider failed.");
+        throw new AppError("AI_PROVIDER_ERROR");
       }
 
       if (invalidAiResponse) {
-        throw new Error("Provider returned an invalid response.");
+        throw new AppError("AI_INVALID_RESPONSE");
       }
 
       return {
@@ -169,22 +181,15 @@ function createHarness({
   };
 
   const quotaService = {
-    async runWithAnalysisQuota(userId, operation) {
-      calls.runWithAnalysisQuota.push(userId);
-
-      if (!quotaAllowed) {
-        return { allowed: false, limit: 50, plan: "free", used: 50 };
-      }
-
-      const value = await operation({ query() {} });
-      return {
-        allowed: true,
-        limit: 50,
-        plan: "free",
-        used: 1,
-        value,
-      };
+    async reserveAnalysis(userId) {
+      calls.reserveAnalysis.push(userId);
+      if (!quotaAllowed) throw new AppError('QUOTA_EXCEEDED');
+      return { reserved: true };
     },
+    async completeAnalysis(userId, key, operation) {
+      return operation({ query() {} });
+    },
+    async releaseAnalysis(...args) { calls.releaseAnalysis.push(args); },
     async getAnalysisUsage(userId) {
       calls.getAnalysisUsage.push(userId);
       return quotaAllowed
@@ -241,7 +246,7 @@ test("authentication accepts a valid token for an existing user", async () => {
     .set("Authorization", authorize(createToken()));
 
   assert.equal(response.status, 200);
-  assert.deepEqual(response.body, {
+  assertLegacyBody(response.body, {
     user: EXISTING_USER,
   });
 });
@@ -258,7 +263,7 @@ test("authentication rejects a valid token for a nonexistent user", async () => 
     .set("Authorization", authorize(token));
 
   assert.equal(response.status, 401);
-  assert.deepEqual(response.body, {
+  assertLegacyBody(response.body, {
     message: "Invalid or expired authentication token.",
   });
 });
@@ -292,7 +297,7 @@ test("authentication rejects a missing Authorization header", async () => {
   const response = await request(app).get("/api/auth/me");
 
   assert.equal(response.status, 401);
-  assert.deepEqual(response.body, {
+  assertLegacyBody(response.body, {
     message: "Authentication token is required.",
   });
   assert.equal(calls.database.length, 0);
@@ -305,7 +310,7 @@ test("authentication rejects tokens revoked by a password reset", async () => {
     .set("Authorization", authorize(createToken()));
 
   assert.equal(response.status, 401);
-  assert.deepEqual(response.body, {
+  assertLegacyBody(response.body, {
     message: "Invalid or expired authentication token.",
   });
 });
@@ -328,7 +333,7 @@ test("malformed JSON receives a safe JSON error", async () => {
     .send('{"email":');
 
   assert.equal(response.status, 400);
-  assert.deepEqual(response.body, {
+  assertLegacyBody(response.body, {
     message: "Request body must contain valid JSON.",
   });
 });
@@ -340,7 +345,7 @@ test("oversized request bodies receive a safe JSON error", async () => {
     .send({ padding: "x".repeat(257 * 1024) });
 
   assert.equal(response.status, 413);
-  assert.deepEqual(response.body, {
+  assertLegacyBody(response.body, {
     message: "Request body is too large.",
   });
 });
@@ -356,7 +361,7 @@ test("login validates required credentials before querying the database", async 
       const response = await request(app).post("/api/auth/login").send(body);
 
       assert.equal(response.status, 400);
-      assert.deepEqual(response.body, {
+      assertLegacyBody(response.body, {
         message: "Email and password are required.",
       });
       assert.equal(calls.database.length, 0);
@@ -426,7 +431,7 @@ test("registration validates input before querying the database", async (t) => {
         .send(testCase.body);
 
       assert.equal(response.status, 400);
-      assert.deepEqual(response.body, {
+      assertLegacyBody(response.body, {
         message: testCase.message,
       });
       assert.equal(calls.database.length, 0);
@@ -445,7 +450,7 @@ test("login rate limiting returns JSON after 10 requests in 15 minutes", async (
   const response = await request(app).post("/api/auth/login").send({});
 
   assert.equal(response.status, 429);
-  assert.deepEqual(response.body, {
+  assertLegacyBody(response.body, {
     message: "Too many requests. Please try again later.",
   });
   assert.equal(calls.database.length, 0);
@@ -483,7 +488,7 @@ test("duplicate registration does not disclose account existence", async () => {
   });
 
   assert.equal(response.status, 409);
-  assert.deepEqual(response.body, {
+  assertLegacyBody(response.body, {
     message: "Unable to create an account with the provided details.",
   });
 });
@@ -499,7 +504,7 @@ test("registration rate limiting returns JSON after 5 requests in one hour", asy
   const response = await request(app).post("/api/auth/register").send({});
 
   assert.equal(response.status, 429);
-  assert.deepEqual(response.body, {
+  assertLegacyBody(response.body, {
     message: "Too many requests. Please try again later.",
   });
   assert.equal(calls.database.length, 0);
@@ -517,7 +522,7 @@ test("password recovery returns the same response without exposing account exist
         .send({ email: testCase.email });
 
       assert.equal(response.status, 202);
-      assert.deepEqual(response.body, {
+      assertLegacyBody(response.body, {
         message:
           "If an account exists for that email, a password reset link will be sent.",
       });
@@ -536,7 +541,7 @@ test("password recovery preserves its generic response when delivery fails", asy
     .send({ email: "existing@example.test" });
 
   assert.equal(response.status, 202);
-  assert.deepEqual(response.body, {
+  assertLegacyBody(response.body, {
     message:
       "If an account exists for that email, a password reset link will be sent.",
   });
@@ -561,7 +566,7 @@ test("password reset rejects an expired or used token", async () => {
     .send({ password: "new-password-123", token: "b".repeat(64) });
 
   assert.equal(response.status, 400);
-  assert.deepEqual(response.body, {
+  assertLegacyBody(response.body, {
     message: "The password reset link is invalid or has expired.",
   });
 });
@@ -573,7 +578,7 @@ test("password reset enforces the server-side password policy", async () => {
     .send({ password: "password123", token: "c".repeat(64) });
 
   assert.equal(response.status, 400);
-  assert.deepEqual(response.body, {
+  assertLegacyBody(response.body, {
     message: "Choose a password that is not common or based on your name or email.",
   });
   assert.deepEqual(calls.resetPassword, []);
@@ -598,7 +603,7 @@ test("analysis rejects missing, blank, and non-string logs without external call
         .send(testCase.body);
 
       assert.equal(response.status, 400);
-      assert.deepEqual(response.body, {
+      assertLegacyBody(response.body, {
         message: "A log is required.",
       });
       assert.equal(calls.analyzeLog.length, 0);
@@ -625,7 +630,7 @@ test("analysis rate limiting returns JSON after 20 requests without external cal
     .send({});
 
   assert.equal(response.status, 429);
-  assert.deepEqual(response.body, {
+  assertLegacyBody(response.body, {
     message: "Too many requests. Please try again later.",
   });
   assert.equal(calls.analyzeLog.length, 0);
@@ -641,24 +646,25 @@ test("successful analysis is persisted within the quota transaction", async () =
 
   assert.equal(response.status, 201);
   assert.equal(response.body.id, 501);
-  assert.deepEqual(calls.getAnalysisUsage, [EXISTING_USER.id]);
+  assert.deepEqual(calls.getAnalysisUsage, []);
   assert.deepEqual(calls.analyzeLog, ["production service unavailable"]);
-  assert.deepEqual(calls.runWithAnalysisQuota, [EXISTING_USER.id]);
+  assert.deepEqual(calls.reserveAnalysis, [EXISTING_USER.id]);
   assert.equal(calls.saveAnalysis.length, 1);
   assert.equal(calls.saveAnalysis[0][2], EXISTING_USER.id);
   assert.ok(calls.saveAnalysis[0][3]);
 });
 
-test("provider failure does not enter the quota transaction or persist", async () => {
+test("provider failure follows reservation and does not persist", async () => {
   const { app, calls } = createHarness({ aiFailure: true });
   const response = await request(app)
     .post("/api/analyze")
     .set("Authorization", authorize(createToken()))
     .send({ log: "production service unavailable" });
 
-  assert.equal(response.status, 500);
-  assert.deepEqual(calls.runWithAnalysisQuota, []);
+  assert.equal(response.status, 502);
+  assert.deepEqual(calls.reserveAnalysis, [EXISTING_USER.id]);
   assert.equal(calls.saveAnalysis.length, 0);
+  assert.equal(calls.releaseAnalysis.length, 1);
 });
 
 test("analysis preserves plain text, stack traces, and JSON formatting", async (t) => {
@@ -685,16 +691,17 @@ test("analysis preserves plain text, stack traces, and JSON formatting", async (
   }
 });
 
-test("invalid AI response does not enter the quota transaction or persist", async () => {
+test("invalid AI response follows reservation and does not persist", async () => {
   const { app, calls } = createHarness({ invalidAiResponse: true });
   const response = await request(app)
     .post("/api/analyze")
     .set("Authorization", authorize(createToken()))
     .send({ log: "production service unavailable" });
 
-  assert.equal(response.status, 500);
-  assert.deepEqual(calls.runWithAnalysisQuota, []);
+  assert.equal(response.status, 502);
+  assert.deepEqual(calls.reserveAnalysis, [EXISTING_USER.id]);
   assert.equal(calls.saveAnalysis.length, 0);
+  assert.equal(calls.releaseAnalysis.length, 1);
 });
 
 test("persistence failure is propagated from the quota transaction", async () => {
@@ -705,7 +712,7 @@ test("persistence failure is propagated from the quota transaction", async () =>
     .send({ log: "production service unavailable" });
 
   assert.equal(response.status, 500);
-  assert.deepEqual(calls.runWithAnalysisQuota, [EXISTING_USER.id]);
+  assert.deepEqual(calls.reserveAnalysis, [EXISTING_USER.id]);
   assert.equal(calls.saveAnalysis.length, 1);
 });
 
@@ -717,11 +724,11 @@ test("analysis quota exhaustion blocks Gemini and database saves", async () => {
     .send({ log: "production service unavailable" });
 
   assert.equal(response.status, 429);
-  assert.deepEqual(response.body, {
+  assertLegacyBody(response.body, {
     message: "Monthly analysis quota exceeded.",
   });
-  assert.deepEqual(calls.getAnalysisUsage, [EXISTING_USER.id]);
-  assert.deepEqual(calls.runWithAnalysisQuota, []);
+  assert.deepEqual(calls.getAnalysisUsage, []);
+  assert.deepEqual(calls.reserveAnalysis, [EXISTING_USER.id]);
   assert.equal(calls.analyzeLog.length, 0);
   assert.equal(calls.saveAnalysis.length, 0);
 });
@@ -733,7 +740,7 @@ test("account summary exposes safe billing state and monthly usage", async () =>
     .set("Authorization", authorize(createToken()));
 
   assert.equal(response.status, 200);
-  assert.deepEqual(response.body, {
+  assertLegacyBody(response.body, {
     account: {
       createdAt: "2026-01-01T00:00:00.000Z",
       currentPeriodEnd: null,
@@ -756,7 +763,7 @@ test("history passes the authenticated user ID to the service", async () => {
     .set("Authorization", authorize(createToken()));
 
   assert.equal(response.status, 200);
-  assert.deepEqual(response.body, []);
+  assertLegacyBody(response.body, []);
   assert.equal(calls.getHistory.length, 1);
   assert.equal(calls.getHistory[0][0], EXISTING_USER.id);
 });
@@ -796,4 +803,14 @@ test("analysis redacts credentials before provider calls and persistence", async
   assert.ok(!calls.analyzeLog[0].includes("do-not-disclose"));
   assert.ok(calls.analyzeLog[0].includes("[REDACTED]"));
   assert.equal(calls.saveAnalysis[0][1], calls.analyzeLog[0]);
+});
+
+test('invalid idempotency keys are rejected before quota and provider calls', async () => {
+  const { app, calls } = createHarness();
+  const response = await request(app).post('/api/analyze').set('Authorization', authorize(createToken()))
+    .set('Idempotency-Key', 'short').send({ log: 'ERROR' });
+  assert.equal(response.status, 400);
+  assert.equal(response.body.error.code, 'VALIDATION_ERROR');
+  assert.equal(calls.reserveAnalysis.length, 0);
+  assert.equal(calls.analyzeLog.length, 0);
 });

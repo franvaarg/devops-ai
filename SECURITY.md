@@ -21,7 +21,8 @@ for Docker development. Test hosted connectivity in staging before release; do
 not bypass verification to repair a certificate failure.
 
 Current limitations: JWTs are browser-localStorage bearer credentials; logout is
-local only. Password reset revokes tokens. Rate limits are per process. Quota
-persistence is atomic but provider cost reservation is not yet atomic. Other
-legacy error handlers still need structured safe logging. No compliance
+local only. Password reset revokes tokens. Rate limits are per process. Quota reservations now commit before provider calls;
+usage and analysis persistence commit atomically. Idempotency keys prevent duplicate
+usage on retries; see OPERATIONS.md for expiration, failure and billing semantics.
+Backend request/provider failures use safe structured metadata instead of raw exceptions. No compliance
 certification is claimed. See docs/ENGINEERING_ASSESSMENT.md for release blockers.

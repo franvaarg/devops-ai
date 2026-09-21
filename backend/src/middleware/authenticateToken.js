@@ -51,11 +51,7 @@ async function authenticateToken(req, res, next) {
 
     next();
   } catch (error) {
-    console.error("Authentication database error:", error);
-
-    return res.status(500).json({
-      message: "Something went wrong while authenticating the user.",
-    });
+    return next(error);
   }
 }
 

@@ -1,3 +1,7 @@
+const { randomUUID } = require("node:crypto");
+const { AppError } = require("./operations/errors");
+const { operations, errorHandler } = require("./middleware/operations");
+const { logFailure } = require("./operations/logger");
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -14,8 +18,9 @@ const accountRoutes = require("./routes/accountRoutes");
 const authenticateToken = require("./middleware/authenticateToken");
 const { analyzeRateLimiter } = require("./middleware/rateLimiters");
 const {
-  getAnalysisUsage,
-  runWithAnalysisQuota,
+  reserveAnalysis,
+  completeAnalysis,
+  releaseAnalysis,
 } = require("./services/quotaService");
 
 const { redactSecrets } = require("./security/redactSecrets");
@@ -32,9 +37,11 @@ if (process.env.TRUST_PROXY_HOPS) {
 }
 
 app.disable("x-powered-by");
+app.use(operations);
 app.use(helmet());
 app.use(
   cors({
+    exposedHeaders: ["X-Request-ID", "Idempotency-Key"],
     origin(origin, callback) {
       if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
         return callback(null, true);
@@ -61,9 +68,11 @@ app.get("/api/auth/me", authenticateToken, (req, res) => {
   });
 });
 
-app.post("/api/analyze", authenticateToken, analyzeRateLimiter, async (req, res) => {
+app.post("/api/analyze", authenticateToken, analyzeRateLimiter, async (req, res, next) => {
+  let reserved = false;
+  let requestKey;
   try {
-    const { log } = req.body;
+    const { log } = req.body || {};
 
     if (typeof log !== "string" || !log.trim()) {
       return res.status(400).json({
@@ -71,29 +80,19 @@ app.post("/api/analyze", authenticateToken, analyzeRateLimiter, async (req, res)
       });
     }
 
-    const currentUsage = await getAnalysisUsage(req.user.id);
-
-    if (currentUsage.remaining === 0) {
-      return res.status(429).json({
-        message: "Monthly analysis quota exceeded.",
-      });
-    }
-
+    requestKey = req.get("Idempotency-Key") || randomUUID();
+    if (!/^[A-Za-z0-9_-]{16,128}$/.test(requestKey)) throw new AppError('VALIDATION_ERROR');
+    res.setHeader('Idempotency-Key', requestKey);
     const redactedLog = redactSecrets(log);
-    const analysis = await analyzeLog(redactedLog);
-
-    const quotaResult = await runWithAnalysisQuota(
-      req.user.id,
-      (client) => saveAnalysis(analysis, redactedLog, req.user.id, client)
-    );
-
-    if (!quotaResult.allowed) {
-      return res.status(429).json({
-        message: "Monthly analysis quota exceeded.",
-      });
+    const reservation = await reserveAnalysis(req.user.id, requestKey, redactedLog);
+    let savedAnalysis = reservation.replay;
+    if (!savedAnalysis) {
+      reserved = true;
+      const analysis = await analyzeLog(redactedLog);
+      savedAnalysis = await completeAnalysis(req.user.id, requestKey,
+        (client) => saveAnalysis(analysis, redactedLog, req.user.id, client));
+      reserved = false;
     }
-
-    const savedAnalysis = quotaResult.value;
 
     return res.status(201).json({
       id: savedAnalysis.id,
@@ -108,21 +107,15 @@ app.post("/api/analyze", authenticateToken, analyzeRateLimiter, async (req, res)
       createdAt: savedAnalysis.created_at,
     });
   } catch (error) {
-    console.error(JSON.stringify({ event: "analysis_failed", code: error.code === "AI_INVALID_RESPONSE" ? error.code : "ANALYSIS_FAILED" }));
-
-    return res.status(500).json({
-      severity: "Unknown",
-      summary: "Something went wrong while analyzing or saving the log.",
-      evidence: [],
-      rootCause: "No diagnosis is available because analysis did not complete.",
-      confidence: "Low",
-      recommendation: "Try again later or contact support if the issue continues.",
-      steps: [],
-    });
+    if (reserved) {
+      try { await releaseAnalysis(req.user.id, requestKey); }
+      catch (releaseError) { logFailure('quota_release_failed', releaseError); }
+    }
+    return next(error);
   }
 });
 
-app.get("/api/history", authenticateToken, async (req, res) => {
+app.get("/api/history", authenticateToken, async (req, res, next) => {
   try {
     const { severity, search, limit } = req.query;
 
@@ -153,15 +146,11 @@ app.get("/api/history", authenticateToken, async (req, res) => {
       }))
     );
   } catch (error) {
-    console.error("History error:", error);
-
-    return res.status(500).json({
-      message: "Something went wrong while loading the analysis history.",
-    });
+    return next(error);
   }
 });
 
-app.delete("/api/history/:id", authenticateToken, async (req, res) => {
+app.delete("/api/history/:id", authenticateToken, async (req, res, next) => {
   try {
     const analysisId = Number(req.params.id);
 
@@ -198,38 +187,11 @@ app.delete("/api/history/:id", authenticateToken, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Delete analysis error:", error);
-
-    return res.status(500).json({
-      message: "Something went wrong while deleting the analysis.",
-    });
+    return next(error);
   }
 });
 
-app.use((error, req, res, next) => {
-  if (error.message === "Origin is not allowed by CORS.") {
-    return res.status(403).json({
-      message: "Request origin is not allowed.",
-    });
-  }
-
-  if (error.type === "entity.too.large") {
-    return res.status(413).json({
-      message: "Request body is too large.",
-    });
-  }
-
-  if (error instanceof SyntaxError && error.status === 400 && "body" in error) {
-    return res.status(400).json({
-      message: "Request body must contain valid JSON.",
-    });
-  }
-
-  console.error("Unhandled request error:", error);
-
-  return res.status(500).json({
-    message: "Something went wrong while processing the request.",
-  });
-});
+app.use((req, res, next) => next(new AppError('RESOURCE_NOT_FOUND')));
+app.use(errorHandler);
 
 module.exports = app;

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 import Header from "../components/Header";
@@ -13,6 +13,7 @@ import HistoryList from "../components/HistoryList";
 
 import {
   analyzeLog,
+  ApiError,
   deleteAnalysis,
   getHistory,
   type HistoryItem,
@@ -76,6 +77,7 @@ function clearSession() {
 
 function Home() {
   const [log, setLog] = useState("");
+  const analysisAttempt = useRef<{ log: string; key: string } | null>(null);
   const [severity, setSeverity] = useState("");
   const [summary, setSummary] = useState("");
   const [evidence, setEvidence] = useState<string[]>([]);
@@ -152,7 +154,12 @@ function Home() {
 
     try {
       setIsAnalyzing(true);
-      const data = await analyzeLog(log);
+      // Keep the key after ambiguous network/storage failures so retry cannot charge twice.
+      if (analysisAttempt.current?.log !== log) {
+        analysisAttempt.current = { log, key: crypto.randomUUID() };
+      }
+      const data = await analyzeLog(log, analysisAttempt.current.key);
+      analysisAttempt.current = null;
 
       setSeverity(data.severity ?? "");
       setSummary(data.summary ?? "");
@@ -165,6 +172,9 @@ function Home() {
       await loadHistory(historySearch, historySeverity, false);
       toast.success("Log analyzed successfully.", { id: loadingToast });
     } catch (error) {
+      if (error instanceof ApiError && ["AI_PROVIDER_ERROR", "AI_INVALID_RESPONSE", "ANALYSIS_ATTEMPT_FAILED", "VALIDATION_ERROR", "QUOTA_EXCEEDED"].includes(error.code || "")) {
+        analysisAttempt.current = null;
+      }
       console.error("Analysis error:", error);
 
       if (handleAuthError(error)) {
@@ -182,6 +192,7 @@ function Home() {
   }
 
   function handleClearAnalysis() {
+    analysisAttempt.current = null;
     setLog("");
     setSeverity("");
     setSummary("");

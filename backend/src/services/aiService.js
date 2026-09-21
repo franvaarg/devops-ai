@@ -1,4 +1,5 @@
-require("dotenv").config();
+const { providerCall } = require("../operations/provider");
+if (process.env.NODE_ENV !== "test") require("dotenv").config({ quiet: true });
 
 const { GoogleGenAI } = require("@google/genai");
 
@@ -124,5 +125,5 @@ ${cleanLog}
 }
 
 module.exports = {
-  analyzeLog,
+  analyzeLog: (log) => providerCall("gemini", () => analyzeLog(log)),
 };

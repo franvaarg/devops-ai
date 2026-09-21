@@ -241,3 +241,11 @@ See [the repository assessment and prioritized roadmap](docs/ENGINEERING_ASSESSM
 for verified capabilities, gaps and release gates, and [security/data handling](SECURITY.md)
 for AI transmission, redaction and TLS behavior. The incident-response product
 roadmap is not yet implemented; this remains an analysis application.
+
+### Reliability validation and operations
+
+See [backend test instructions](backend/TESTING.md), [operational consistency and
+release procedures](OPERATIONS.md), and [error/idempotency API semantics](API.md).
+Migration `003_analysis_reservations.sql` must precede the new backend release;
+existing Docker volumes are not migrated automatically. The validation workflow
+runs both backend suites plus frontend lint/build.
