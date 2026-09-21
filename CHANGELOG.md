@@ -26,6 +26,7 @@
   checked before deployment; existing insecure certificate configurations fail closed.
 - Update vulnerable transitive dependencies within existing constraints.
 
-No schema changes. Existing records are preserved. Rolling back privacy changes
+The initial security milestone required no schema changes; the operational
+reliability milestone adds migration 003. Existing records are preserved. Rolling back privacy changes
 would resume raw-log transmission/storage and is not a safe privacy workaround;
 disable analysis temporarily if the new boundary causes production failures.

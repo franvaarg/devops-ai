@@ -242,10 +242,45 @@ for verified capabilities, gaps and release gates, and [security/data handling](
 for AI transmission, redaction and TLS behavior. The incident-response product
 roadmap is not yet implemented; this remains an analysis application.
 
-### Reliability validation and operations
+## Production Reliability
 
-See [backend test instructions](backend/TESTING.md), [operational consistency and
-release procedures](OPERATIONS.md), and [error/idempotency API semantics](API.md).
-Migration `003_analysis_reservations.sql` must precede the new backend release;
-existing Docker volumes are not migrated automatically. The validation workflow
-runs both backend suites plus frontend lint/build.
+KANYI includes a growing set of production-readiness controls designed to make
+incident analysis safer and more reliable.
+
+Current reliability features include:
+
+* Atomic database-backed quota reservations
+* Idempotency protection for analysis requests that reuse the same request key
+* Automatic release of failed analysis reservations, with expiry after process failures
+* Real PostgreSQL integration testing
+* Structured backend logging
+* Request and correlation IDs
+* Centralized API error handling
+* Hardened AI and email provider boundaries
+* Best-effort secret redaction before AI transmission and new log storage
+* Strict validation of AI-generated analysis responses
+* Evidence validation against excerpts in the submitted logs
+* Verified TLS for hosted PostgreSQL connections
+* Dependency security audits, with zero npm vulnerabilities reported in the last recorded audits
+
+Latest recorded local validation (2026-09-21):
+
+* 78 unit and API tests passing
+* 13 PostgreSQL integration tests passing
+* Frontend lint passing
+* TypeScript validation passing
+* Production build passing, with an existing bundle-size warning
+
+Production deployment of the latest reliability changes requires database
+[migration 003](database/migrations/003_analysis_reservations.sql) and the rollout
+procedure documented in [OPERATIONS.md](OPERATIONS.md). These local results do
+not verify live-provider behavior or a production deployment.
+
+For additional technical details, see:
+
+* [OPERATIONS.md](OPERATIONS.md)
+* [SECURITY.md](SECURITY.md)
+* [Engineering assessment](docs/ENGINEERING_ASSESSMENT.md)
+* [CHANGELOG.md](CHANGELOG.md)
+* [Backend test instructions](backend/TESTING.md)
+* [API error and idempotency semantics](API.md)
