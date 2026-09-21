@@ -18,6 +18,8 @@ const {
   runWithAnalysisQuota,
 } = require("./services/quotaService");
 
+const { redactSecrets } = require("./security/redactSecrets");
+
 const app = express();
 
 const allowedOrigins = (process.env.CORS_ORIGINS || "")
@@ -77,11 +79,12 @@ app.post("/api/analyze", authenticateToken, analyzeRateLimiter, async (req, res)
       });
     }
 
-    const analysis = await analyzeLog(log);
+    const redactedLog = redactSecrets(log);
+    const analysis = await analyzeLog(redactedLog);
 
     const quotaResult = await runWithAnalysisQuota(
       req.user.id,
-      (client) => saveAnalysis(analysis, log, req.user.id, client)
+      (client) => saveAnalysis(analysis, redactedLog, req.user.id, client)
     );
 
     if (!quotaResult.allowed) {
@@ -105,7 +108,7 @@ app.post("/api/analyze", authenticateToken, analyzeRateLimiter, async (req, res)
       createdAt: savedAnalysis.created_at,
     });
   } catch (error) {
-    console.error("Analysis error:", error);
+    console.error(JSON.stringify({ event: "analysis_failed", code: error.code === "AI_INVALID_RESPONSE" ? error.code : "ANALYSIS_FAILED" }));
 
     return res.status(500).json({
       severity: "Unknown",

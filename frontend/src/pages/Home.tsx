@@ -270,6 +270,10 @@ function Home() {
             <Header />
             <LogInput log={log} setLog={setLog} />
             <FileUpload onFileLoaded={setLog} />
+            <p className="mt-3 text-xs leading-5 text-slate-500 dark:text-slate-400">
+              Logs are sent to Google Gemini for analysis. KANYI attempts to redact common credentials
+              before analysis and storage, but detection is not complete. Remove sensitive data before submitting.
+            </p>
             <AnalyzeButton
               onAnalyze={handleAnalyze}
               onClear={handleClearAnalysis}

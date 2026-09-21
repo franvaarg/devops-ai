@@ -786,3 +786,14 @@ test("history deletion passes both analysis and authenticated user IDs", async (
   assert.equal(response.status, 404);
   assert.deepEqual(calls.deleteAnalysis, [[25, EXISTING_USER.id]]);
 });
+
+test("analysis redacts credentials before provider calls and persistence", async () => {
+  const { app, calls } = createHarness();
+  const response = await request(app).post("/api/analyze")
+    .set("Authorization", authorize(createToken()))
+    .send({ log: "ERROR database failed password=do-not-disclose" });
+  assert.equal(response.status, 201);
+  assert.ok(!calls.analyzeLog[0].includes("do-not-disclose"));
+  assert.ok(calls.analyzeLog[0].includes("[REDACTED]"));
+  assert.equal(calls.saveAnalysis[0][1], calls.analyzeLog[0]);
+});

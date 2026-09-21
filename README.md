@@ -234,3 +234,10 @@ All rights reserved.
 This software and its source code are the intellectual property of Francisco (Fran) Vargas.
 
 No part of this project may be copied, modified, distributed, sublicensed, or used for commercial purposes without prior written permission from the author.
+
+## Engineering readiness
+
+See [the repository assessment and prioritized roadmap](docs/ENGINEERING_ASSESSMENT.md)
+for verified capabilities, gaps and release gates, and [security/data handling](SECURITY.md)
+for AI transmission, redaction and TLS behavior. The incident-response product
+roadmap is not yet implemented; this remains an analysis application.
