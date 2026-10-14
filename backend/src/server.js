@@ -2,10 +2,11 @@ const app = require("./app");
 
 const PORT = process.env.PORT || 3000;
 
-if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
-  throw new Error("JWT_SECRET must be configured with at least 32 characters.");
-}
+require('./operations/configuration').validateStartup();
 
-app.listen(PORT, "0.0.0.0", () => {
+const server = app.listen(PORT, "0.0.0.0", () => {
   require("./operations/logger").log("server_started");
 });
+server.headersTimeout = 10000;
+server.requestTimeout = 15000;
+require('./operations/shutdown').installShutdown(server, app, require('./database/db'));

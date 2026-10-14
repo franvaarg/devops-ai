@@ -33,3 +33,10 @@ test("password policy rejects short, common, repeated, and identity passwords", 
 
   assert.equal(validatePassword("correct-horse-battery", identity), null);
 });
+
+test('registration and reset cannot accept passwords login rejects or silently truncates', () => {
+  assert.ok(validatePassword('unique-' + 'x'.repeat(66)));
+  assert.ok(validatePassword('😀'.repeat(19)));
+  assert.equal(validatePassword('different-' + 'x'.repeat(62)), null);
+  assert.equal(isValidEmail('a'.repeat(140) + '@example.test'), false);
+});

@@ -15,6 +15,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/000_init.sql:ro
+      - ./database/migrations/004_commercial_product.sql:/docker-entrypoint-initdb.d/004_commercial_product.sql:ro
       - ./database/migrations/003_analysis_reservations.sql:/docker-entrypoint-initdb.d/003_analysis_reservations.sql:ro
 
     healthcheck:
@@ -30,6 +31,7 @@ services:
   backend:
     build: ./backend
     container_name: devops-backend
+    stop_grace_period: 70s
     restart: unless-stopped
 
     depends_on:
@@ -40,6 +42,7 @@ services:
       - ./backend/.env
 
     environment:
+      NODE_ENV: ${NODE_ENV:-development}
       DATABASE_URL: ""
       DB_HOST: database
       DB_PORT: 5432
@@ -55,7 +58,13 @@ services:
       - "3000:3000"
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        VITE_LEGAL_NAME: ${VITE_LEGAL_NAME:-}
+        VITE_SUPPORT_EMAIL: ${VITE_SUPPORT_EMAIL:-}
+        VITE_PRIVACY_URL: ${VITE_PRIVACY_URL:-}
+        VITE_TERMS_URL: ${VITE_TERMS_URL:-}
     container_name: devops-frontend
     restart: unless-stopped
 

@@ -1,0 +1,52 @@
+{
+  "timestamp": "2026-09-30T23:48:18.799Z",
+  "synthetic": true,
+  "databaseWrites": false,
+  "model": "gemini-3.7-flash",
+  "results": [
+    {
+      "name": "recovered-legacy-noise",
+      "ok": true,
+      "durationMs": 28433,
+      "result": {
+        "severity": "Low",
+        "summary": "Transient cache refresh timeout self-healed on retry, with subsequent health checks reporting normal operation.",
+        "evidence": [
+          "12:00 WARN legacy cache API deprecated; compatibility mode enabled",
+          "12:00 ERROR cache refresh timeout; retry scheduled",
+          "12:01 INFO cache refresh retry succeeded",
+          "12:02 INFO healthcheck healthy; 100 requests served; 0 failed"
+        ],
+        "rootCause": "Likely a temporary latency spike or transient failure during cache refresh that resolved upon retry.",
+        "confidence": "High",
+        "recommendation": "Monitor cache latency metrics to confirm timeout events remain isolated and transient.",
+        "steps": [
+          "Verify ongoing cache refresh durations and error counts in monitoring dashboards.",
+          "Confirm subsequent healthcheck results continue to report zero failed requests.",
+          "Track and schedule migration away from the deprecated cache API in a future maintenance window."
+        ],
+        "actionability": "Likely Noise",
+        "falsePositiveRisk": "High",
+        "noiseAssessment": "The initial cache refresh timeout automatically resolved on retry within one minute, and subsequent health checks confirmed 100 requests served with 0 failures. Deprecation warnings are informational. Sustained retry failures or degraded health metrics would be required to indicate an active incident."
+      }
+    },
+    {
+      "name": "supported-service-impact",
+      "ok": false,
+      "durationMs": 3395,
+      "errorCode": "AI_PROVIDER_ERROR"
+    },
+    {
+      "name": "insufficient-impact-context",
+      "ok": false,
+      "durationMs": 6485,
+      "errorCode": "AI_PROVIDER_ERROR"
+    },
+    {
+      "name": "log-instruction-injection",
+      "ok": false,
+      "durationMs": 30018,
+      "errorCode": "AI_PROVIDER_ERROR"
+    }
+  ]
+}

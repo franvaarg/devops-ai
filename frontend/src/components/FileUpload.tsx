@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import type { ChangeEvent } from "react";
 
 type FileUploadProps = {
@@ -16,14 +17,16 @@ function FileUpload({
       return;
     }
 
+    if (!/\.(log|txt)$/i.test(file.name) || file.size > 16384) { toast.error("Choose a .log or .txt file up to 16 KiB."); event.target.value = ""; return; }
     const reader = new FileReader();
 
+    reader.onerror = () => toast.error("Could not read the file. Try pasting the text instead.");
     reader.onload = (loadEvent) => {
       const content = loadEvent.target?.result;
 
-      if (typeof content === "string") {
+      if (typeof content === "string" && !Array.from(content).some(c => c.charCodeAt(0) < 32 && ![9, 10, 11, 12, 13].includes(c.charCodeAt(0)))) {
         onFileLoaded(content);
-      }
+      } else toast.error("This file is not a supported text log.");
     };
 
     reader.readAsText(file);
@@ -58,7 +61,7 @@ function FileUpload({
           </label>
 
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Supported formats: .log and .txt
+            Text only: .log and .txt, up to 16 KiB
           </p>
         </div>
 
@@ -86,7 +89,7 @@ function FileUpload({
             file:text-white
             file:transition
             hover:file:bg-slate-700
-            dark:file:bg-emerald-600
+            dark:file:bg-emerald-700
             dark:hover:file:bg-emerald-500
             sm:w-auto
           "

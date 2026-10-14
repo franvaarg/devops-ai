@@ -4,7 +4,7 @@ const context = new AsyncLocalStorage();
 // Fixed-field allowlist: never serialize arbitrary errors, headers, input or URLs.
 function log(event, fields = {}) {
   const record = { timestamp: new Date().toISOString(), event, requestId: context.getStore()?.requestId };
-  for (const key of ['method', 'route', 'status', 'durationMs', 'code', 'expected', 'provider', 'outcome', 'databaseCode', 'retryable']) {
+  for (const key of ['method', 'route', 'status', 'durationMs', 'code', 'expected', 'provider', 'outcome', 'databaseCode', 'retryable', 'inputTokens', 'outputTokens', 'thinkingTokens', 'attempt', 'delayMs', 'providerCode', 'reason']) {
     if (fields[key] !== undefined) record[key] = fields[key];
   }
   record.level = fields.expected === false ? 'error' : fields.code ? 'warn' : 'info';

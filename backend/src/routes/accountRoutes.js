@@ -17,6 +17,8 @@ router.get("/", authenticateToken, async (req, res, next) => {
           plan,
           subscription_status,
           current_period_end,
+          cancel_at_period_end,
+          provider_customer_id,
           created_at
         FROM users
         WHERE id = $1;
@@ -29,6 +31,8 @@ router.get("/", authenticateToken, async (req, res, next) => {
     return res.status(200).json({
       account: {
         createdAt: account.created_at,
+        hasBillingCustomer: !!account.provider_customer_id,
+        cancelAtPeriodEnd: account.cancel_at_period_end,
         currentPeriodEnd: account.current_period_end,
         email: account.email,
         id: account.id,

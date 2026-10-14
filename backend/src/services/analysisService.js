@@ -11,9 +11,10 @@ async function saveAnalysis(analysis, originalLog, userId, database = pool) {
       recommendation,
       steps,
       original_log,
-      user_id
+      user_id,
+      decision
     )
-    VALUES ($1, $2, $3::jsonb, $4, $5, $6, $7::jsonb, $8, $9)
+    VALUES ($1, $2, $3::jsonb, $4, $5, $6, $7::jsonb, $8, $9, $10::jsonb)
     RETURNING
       id,
       severity,
@@ -25,6 +26,7 @@ async function saveAnalysis(analysis, originalLog, userId, database = pool) {
       steps,
       original_log,
       user_id,
+      decision,
       created_at;
   `;
 
@@ -38,6 +40,7 @@ async function saveAnalysis(analysis, originalLog, userId, database = pool) {
     JSON.stringify(analysis.steps ?? []),
     originalLog,
     userId,
+    JSON.stringify(analysis.actionability ? { actionability: analysis.actionability, falsePositiveRisk: analysis.falsePositiveRisk, noiseAssessment: analysis.noiseAssessment, operationalContext: analysis.operationalContext || "", ...(analysis.inputSignals ? { inputSignals: analysis.inputSignals } : {}) } : {}),
   ];
 
   const result = await database.query(query, values);
@@ -46,13 +49,18 @@ async function saveAnalysis(analysis, originalLog, userId, database = pool) {
 }
 
 async function getHistory(userId, filters = {}) {
-  const { severity, search, limit = 50 } = filters;
+  const { severity, search, limit = 50, beforeId } = filters;
 
   const conditions = [];
   const values = [];
 
   values.push(userId);
   conditions.push(`user_id = $${values.length}`);
+
+  if (Number.isInteger(Number(beforeId)) && Number(beforeId) > 0) {
+    values.push(Number(beforeId));
+    conditions.push(`id < $${values.length}`);
+  }
 
   if (severity) {
     values.push(severity);
@@ -95,10 +103,11 @@ async function getHistory(userId, filters = {}) {
       steps,
       original_log,
       user_id,
+      decision,
       created_at
     FROM analyses
     WHERE ${conditions.join(" AND ")}
-    ORDER BY created_at DESC
+    ORDER BY id DESC
     LIMIT $${values.length};
   `;
 
@@ -123,6 +132,7 @@ async function deleteAnalysis(id, userId) {
       steps,
       original_log,
       user_id,
+      decision,
       created_at;
   `;
 

@@ -22,7 +22,7 @@ function normalizeComparable(value) {
 function isValidEmail(email) {
   return (
     typeof email === "string" &&
-    email.length <= 254 &&
+    email.length <= 150 &&
     EMAIL_PATTERN.test(email)
   );
 }
@@ -34,6 +34,11 @@ function validatePassword(password, identity = {}) {
 
   if (password.length > MAX_PASSWORD_LENGTH) {
     return `Password must contain no more than ${MAX_PASSWORD_LENGTH} characters.`;
+  }
+
+  // bcrypt silently truncates after 72 bytes; login already rejects this size.
+  if (Buffer.byteLength(password, 'utf8') > 72) {
+    return 'Password must contain no more than 72 UTF-8 bytes. Use a shorter passphrase.';
   }
 
   const normalizedPassword = normalizeComparable(password);

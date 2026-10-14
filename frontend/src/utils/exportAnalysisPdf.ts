@@ -367,6 +367,11 @@ export function exportAnalysisToPdf(
 
   currentY += 19;
 
+  currentY = addSectionTitle(doc, "Decision", currentY);
+  currentY = addWrappedText(doc, `${analysis.actionability || 'Actionability not assessed'} | ${analysis.confidence || 'Low'} confidence | False-positive risk: ${analysis.falsePositiveRisk || 'Not assessed'}`, currentY);
+  currentY = addSectionTitle(doc, "Noise assessment", currentY);
+  currentY = addWrappedText(doc, analysis.noiseAssessment || 'This older analysis predates noise assessment.', currentY);
+  currentY = addWrappedText(doc, 'Assessment of the submitted excerpt only. Root causes are hypotheses; verify recommendations before production changes.', currentY);
   currentY = addSectionTitle(
     doc,
     "Summary",
@@ -439,7 +444,7 @@ export function exportAnalysisToPdf(
 
   currentY = addSectionTitle(
     doc,
-    "Original Log",
+    "Stored log excerpt",
     currentY
   );
 

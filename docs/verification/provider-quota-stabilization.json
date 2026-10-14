@@ -1,0 +1,25 @@
+{
+  "timestamp": "2026-10-01T00:30:43.544Z",
+  "synthetic": true,
+  "promptBytes": 28,
+  "sdk": "2.10.0",
+  "results": [
+    {
+      "requestId": "da6fb909-803c-4846-8b9b-66f48e7549bf",
+      "model": "gemini-3.6-flash",
+      "structured": false,
+      "durationMs": 817,
+      "ok": false,
+      "status": 429,
+      "errorType": "ApiError",
+      "quota": [
+        {
+          "quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+          "quotaValue": "20"
+        }
+      ],
+      "providerCode": "RESOURCE_EXHAUSTED",
+      "reason": "quota_or_rate_limit"
+    }
+  ]
+}

@@ -8,8 +8,10 @@ async function providerCall(provider, operation) {
     return value;
   } catch (error) {
     const code = provider === 'brevo' ? 'EMAIL_PROVIDER_ERROR' : error?.code === 'AI_INVALID_RESPONSE' ? 'AI_INVALID_RESPONSE' : 'AI_PROVIDER_ERROR';
-    log('provider_request', { provider, outcome: 'failure', code, expected: false, durationMs: Math.round(performance.now() - start) });
-    throw new AppError(code);
+    log('provider_request', { provider, outcome: 'failure', status: Number.isInteger(error?.status) && error.status >= 400 && error.status <= 599 ? error.status : undefined, code, expected: false, durationMs: Math.round(performance.now() - start) });
+    const safe = new AppError(code);
+    if (provider === 'gemini') safe.retryable = error?.retryable === true;
+    throw safe;
   }
 }
 module.exports = { providerCall };

@@ -1,0 +1,91 @@
+{
+  "timestamp": "2026-10-08T05:04:45.655544+00:00",
+  "localDate": "2026-10-07",
+  "scope": "Local changes, isolated PostgreSQL, fixture browser journeys and real synthetic Gemini; no production deployment or real Stripe purchase",
+  "backendUnit": {
+    "tests": 113,
+    "pass": 113,
+    "fail": 0,
+    "skipped": 0
+  },
+  "postgresqlIntegration": {
+    "tests": 23,
+    "pass": 23,
+    "fail": 0,
+    "skipped": 0
+  },
+  "frontendLint": {
+    "exitCode": 0,
+    "status": "passed"
+  },
+  "frontendTypecheckAndBuild": {
+    "exitCode": 0,
+    "status": "passed"
+  },
+  "browser": {
+    "exitCode": 0,
+    "fixtures": true,
+    "viewports": [
+      "1440x1000",
+      "390x844"
+    ],
+    "pdfDownloads": true,
+    "returningLoginAndServerLogout": true,
+    "axeViolations": 0,
+    "report": "browser-journey.json",
+    "initialFailedRun": "browser-returning-login-initial-failure.log",
+    "initialFailureReason": "Test expected sign-in immediately after logout; actual app navigates to landing. Final test verifies logout call/token clearing, then follows landing sign-in."
+  },
+  "dependencyAudit": {
+    "backend": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "frontend": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    }
+  },
+  "database": {
+    "localAuthentication": "passed",
+    "localSchema": "MIGRATIONS_REQUIRED",
+    "remoteDatabase": "NOT VERIFIED; authorization pending",
+    "writes": false
+  },
+  "ai": {
+    "realSyntheticCases": 11,
+    "originalDecisionRubricPassed": 9,
+    "providerFailures": 2,
+    "retrospectiveConfidenceAwareRubricPassed": 4,
+    "commercialReliability": "NOT READY",
+    "originalReport": "live-incidents.json",
+    "qualityReview": "ai-quality-review.json",
+    "attemptEvidence": "live-incidents.log",
+    "modelChanged": false
+  },
+  "stripe": {
+    "realTestPayment": false,
+    "realProviderWebhook": false,
+    "realPortalAndCancellation": false,
+    "credentialsConfigured": false,
+    "billingEnabled": false
+  },
+  "production": {
+    "deployed": false,
+    "migrationsApplied": false,
+    "dockerImageVerified": false,
+    "restoreAndMonitoringVerified": false
+  },
+  "sellingPriceChanged": false,
+  "commercialReadiness": "NOT READY",
+  "technicalReadiness": "Local protections verified; release gates remain open",
+  "commercialValidation": "No paying-customer or renewal evidence"
+}

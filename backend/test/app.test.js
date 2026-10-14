@@ -291,6 +291,17 @@ test("authentication rejects a malformed token", async () => {
   assert.equal(calls.database.length, 0);
 });
 
+test('authentication rejects invalid signed claims and unexpected algorithms before querying storage', async () => {
+  const { app, calls } = createHarness();
+  for (const payload of [{ userId: '101' }, { userId: -1 }, { userId: 101, tokenVersion: '0' }]) {
+    const token = jwt.sign(payload, TEST_JWT_SECRET);
+    assert.equal((await request(app).get('/api/auth/me').set('Authorization', authorize(token))).status, 401);
+  }
+  const token = jwt.sign({ userId: 101 }, TEST_JWT_SECRET, { algorithm: 'HS512' });
+  assert.equal((await request(app).get('/api/auth/me').set('Authorization', authorize(token))).status, 401);
+  assert.equal(calls.database.length, 0);
+});
+
 test("authentication rejects a missing Authorization header", async () => {
   const { app, calls } = createHarness();
 
@@ -665,6 +676,13 @@ test("provider failure follows reservation and does not persist", async () => {
   assert.deepEqual(calls.reserveAnalysis, [EXISTING_USER.id]);
   assert.equal(calls.saveAnalysis.length, 0);
   assert.equal(calls.releaseAnalysis.length, 1);
+  assert.equal(response.body.error.requestId, response.headers['x-request-id']);
+  assert.match(response.body.error.message, /unsuccessful analyses do not use/);
+  const nextResponse = await request(app).post('/api/analyze')
+    .set('Authorization', authorize(createToken())).send({ log: 'another incident' });
+  assert.equal(nextResponse.status, 502);
+  assert.equal(calls.releaseAnalysis.length, 2);
+  assert.notEqual(nextResponse.headers['x-request-id'], response.headers['x-request-id']);
 });
 
 test("analysis preserves plain text, stack traces, and JSON formatting", async (t) => {
@@ -747,6 +765,7 @@ test("account summary exposes safe billing state and monthly usage", async () =>
       email: EXISTING_USER.email,
       id: EXISTING_USER.id,
       name: "Existing User",
+      hasBillingCustomer: false,
       plan: "free",
       subscriptionStatus: "inactive",
     },
@@ -813,4 +832,21 @@ test('invalid idempotency keys are rejected before quota and provider calls', as
   assert.equal(response.body.error.code, 'VALIDATION_ERROR');
   assert.equal(calls.reserveAnalysis.length, 0);
   assert.equal(calls.analyzeLog.length, 0);
+});
+
+test('invalid text logs are rejected before quota reservation or AI calls', async () => {
+  const { app, calls } = createHarness();
+  for (const log of ['x'.repeat(16385), 'ERROR\u0000binary']) {
+    const result = await request(app).post('/api/analyze').set('Authorization', authorize(createToken())).send({log});
+    assert.equal(result.status,400); assert.equal(result.body.error.code,'LOG_INVALID');
+  }
+  assert.equal(calls.analyzeLog.length,0); assert.equal(calls.reserveAnalysis.length,0);
+});
+test('billing does not offer checkout without configuration or authentication', async () => {
+  const { app } = createHarness();
+  process.env.BILLING_ENABLED = 'false';
+  const plans = await request(app).get('/api/billing/plans');
+  assert.equal(plans.status,200); assert.equal(plans.body.available,false); assert.equal(plans.body.pricing,null);
+  assert.equal((await request(app).post('/api/billing/checkout').send({plan:'pro'})).status,401);
+  assert.equal((await request(app).post('/api/billing/checkout').set('Authorization',authorize(createToken())).send({plan:'pro'})).status,503);
 });

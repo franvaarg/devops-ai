@@ -1,6 +1,12 @@
 import type { ReactNode } from "react";
+import type { InputSignals } from '../services/api';
 
 type AnalysisPanelProps = {
+  inputSignals?: InputSignals;
+  operationalContext?: string;
+  actionability?: string;
+  falsePositiveRisk?: string;
+  noiseAssessment?: string;
   severity: string;
   summary: string;
   evidence: string[];
@@ -42,7 +48,7 @@ function AnalysisSection({
         {title}
       </h3>
 
-      <div className="mt-3 leading-7 text-slate-700 dark:text-slate-300">
+      <div className="mt-3 break-words [overflow-wrap:anywhere] leading-7 text-slate-700 dark:text-slate-300">
         {children}
       </div>
     </div>
@@ -50,6 +56,7 @@ function AnalysisSection({
 }
 
 function AnalysisPanel({
+  actionability, falsePositiveRisk, noiseAssessment, operationalContext, inputSignals,
   severity,
   summary,
   evidence,
@@ -87,7 +94,7 @@ function AnalysisPanel({
           </div>
 
           <h2 className="mt-4 text-xl font-bold text-slate-900 dark:text-white">
-            Latest Analysis
+            Incident assessment
           </h2>
 
           <p className="mt-2 max-w-md text-sm leading-6 text-slate-500 dark:text-slate-400">
@@ -105,11 +112,11 @@ function AnalysisPanel({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-400">
-              AI diagnosis
+              Incident assessment
             </p>
 
             <h2 className="mt-1 text-2xl font-black text-slate-950 dark:text-white">
-              Latest Analysis
+              Incident assessment
             </h2>
           </div>
 
@@ -124,6 +131,11 @@ function AnalysisPanel({
       </div>
 
       <div className="grid gap-4 p-6">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">{[['Actionability', actionability || 'Not assessed'], ['Severity', severity], ['Confidence', confidence], ['False-positive risk', falsePositiveRisk || 'Not assessed']].map(([label, value]) => <div key={label} className="rounded-xl border border-slate-200 p-4 dark:border-slate-700"><p className="text-xs text-slate-500 dark:text-slate-400">{label}</p><p className="mt-2 font-bold">{value}</p></div>)}</div>
+        <p className="text-xs text-slate-500 dark:text-slate-400">Assessment of the submitted excerpt only. Confidence is qualitative. Verify impact and recommendations before making production changes.</p>
+        {inputSignals && <p className="text-sm">Excerpt checks: {inputSignals.lineCount} nonempty lines · {inputSignals.duplicateLineCount} exact repeats · {inputSignals.olderThanSevenDaysCount} timestamps older than seven days at submission · {inputSignals.futureTimestampCount} future timestamps. Only full timestamps with timezone are checked. Repetition or age alone does not establish noise or current service health.</p>}
+
+        {operationalContext && <details className="rounded-xl border p-4"><summary className="cursor-pointer font-semibold">User-reported operational context</summary><p className="mt-3 break-words">{operationalContext}</p></details>}
         <AnalysisSection title="Summary">
           <p>{summary || "No summary available."}</p>
         </AnalysisSection>
@@ -175,6 +187,7 @@ function AnalysisPanel({
             </p>
           )}
         </AnalysisSection>
+        <AnalysisSection title="Noise and legacy-log assessment"><p>{noiseAssessment || 'This older analysis predates noise assessment. Reanalyze the relevant log window to assess actionability and false-positive risk.'}</p></AnalysisSection>
       </div>
     </section>
   );

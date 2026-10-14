@@ -56,7 +56,7 @@ function ResetPassword({ token, onComplete }: ResetPasswordProps) {
           <button
             type="button"
             onClick={onComplete}
-            className="mt-8 w-full rounded-2xl bg-emerald-600 px-5 py-4 text-sm font-black text-white"
+            className="mt-8 w-full rounded-2xl bg-emerald-700 px-5 py-4 text-sm font-black text-white"
           >
             Back to Sign In
           </button>
@@ -83,7 +83,7 @@ function ResetPassword({ token, onComplete }: ResetPasswordProps) {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full rounded-2xl bg-emerald-600 px-5 py-4 text-sm font-black text-white disabled:opacity-60"
+              className="w-full rounded-2xl bg-emerald-700 px-5 py-4 text-sm font-black text-white disabled:opacity-60"
             >
               {isSubmitting ? "Resetting password..." : "Reset password"}
             </button>

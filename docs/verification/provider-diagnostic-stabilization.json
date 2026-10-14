@@ -1,0 +1,58 @@
+{
+  "timestamp": "2026-10-01T00:28:11.756Z",
+  "synthetic": true,
+  "promptBytes": 28,
+  "sdk": "2.10.0",
+  "results": [
+    {
+      "requestId": "f14945fb-5fec-42ec-a24c-e3c3b236b2e2",
+      "model": "gemini-3.6-flash",
+      "structured": false,
+      "durationMs": 1617,
+      "ok": true
+    },
+    {
+      "requestId": "3c5f2a4d-7ad3-4d7d-a4b9-96a48670ad91",
+      "model": "gemini-3.6-flash",
+      "structured": true,
+      "durationMs": 1200,
+      "ok": true
+    },
+    {
+      "requestId": "9ad318a4-eeb4-498c-ac50-81f2d67cbe5a",
+      "model": "gemini-3.7-flash",
+      "structured": false,
+      "durationMs": 6341,
+      "ok": true
+    },
+    {
+      "requestId": "bcc69ad0-9c3f-4f96-b04a-fe9609a49a78",
+      "model": "gemini-3.7-flash",
+      "structured": true,
+      "durationMs": 13339,
+      "ok": true
+    },
+    {
+      "requestId": "20ed527d-4b52-4ebe-98e8-19363158297b",
+      "model": "gemini-2.5-flash",
+      "structured": false,
+      "durationMs": 152,
+      "ok": false,
+      "status": 404,
+      "errorType": "ApiError",
+      "providerCode": "NOT_FOUND",
+      "reason": "unclassified"
+    },
+    {
+      "requestId": "6169c713-c04b-4c12-a5b5-855fffc38793",
+      "model": "gemini-2.5-flash",
+      "structured": true,
+      "durationMs": 175,
+      "ok": false,
+      "status": 404,
+      "errorType": "ApiError",
+      "providerCode": "NOT_FOUND",
+      "reason": "unclassified"
+    }
+  ]
+}

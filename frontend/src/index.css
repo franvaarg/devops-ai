@@ -26,3 +26,37 @@
     @apply bg-slate-950 text-slate-100;
   }
 }
+.marketing { background:#f5f7f6; color:#142b29; font-family:inherit; }
+.marketing nav,.marketing section,.marketing footer { max-width:1180px; margin:auto; padding:64px 28px; }
+.marketing nav { display:flex; justify-content:space-between; align-items:center; gap:24px; padding-top:24px; padding-bottom:24px; border-bottom:1px solid #d6e3de; }
+.marketing nav>div { display:flex; align-items:center; flex-wrap:wrap; gap:24px; }
+.marketing .brand { font-size:24px; font-weight:900; letter-spacing:-1px; }
+.marketing .brand span { display:block; font-size:11px; font-weight:500; letter-spacing:1px; }
+.marketing button { cursor:pointer; padding:12px 18px; border:1px solid #aac3b7; border-radius:8px; font-weight:700; }
+.marketing button:hover { background:#d9ece3; }
+.marketing a:focus-visible,.marketing button:focus-visible,.marketing summary:focus-visible { outline:3px solid #0e8d67; outline-offset:4px; }
+.marketing .hero { display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center; padding-top:80px; }
+.marketing h1 { font-size:clamp(38px,5vw,62px); line-height:1.08; letter-spacing:-2px; font-weight:800; margin:18px 0 24px; }
+.marketing h1 em { font-style:normal; color:#097555; }
+.marketing h2 { font-size:clamp(28px,3vw,38px); font-weight:750; line-height:1.2; letter-spacing:-1px; margin:12px 0 28px; }
+.marketing h3 { font-size:19px; font-weight:750; margin:12px 0; }
+.marketing p { line-height:1.65; margin-bottom:14px; }
+.marketing .eyebrow { font-size:11px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; color:#096348; }
+.marketing .intro { font-size:18px; max-width:690px; color:#49605a; }
+.marketing .primary { background:#096348; color:white; border-color:#096348; margin:12px 0; }
+.marketing .primary:hover { background:#064d38; }
+.marketing .fine { font-size:12px; color:#52675f; margin-top:16px; }
+.marketing .demo { background:white; border:1px solid #c7dcd1; border-radius:16px; padding:26px; box-shadow:0 24px 60px #142b2910; }
+.marketing pre { white-space:pre-wrap; overflow-wrap:anywhere; background:#142b29; color:#d1eee0; padding:18px; border-radius:8px; font-size:12px; line-height:1.8; }
+.marketing .decision-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:20px 0; font-size:11px; color:#49605a; }
+.marketing .decision-grid strong { display:block; font-size:15px; color:#142b29; }
+.marketing .three-cols { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+.marketing article { padding:26px; border:1px solid #d0dfd7; border-radius:12px; background:white; }
+.marketing .featured { border:2px solid #097555; }
+.marketing .price { display:block; font-size:24px; margin:18px 0; }
+.marketing details { border-bottom:1px solid #d0dfd7; padding:20px 0; }
+.marketing summary { cursor:pointer; font-weight:700; }
+.marketing details p { max-width:850px; margin-top:12px; }
+.marketing footer { border-top:1px solid #d0dfd7; }
+.marketing footer label { display:block; }
+@media(max-width:760px) { .marketing .hero,.marketing .three-cols { grid-template-columns:1fr; gap:24px; } .marketing nav { align-items:flex-start; } .marketing nav>div { gap:12px; justify-content:flex-end; font-size:12px; } .marketing nav,.marketing section,.marketing footer { padding:36px 20px; } }

@@ -1,3 +1,5 @@
+> Latest verification (2026-10-07): see [the transformation readiness report](TRANSFORMATION_READINESS.md) and [current evidence](verification/2026-10-07/summary.json). Earlier results below remain historical and do not establish current commercial readiness.
+
 # KANYI engineering assessment and delivery roadmap
 
 Audit date: 2026-09-21. Baseline: 47206fe; working tree clean before work.

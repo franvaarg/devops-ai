@@ -1,0 +1,56 @@
+{
+  "timestamp": "2026-10-01T00:30:07.767Z",
+  "synthetic": true,
+  "databaseWrites": false,
+  "thinkingLevel": "LOW for supported 3.x Flash models",
+  "model": "gemini-3.6-flash",
+  "results": [
+    {
+      "name": "recovered-legacy-noise",
+      "requestId": "f57b9190-20aa-4b8f-93d6-9b9e492690f4",
+      "ok": true,
+      "durationMs": 3542,
+      "result": {
+        "severity": "Low",
+        "summary": "Transient cache refresh timeout resolved automatically with successful retry and healthy service status.",
+        "evidence": [
+          "12:00 WARN legacy cache API deprecated; compatibility mode enabled",
+          "12:00 ERROR cache refresh timeout; retry scheduled",
+          "12:01 INFO cache refresh retry succeeded",
+          "12:02 INFO healthcheck healthy; 100 requests served; 0 failed"
+        ],
+        "rootCause": "Likely temporary network or cache backend latency causing an initial refresh timeout, which immediately recovered on the scheduled retry.",
+        "confidence": "Medium",
+        "recommendation": "Monitor cache refresh latency metrics to ensure timeouts remain transient.",
+        "steps": [
+          "Verify cache backend response times around 12:00.",
+          "Check if cache API deprecation migration is scheduled for future sprints."
+        ],
+        "actionability": "Likely Noise",
+        "falsePositiveRisk": "High",
+        "noiseAssessment": "The log explicitly shows a transient error (cache refresh timeout) followed by a successful retry and subsequent healthy status with 0 failed requests. Deprecation warnings are expected per context."
+      }
+    },
+    {
+      "name": "supported-service-impact",
+      "requestId": "54fc874d-902e-43d1-a817-58548184d182",
+      "ok": false,
+      "durationMs": 918,
+      "errorCode": "AI_PROVIDER_ERROR"
+    },
+    {
+      "name": "insufficient-impact-context",
+      "requestId": "f1d2f0d0-e633-421c-bd88-d47ce3f8330a",
+      "ok": false,
+      "durationMs": 1405,
+      "errorCode": "AI_PROVIDER_ERROR"
+    },
+    {
+      "name": "log-instruction-injection",
+      "requestId": "e37450dc-6c54-4604-a2c5-adb6c353e029",
+      "ok": false,
+      "durationMs": 699,
+      "errorCode": "AI_PROVIDER_ERROR"
+    }
+  ]
+}

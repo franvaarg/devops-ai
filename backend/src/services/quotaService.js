@@ -4,7 +4,7 @@ const { AppError } = require('../operations/errors');
 const { log, logFailure } = require('../operations/logger');
 const PLAN_LIMITS = Object.freeze({ free: 50, pro: 500 });
 function planFor(account) {
-  return account?.plan === 'pro' && ['active', 'trialing'].includes(account.subscription_status) ? 'pro' : 'free';
+  return account?.plan === 'pro' && ['active', 'trialing'].includes(account.subscription_status) && (!account.provider_subscription_id || new Date(account.current_period_end) > new Date()) ? 'pro' : 'free';
 }
 // All reservation and completion transactions lock the same user row first.
 // No database lock or connection is held while waiting for Gemini.
@@ -14,7 +14,7 @@ async function transaction(userId, operation) {
     client = await pool.connect();
     await client.query('BEGIN');
     await client.query("SET LOCAL lock_timeout = '5s'");
-    const result = await client.query('SELECT plan, subscription_status FROM users WHERE id = $1 FOR UPDATE', [userId]);
+    const result = await client.query('SELECT plan, subscription_status, provider_subscription_id, current_period_end FROM users WHERE id = $1 FOR UPDATE', [userId]);
     if (!result.rows[0]) throw new AppError('AUTHENTICATION_REQUIRED');
     const value = await operation(client, planFor(result.rows[0]));
     await client.query('COMMIT');
@@ -72,7 +72,7 @@ async function releaseAnalysis(userId, requestKey) {
   log('quota_released');
 }
 async function getAnalysisUsage(userId) {
-  const result = await pool.query(`SELECT u.plan, u.subscription_status, COALESCE(m.analyses_used, 0) AS used,
+  const result = await pool.query(`SELECT u.plan, u.subscription_status, u.provider_subscription_id, u.current_period_end, COALESCE(m.analyses_used, 0) AS used,
     (SELECT count(*)::integer FROM analysis_requests r WHERE r.user_id = u.id AND r.period_start = date_trunc('month', clock_timestamp() AT TIME ZONE 'UTC')::date
       AND r.status = 'pending' AND r.expires_at > clock_timestamp()) AS reserved
     FROM users u LEFT JOIN monthly_usage m ON m.user_id = u.id AND m.period_start = date_trunc('month', clock_timestamp() AT TIME ZONE 'UTC')::date WHERE u.id = $1`, [userId]);

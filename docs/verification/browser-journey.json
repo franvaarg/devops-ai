@@ -1,0 +1,62 @@
+[
+  {
+    "viewport": "desktop",
+    "landing": true,
+    "signup": true,
+    "sample": true,
+    "analysis": true,
+    "context": true,
+    "history": true,
+    "pdfDownload": true,
+    "deleteAnalysis": true,
+    "planUsage": true,
+    "providerError": true,
+    "billingError": true,
+    "uploadValidation": true,
+    "quota": true,
+    "pendingPayment": true,
+    "paidPlanDisplay": true,
+    "cancellationDisplay": true,
+    "portalDuringPriceFailure": true,
+    "sessionOutage": true,
+    "horizontalOverflow": false,
+    "pageErrors": [],
+    "keyboardFocus": true,
+    "accessibility": {
+      "landing": [],
+      "signup": [],
+      "workspace": [],
+      "workspace-dark": []
+    }
+  },
+  {
+    "viewport": "mobile",
+    "landing": true,
+    "signup": true,
+    "sample": true,
+    "analysis": true,
+    "context": true,
+    "history": true,
+    "pdfDownload": true,
+    "deleteAnalysis": true,
+    "planUsage": true,
+    "providerError": true,
+    "billingError": true,
+    "uploadValidation": true,
+    "quota": true,
+    "pendingPayment": true,
+    "paidPlanDisplay": true,
+    "cancellationDisplay": true,
+    "portalDuringPriceFailure": true,
+    "sessionOutage": true,
+    "horizontalOverflow": false,
+    "pageErrors": [],
+    "keyboardFocus": true,
+    "accessibility": {
+      "landing": [],
+      "signup": [],
+      "workspace": [],
+      "workspace-dark": []
+    }
+  }
+]

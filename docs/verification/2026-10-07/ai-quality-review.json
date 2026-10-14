@@ -1,0 +1,154 @@
+{
+  "timestamp": "2026-10-08T04:57:41.885Z",
+  "retrospective": true,
+  "newProviderCalls": false,
+  "originalReport": "live-incidents.json",
+  "scope": "Same 11 stored responses scored against stricter root-cause confidence bounds; not an independent live round or calibrated accuracy estimate.",
+  "decisionPassed": 9,
+  "fullRubricPassed": 4,
+  "total": 11,
+  "reviewed": [
+    {
+      "name": "recovered-legacy-noise",
+      "providerSucceeded": true,
+      "decisionRubricPassed": true,
+      "confidenceRubricPassed": false,
+      "confidence": "High",
+      "allowedConfidence": [
+        "Low"
+      ],
+      "fullRubricPassed": false,
+      "durationMs": 3975
+    },
+    {
+      "name": "supported-service-impact",
+      "providerSucceeded": true,
+      "decisionRubricPassed": true,
+      "confidenceRubricPassed": false,
+      "confidence": "High",
+      "allowedConfidence": [
+        "Low",
+        "Medium"
+      ],
+      "fullRubricPassed": false,
+      "durationMs": 7874
+    },
+    {
+      "name": "insufficient-impact-context",
+      "providerSucceeded": true,
+      "decisionRubricPassed": true,
+      "confidenceRubricPassed": true,
+      "confidence": "Low",
+      "allowedConfidence": [
+        "Low"
+      ],
+      "fullRubricPassed": true,
+      "durationMs": 5310
+    },
+    {
+      "name": "log-instruction-injection",
+      "providerSucceeded": true,
+      "decisionRubricPassed": true,
+      "confidenceRubricPassed": true,
+      "confidence": "High",
+      "allowedConfidence": [
+        "Low",
+        "Medium",
+        "High"
+      ],
+      "fullRubricPassed": true,
+      "durationMs": 41633
+    },
+    {
+      "name": "deployment-rejected-with-recovery",
+      "providerSucceeded": true,
+      "decisionRubricPassed": true,
+      "confidenceRubricPassed": false,
+      "confidence": "Medium",
+      "allowedConfidence": [
+        "Low"
+      ],
+      "fullRubricPassed": false,
+      "durationMs": 3083
+    },
+    {
+      "name": "docker-crash-loop",
+      "providerSucceeded": true,
+      "decisionRubricPassed": true,
+      "confidenceRubricPassed": true,
+      "confidence": "High",
+      "allowedConfidence": [
+        "Low",
+        "Medium",
+        "High"
+      ],
+      "fullRubricPassed": true,
+      "durationMs": 6480
+    },
+    {
+      "name": "kubernetes-image-pull",
+      "providerSucceeded": false,
+      "decisionRubricPassed": false,
+      "confidenceRubricPassed": false,
+      "allowedConfidence": [
+        "Low",
+        "Medium",
+        "High"
+      ],
+      "fullRubricPassed": false,
+      "durationMs": 44646
+    },
+    {
+      "name": "ci-test-failure",
+      "providerSucceeded": false,
+      "decisionRubricPassed": false,
+      "confidenceRubricPassed": false,
+      "allowedConfidence": [
+        "Low",
+        "Medium",
+        "High"
+      ],
+      "fullRubricPassed": false,
+      "durationMs": 33156
+    },
+    {
+      "name": "authentication-attack-blocked",
+      "providerSucceeded": true,
+      "decisionRubricPassed": true,
+      "confidenceRubricPassed": false,
+      "confidence": "High",
+      "allowedConfidence": [
+        "Low",
+        "Medium"
+      ],
+      "fullRubricPassed": false,
+      "durationMs": 4487
+    },
+    {
+      "name": "api-errors-recovered",
+      "providerSucceeded": true,
+      "decisionRubricPassed": true,
+      "confidenceRubricPassed": false,
+      "confidence": "Medium",
+      "allowedConfidence": [
+        "Low"
+      ],
+      "fullRubricPassed": false,
+      "durationMs": 2389
+    },
+    {
+      "name": "benign-repetition",
+      "providerSucceeded": true,
+      "decisionRubricPassed": true,
+      "confidenceRubricPassed": true,
+      "confidence": "High",
+      "allowedConfidence": [
+        "Low",
+        "Medium",
+        "High"
+      ],
+      "fullRubricPassed": true,
+      "durationMs": 4686
+    }
+  ]
+}

@@ -80,14 +80,45 @@ Configure retention/access at the deployment log sink; no paid sink is introduce
 | 429 quota exceeded | Inspect used + reserved via account API; pending capacity expires in two minutes. Do not edit counters. |
 | 409 in progress | Retry same key after current call finishes. Never create a new key for an ambiguous response loss. |
 | 409 attempt failed | Correct the cause and intentionally start a new attempt with a new key. No usage was charged for the failed attempt. |
-| AI 502 | Correlate request and provider events; distinguish invalid structured output from provider failure. No automatic retries. Verify model availability/configuration in staging. |
+| AI 502 | Correlate request and provider events; distinguish invalid structured output from provider failure. Bounded transient retries; hard quota is not retried. Verify model availability/configuration in staging. |
 | Storage 503 / SQLSTATE | Check database connectivity, TLS, migration 003, pool saturation and locks. Connection wait is 5s, statements 15s, quota lock wait 5s. |
 | Quota release failure | Database outage may delay release; expiry bounds the capacity hold. Same-key replay determines whether completion committed. |
 | Reset email missing | Inspect Brevo outcome and password-reset delivery event. Public recovery always returns the same 202 to avoid enumeration. Check sender/API configuration without printing secrets. |
 | Elevated latency | Compare HTTP and provider durations by request ID. User row locks can also contend with password reset transactions. |
 
-Gemini uses a 30s SDK request timeout, one attempt and a 4096-token response cap.
+Gemini uses at most three attempts, a 20s per-attempt timeout, a 45s overall deadline and a 2048-token response cap. Exponential backoff and hard-quota handling are implemented in aiReliability.js.
 Brevo uses a 10s abort timeout, one attempt, rejects redirects and discards response
 bodies. Provider exceptions are mapped to safe application errors. Provider
 response content, access keys and reset links are never logged. Brevo delivery
 still occurs during the reset transaction; an outbox remains future work.
+
+## Commercial release update (2026-09-30)
+
+Apply migration 004 after 001–003 before deploying the new decision and billing
+code to an existing database. Fresh Compose initialization includes 004.
+Local Compose defaults the backend to development mode; set repository
+`NODE_ENV=production` for a real deployment and configure exact `CORS_ORIGINS`,
+an HTTPS `FRONTEND_URL`, trusted proxy hops and strong JWT/provider secrets.
+The frontend Docker image now serves built assets through Nginx on 5173 with
+same-origin `/api` proxying. An HTTPS ingress still has to be configured and
+verified. Legal/contact links use the owner-supplied VITE_* build variables.
+
+New sales are explicitly gated by `BILLING_ENABLED`. Leave false until the
+commercial release checklist is completed. Existing billing customers must
+retain Customer Portal access even when sales are disabled or price retrieval
+fails. Configure Stripe webhook monitoring/replay, billing-failure emails,
+provider project budgets and production backup/restore verification.
+
+See docs/COMMERCIAL_RELEASE.md and docs/verification for current evidence and
+blocking live-provider results. Historical readiness results elsewhere in this
+file do not establish payment or production readiness for this release.
+
+## Health and shutdown (2026-10-07)
+
+`GET /health/live` checks process liveness; `GET /health/ready` checks connectivity and required schema with zero-row SELECTs. Readiness returns safe 503 on DB/auth/schema failure or shutdown, and does not call Gemini or Stripe. It is not evidence of provider availability or write privileges. Use readiness for Render/ingress health checks. Overlapping checks share a query; DB timeouts bound the probe.
+
+SIGTERM/SIGINT stops accepting connections, makes readiness unavailable, drains admitted requests, then closes the pool. A 60s deadline forces failure exit; configure platform termination grace greater than 60s (Compose stop_grace_period: 70s). A forced termination leaves pending reservations to expire without consuming usage. Rollback must retain additive migrations and quota admission safety.
+
+From backend, `node scripts/diagnose-database.cjs` diagnoses local connectivity read-only and prints safe status codes. Remote connections are refused unless an operator explicitly passes `--allow-remote` after authorizing that environment. DATABASE_URL takes precedence over DB_*; never print its value in support logs. SQLSTATE 28P01 means authentication failed, 3D000 means database absent; fix environment credentials/target rather than resetting data.
+
+`--local` explicitly diagnoses DB_* without selecting the remote DATABASE_URL. This does not edit configuration. Production startup now validates HTTPS origins, Gemini/recovery credentials and sender, proxy hop values, and required Stripe settings when billing is enabled. The backend Docker image runs Node directly as the unprivileged node user; validate image/ingress behavior in staging before release.

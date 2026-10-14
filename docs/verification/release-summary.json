@@ -1,0 +1,139 @@
+{
+  "releaseDate": "2026-09-30",
+  "scope": "Local source and production-build verification; not a production deployment or real payment",
+  "backendUnit": {
+    "tests": 102,
+    "pass": 102,
+    "fail": 0
+  },
+  "postgresqlIntegration": {
+    "tests": 21,
+    "pass": 21,
+    "fail": 0
+  },
+  "frontendLint": "passed",
+  "frontendProductionBuild": "passed",
+  "dependencyAudit": {
+    "backend": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "frontend": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    }
+  },
+  "browserReport": "browser-journey.json",
+  "liveProviderReports": [
+    "gemini-36.json",
+    "gemini-25.json",
+    "gemini-37.json",
+    "gemini-37-low.json",
+    "provider-diagnostic-stabilization.json",
+    "gemini-stabilization-round-1.json",
+    "gemini-stabilization-round-2.json",
+    "provider-quota-stabilization.json"
+  ],
+  "billingVerification": "Real SDK test signatures and real PostgreSQL; Stripe network calls replaced with fixtures. Owner test-mode and live purchase still required.",
+  "chargingReady": false,
+  "stabilization": {
+    "timestamp": "2026-10-01T00:30:43.544Z",
+    "aiReliability": "NOT RESOLVED",
+    "configuration": {
+      "model": "gemini-3.6-flash",
+      "sdk": "2.10.0",
+      "perAttemptTimeoutMs": 20000,
+      "overallDeadlineMs": 45000,
+      "maxAttempts": 3,
+      "backoff": "500ms exponential base plus 0\u2013249ms jitter; respects Google RetryInfo within deadline",
+      "quotaReservationMs": 120000,
+      "proxyReadTimeoutMs": 60000
+    },
+    "liveIncidentAnalyses": {
+      "round1": {
+        "successfulReliableEvaluations": 3,
+        "total": 4,
+        "failedCase": "recovered-legacy-noise",
+        "failedCaseAttempts": [
+          "timeout",
+          "HTTP 503",
+          "HTTP 503"
+        ]
+      },
+      "round2": {
+        "successfulReliableEvaluations": 1,
+        "total": 4,
+        "failedCases": 3,
+        "verifiedFailure": "HTTP 429 RESOURCE_EXHAUSTED; daily Free-tier quota exhausted; no retries"
+      }
+    },
+    "verifiedQuota": {
+      "quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+      "quotaValue": 20
+    },
+    "diagnostics": {
+      "gemini36": {
+        "plain": "success",
+        "structured": "success"
+      },
+      "gemini37": {
+        "plain": "success",
+        "structured": "success"
+      },
+      "gemini25": {
+        "plain": "HTTP 404 NOT_FOUND",
+        "structured": "HTTP 404 NOT_FOUND"
+      }
+    },
+    "stripeE2E": {
+      "status": "NOT VERIFIED",
+      "testSecretKeyConfigured": false,
+      "priceConfigured": false,
+      "webhookSecretConfigured": false,
+      "billingEnabled": false,
+      "reason": "AI reliability prerequisite is unresolved, and owner Stripe TEST MODE configuration is absent. No mocked Stripe result counted as readiness."
+    },
+    "deploymentReadiness": "NOT READY",
+    "ownerActions": [
+      "Enable/verify paid Gemini project capacity and budgets for configured model; rerun repeated live incident evaluations after capacity is available.",
+      "Configure Stripe TEST MODE secret key, active monthly USD price, webhook signing secret/endpoint, portal and test deployment only after AI gate passes.",
+      "Complete domain/TLS, legal/support/pricing and production operations gates in COMMERCIAL_RELEASE.md."
+    ],
+    "remainingBlockers": [
+      "Provider timeout/503 persists despite bounded retries.",
+      "Verified daily Gemini Free-tier request cap of 20 prevents completing further configured-model live verification.",
+      "Real Stripe test payment, signed provider-delivered webhook, Pro entitlements, portal and cancellation not verified.",
+      "Production deployment and operational release evidence absent."
+    ],
+    "liveEvaluationDeadlineMs": 55000,
+    "finalBudgetLiveVerification": "Pending quota; reported live outcomes completed within 24 seconds, final total deadline reduced for database headroom.",
+    "regressionVerification": {
+      "backendUnit": {
+        "tests": 102,
+        "pass": 102,
+        "fail": 0,
+        "command": "npm test"
+      },
+      "postgresqlIntegration": {
+        "tests": 21,
+        "pass": 21,
+        "fail": 0,
+        "command": "npm run test:integration"
+      },
+      "checks": "429, retryable 5xx, permanent client errors, hard quota, RetryInfo delays, timeout/abort recovery, total deadline, malformed response rejection, correlated IDs, missing credentials, and repeated API failure containment"
+    }
+  },
+  "latestVerification": {
+    "localDate": "2026-10-07",
+    "report": "2026-10-07/summary.json",
+    "commercialReadiness": "NOT READY"
+  }
+}

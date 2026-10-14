@@ -1,0 +1,1 @@
+{"status":"MIGRATIONS_REQUIRED","readOnly":true,"schema":{"users":true,"analyses":true,"monthly_usage":false,"analysis_requests":false,"password_reset_tokens":false,"billing_events":false,"product_events":false},"databaseUrlTakesPrecedence":false,"source":"DB_* explicit local override"}

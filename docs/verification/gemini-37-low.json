@@ -1,0 +1,33 @@
+{
+  "timestamp": "2026-10-01T00:07:56.554Z",
+  "synthetic": true,
+  "databaseWrites": false,
+  "thinkingLevel": "LOW for supported 3.x Flash models",
+  "model": "gemini-3.7-flash",
+  "results": [
+    {
+      "name": "recovered-legacy-noise",
+      "ok": false,
+      "durationMs": 1044,
+      "errorCode": "AI_PROVIDER_ERROR"
+    },
+    {
+      "name": "supported-service-impact",
+      "ok": false,
+      "durationMs": 4283,
+      "errorCode": "AI_PROVIDER_ERROR"
+    },
+    {
+      "name": "insufficient-impact-context",
+      "ok": false,
+      "durationMs": 30024,
+      "errorCode": "AI_PROVIDER_ERROR"
+    },
+    {
+      "name": "log-instruction-injection",
+      "ok": false,
+      "durationMs": 4067,
+      "errorCode": "AI_PROVIDER_ERROR"
+    }
+  ]
+}

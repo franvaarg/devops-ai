@@ -14,7 +14,7 @@ function Header() {
           </span>
 
           <span className="text-xs font-bold uppercase tracking-[0.18em] text-teal-800 dark:text-teal-300">
-            AI Log Intelligence
+            Incident intelligence
           </span>
         </div>
 
@@ -40,7 +40,7 @@ function Header() {
       </h1>
 
       <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-300">
-        We find what hides in your logs.
+        What needs attention? Analyze the evidence, assess the noise, and choose your next step.
       </p>
     </header>
   );

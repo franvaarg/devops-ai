@@ -1,286 +1,75 @@
-# 🚀 KANYI
+# KANYI — incident intelligence
 
-> AI Log Intelligence
->
-> We find what hides in your logs.
+KANYI helps developers turn noisy log excerpts into prioritized incident assessments. It separates actionability, severity, confidence and false-positive risk, grounds observed evidence in exact source excerpts, and keeps past assessments searchable.
 
-![React](https://img.shields.io/badge/React-19-blue)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
-![Node.js](https://img.shields.io/badge/Node.js-22-green)
-![Express](https://img.shields.io/badge/Express-5-black)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
-![Docker](https://img.shields.io/badge/Docker-Ready-2496ED)
-![License](https://img.shields.io/badge/License-MIT-green)
+The [current transformation audit and plan](docs/TRANSFORMATION_AUDIT.md) records the latest work. A paid product needs more than a working diagnosis. See [the commercial release gate](docs/COMMERCIAL_RELEASE.md) for implemented customer behavior, cost assumptions, precise owner setup, evidence boundaries and what still prevents charging customers.
 
----
+## Customer workflow
 
-## 📖 Overview
+Public landing and pricing → account creation → safe example or real log excerpt → evidence-backed assessment → searchable history/PDF export → monthly quota → Stripe Checkout → verified subscription activation → billing portal and cancellation.
 
-KANYI is an AI Log Intelligence platform that uses Google's Gemini AI to uncover severity, root causes, and actionable insights in infrastructure and application logs.
+Free includes 50 successful analyses per UTC calendar month. Pro includes 500. Both accept text logs up to 16 KiB and optional operational context, and use the same assessment standards. Team is planned and not sold. Paid offers are unavailable unless billing is explicitly configured and enabled. Selling price is retrieved from Stripe, not hardcoded in the UI.
 
-The platform automatically classifies incidents by severity, identifies the most likely root cause, provides actionable recommendations, and stores analysis history for authenticated users.
+## Architecture
 
----
+React/TypeScript/Vite frontend; Express API; PostgreSQL persistence; Google Gemini analysis; Stripe hosted Checkout and Customer Portal. Server-side quotas and entitlements control capacity. Signed webhooks retrieve current provider subscription state, persist updates transactionally and reject mismatched accounts. A checkout return URL never grants paid access.
 
-## ✨ Features
+The frontend Docker image serves built static assets with Nginx rather than a development server. Its `/api` proxy reaches the backend on the Docker network. Separate frontend hosting uses `VITE_API_BASE_URL` at build time.
 
-- 🔐 JWT Authentication
-- 🤖 AI-powered log analysis
-- 📊 Interactive dashboard
-- 📁 Analysis history
-- 🔍 Search and filtering
-- 🗑 Delete analyses
-- 🐳 Docker & Docker Compose
-- 📈 Severity statistics
-- ⚡ Fast React + Vite frontend
-- 🗄 PostgreSQL persistence
-- 🛡 Rate limits and hardened HTTP headers
-- 📈 Per-user monthly AI usage quotas
-- 🔑 Secure password-recovery API
-- 💳 Billing-ready individual account model
+## Local setup
 
----
-
-## 🏗 Architecture
-
-```text
-                React + TypeScript
-                       │
-                       ▼
-                Express REST API
-                       │
-         ┌─────────────┴─────────────┐
-         ▼                           ▼
-     PostgreSQL                Google Gemini
-                       │
-                       ▼
-                 Docker Compose
-```
-
----
-
-## 🛠 Tech Stack
-
-### Frontend
-
-- React
-- TypeScript
-- Vite
-- Tailwind CSS
-
-### Backend
-
-- Node.js
-- Express.js
-
-### Database
-
-- PostgreSQL
-
-### AI
-
-- Google Gemini API
-
-### DevOps
-
-- Docker
-- Docker Compose
-
----
-
-## 📸 Screenshots
-
-Coming soon...
-
----
-
-## 🚀 Getting Started
-
-### Clone the repository
-
-```bash
-git clone https://github.com/yourusername/devops-ai.git
-cd devops-ai
-```
-
-### Configure environment variables
-
-```bash
+```sh
+cp .env.example .env
 cp backend/.env.example backend/.env
 ```
 
-Fill your credentials.
+Configure the PostgreSQL password in the repository `.env`, plus a strong JWT secret and Gemini key in `backend/.env`. Configure email delivery for password recovery. Keep billing disabled for local use without Stripe credentials. Local Compose defaults to development backend mode; production requires `NODE_ENV=production`, exact CORS origins, an HTTPS frontend URL and trusted ingress settings.
 
-For password recovery, configure the SMTP variables and `FRONTEND_URL` in
-`backend/.env`. In production, set `CORS_ORIGINS` to the exact frontend origin
-and `TRUST_PROXY_HOPS` to the number of trusted proxies in front of Express.
+```sh
+docker compose up --build
+```
 
-### Upgrade an existing database
+Frontend: `http://localhost:5173`. Backend: `http://localhost:3000`. PostgreSQL binds to `127.0.0.1:5433`. Production requires HTTPS ingress; Compose alone does not provide it.
 
-Docker initialization scripts only run for a new PostgreSQL volume. Apply the
-idempotent SaaS migration to an existing database before deploying this version:
+Existing database volumes require migrations; initialization scripts only run for fresh volumes. Back up before applying:
 
-```bash
+```sh
 psql "$DATABASE_URL" -f database/migrations/001_saas_foundations.sql
+psql "$DATABASE_URL" -f database/migrations/002_trustworthy_analysis.sql
+psql "$DATABASE_URL" -f database/migrations/003_analysis_reservations.sql
+psql "$DATABASE_URL" -f database/migrations/004_commercial_product.sql
 ```
 
-New databases receive the same schema from `database/init.sql`.
+See `database/migrations` and [operations](OPERATIONS.md). All migrations are rerunnable. The commercial migration stores decision/context metadata and billing event deduplication without discarding existing history. Older analyses explicitly show that noise/actionability was not assessed.
 
-### Individual account plans
+## Verification
 
-- `free`: 50 AI analyses per calendar month
-- `pro`: 500 AI analyses per calendar month when the subscription status is
-  `active` or `trialing`
-
-`GET /api/account` returns the authenticated user's safe subscription summary
-and current monthly usage. Provider customer/subscription identifiers remain
-server-side. Checkout and webhooks are intentionally deferred until a billing
-provider is selected.
-
-Password-reset links expire after one hour, are stored only as SHA-256 hashes,
-can be used once, and revoke existing sessions when successfully used.
-
-### Run with Docker
-
-```bash
-docker compose up -d --build
+```sh
+cd backend
+npm ci --ignore-scripts
+npm test
+npm run test:integration
 ```
 
----
+Integration tests create an isolated temporary PostgreSQL cluster; they refuse a shared or remote database. Set `PG_TEST_BIN` if server binaries are installed elsewhere. Stripe/Gemini network calls are fixtures in local tests, not evidence of live provider behavior.
 
-## 🌐 Application
-
-| Service | URL |
-|----------|-----|
-| Frontend | http://localhost:5173 |
-| Backend | http://localhost:3000 |
-| PostgreSQL | localhost:5433 |
-
----
-
-## 📂 Project Structure
-
-```text
-backend/
-frontend/
-database/
-docker-compose.yml
-README.md
+```sh
+cd frontend
+npm ci --ignore-scripts
+npm run lint
+npm run build
 ```
 
----
+A desktop/mobile browser workflow is available in `frontend/scripts/verify-journey.cjs`. It requires Playwright, `@axe-core/playwright`, and a running local frontend; set `PLAYWRIGHT_MODULE`, `APP_URL`, and optionally `BROWSER_REPORT_DIR`. It explicitly uses network fixtures and saves screenshots/report evidence. A real purchase is a separate release gate.
 
-## 🧪 Roadmap
+## Trust and release references
 
-- [x] JWT Authentication
-- [x] Gemini AI Integration
-- [x] Docker Support
-- [x] Dashboard
-- [x] Analysis History
+- [Commercial readiness, pricing and billing setup](docs/COMMERCIAL_RELEASE.md)
+- [Security and data handling](SECURITY.md)
+- [Operations and reliability](OPERATIONS.md)
+- [API errors and retry semantics](API.md)
+- [Backend tests](backend/TESTING.md)
 
-### Next Version
+Logs and context go to Gemini after best-effort secret redaction and are stored with the result. Remove confidential data before submission. Deletion removes the live stored analysis; backup/provider retention is an owner policy/configuration decision. Evidence validation establishes provenance, not causal certainty. No unsupported certifications, testimonials or accuracy claims are made.
 
-- [ ] Deploy to Production
-- [ ] CI/CD Pipeline
-- [ ] Monitoring
-- [ ] Export Reports
-- [ ] Role-Based Access Control
-
----
-
-## 📸 Screenshots
-
-### 🔐 Login
-
-![Login](docs/screenshots/login.png)
-
-### 📊 Dashboard
-
-![Dashboard](docs/screenshots/dashboard.png)
-
-### 🤖 AI Analysis
-
-![Analysis](docs/screenshots/analysis.png)
-
-### 📚 History
-
-![History](docs/screenshots/history.png)
-
-
-## 🎥 Demo
-
-A complete walkthrough of the application is available in:
-
-`docs/demo/devops-ai-demo.mp4`
-
-
-
-## Source code available upon request for recruitment purposes.###
-
-## 👨‍💻 Author
-
-Francisco Vargas
-
-Backend • Frontend • DevOps • AI
-
----
-
-## 📄 License
-
-Copyright © 2026 Francisco (Fran) Vargas
-
-All rights reserved.
-
-This software and its source code are the intellectual property of Francisco (Fran) Vargas.
-
-No part of this project may be copied, modified, distributed, sublicensed, or used for commercial purposes without prior written permission from the author.
-
-## Engineering readiness
-
-See [the repository assessment and prioritized roadmap](docs/ENGINEERING_ASSESSMENT.md)
-for verified capabilities, gaps and release gates, and [security/data handling](SECURITY.md)
-for AI transmission, redaction and TLS behavior. The incident-response product
-roadmap is not yet implemented; this remains an analysis application.
-
-## Production Reliability
-
-KANYI includes a growing set of production-readiness controls designed to make
-incident analysis safer and more reliable.
-
-Current reliability features include:
-
-* Atomic database-backed quota reservations
-* Idempotency protection for analysis requests that reuse the same request key
-* Automatic release of failed analysis reservations, with expiry after process failures
-* Real PostgreSQL integration testing
-* Structured backend logging
-* Request and correlation IDs
-* Centralized API error handling
-* Hardened AI and email provider boundaries
-* Best-effort secret redaction before AI transmission and new log storage
-* Strict validation of AI-generated analysis responses
-* Evidence validation against excerpts in the submitted logs
-* Verified TLS for hosted PostgreSQL connections
-* Dependency security audits, with zero npm vulnerabilities reported in the last recorded audits
-
-Latest recorded local validation (2026-09-21):
-
-* 78 unit and API tests passing
-* 13 PostgreSQL integration tests passing
-* Frontend lint passing
-* TypeScript validation passing
-* Production build passing, with an existing bundle-size warning
-
-Production deployment of the latest reliability changes requires database
-[migration 003](database/migrations/003_analysis_reservations.sql) and the rollout
-procedure documented in [OPERATIONS.md](OPERATIONS.md). These local results do
-not verify live-provider behavior or a production deployment.
-
-For additional technical details, see:
-
-* [OPERATIONS.md](OPERATIONS.md)
-* [SECURITY.md](SECURITY.md)
-* [Engineering assessment](docs/ENGINEERING_ASSESSMENT.md)
-* [CHANGELOG.md](CHANGELOG.md)
-* [Backend test instructions](backend/TESTING.md)
-* [API error and idempotency semantics](API.md)
+Copyright © 2026 Francisco (Fran) Vargas. All rights reserved. Existing ownership and license terms apply.

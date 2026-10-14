@@ -21,7 +21,9 @@ async function authenticateToken(req, res, next) {
   let decodedToken;
 
   try {
-    decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    decodedToken = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
+    if (!decodedToken || typeof decodedToken !== 'object' || !Number.isInteger(decodedToken.userId) || decodedToken.userId < 1 || decodedToken.userId > 2147483647 ||
+        (decodedToken.tokenVersion !== undefined && (!Number.isInteger(decodedToken.tokenVersion) || decodedToken.tokenVersion < 0))) throw new Error('Invalid claims');
   } catch (error) {
     return res.status(401).json({
       message: "Invalid or expired authentication token.",

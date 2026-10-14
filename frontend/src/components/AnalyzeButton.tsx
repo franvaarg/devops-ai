@@ -24,7 +24,7 @@ function AnalyzeButton({
           justify-center
           gap-2
           rounded-xl
-          bg-emerald-600
+          bg-emerald-700
           px-6
           py-3
           text-sm
@@ -36,12 +36,12 @@ function AnalyzeButton({
           duration-200
 
           hover:-translate-y-0.5
-          hover:bg-emerald-700
+          hover:bg-emerald-800
           hover:shadow-xl
           hover:shadow-emerald-600/25
 
-          dark:bg-emerald-500
-          dark:hover:bg-emerald-400
+          dark:bg-emerald-700
+          dark:hover:bg-emerald-800
           dark:shadow-emerald-900/40
 
           active:translate-y-0
@@ -81,7 +81,7 @@ function AnalyzeButton({
               <path d="m19 14-.75 2.25L16 17l2.25.75L19 20l.75-2.25L22 17l-2.25-.75L19 14Z" />
             </svg>
 
-            Analyze with AI
+            Assess incident
           </>
         )}
       </button>

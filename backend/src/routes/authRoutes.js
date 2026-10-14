@@ -20,6 +20,12 @@ const {
 } = require("../security/credentialValidation");
 
 const router = express.Router();
+router.post('/logout', require('../middleware/authenticateToken'), async (req, res, next) => {
+  try {
+    await pool.query('UPDATE users SET token_version = token_version + 1 WHERE id = $1', [req.user.id]);
+    return res.status(204).end();
+  } catch (error) { return next(error); }
+});
 const DUMMY_PASSWORD_HASH =
   "$2b$12$B1kX1Aasm9ZFDDzuaFFY4.ni2OFxO8RpRGJyVsp08wwBoNqGp4pF.";
 

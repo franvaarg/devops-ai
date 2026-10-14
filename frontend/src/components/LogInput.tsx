@@ -15,7 +15,7 @@ function LogInput({ log, setLog }: LogInputProps) {
         </label>
 
         <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-          {log.length.toLocaleString()} characters
+          {new TextEncoder().encode(log).length.toLocaleString()} / 16,384 bytes
         </span>
       </div>
 
@@ -54,7 +54,7 @@ function LogInput({ log, setLog }: LogInputProps) {
           <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
           <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
 
-          <span className="ml-2 font-mono text-xs text-slate-500 dark:text-slate-400">
+          <span className="ml-2 font-mono text-xs text-slate-600 dark:text-slate-400">
             system.log
           </span>
         </div>

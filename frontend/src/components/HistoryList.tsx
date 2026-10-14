@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import type { HistoryItem } from "../services/api";
-import { exportAnalysisToPdf } from "../utils/exportAnalysisPdf";
+
 
 type HistoryListProps = {
   history: HistoryItem[];
@@ -202,12 +202,12 @@ function HistoryList({
     setConfirmingId(null);
   }
 
-  function handleExportPdf(item: HistoryItem) {
+  async function handleExportPdf(item: HistoryItem) {
     try {
       setExportingId(item.id);
+      const { exportAnalysisToPdf } = await import("../utils/exportAnalysisPdf");
       exportAnalysisToPdf(item);
-    } catch (error) {
-      console.error("PDF export error:", error);
+    } catch {
 
       window.alert(
         "The PDF could not be generated. Please try again."
@@ -355,7 +355,15 @@ function HistoryList({
 
             {isExpanded && (
               <div className="border-t border-slate-200 bg-slate-50/70 p-5 dark:border-slate-800 dark:bg-slate-950/40 sm:p-7">
-                <div className="grid gap-5">
+                <div className="grid gap-5 break-words [overflow-wrap:anywhere]">
+                  <section className="rounded-2xl border bg-white p-5 dark:bg-slate-900">
+                    <p className="font-bold">{item.actionability || 'Actionability not assessed'} · {item.confidence || 'Low'} confidence</p>
+                    <p className="mt-2">False-positive risk: {item.falsePositiveRisk || 'Not assessed'}</p>
+                    <p className="mt-2">{item.noiseAssessment || 'This older result predates noise assessment.'}</p>
+                    {item.operationalContext && <p className="mt-3 text-sm">User-reported context: {item.operationalContext}</p>}
+                    {item.inputSignals && <p className="mt-3 text-sm">Excerpt checks at submission: {item.inputSignals.duplicateLineCount} exact repeated lines; {item.inputSignals.olderThanSevenDaysCount} timestamps older than seven days; {item.inputSignals.futureTimestampCount} future timestamps. Age and repetition alone do not establish noise.</p>}
+                    <p className="mt-3 text-xs">Hypotheses based on the submitted excerpt. Verify before changing production.</p>
+                  </section>
                   <section className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
                     <h3 className="text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
                       Observed Evidence
@@ -406,7 +414,7 @@ function HistoryList({
                               key={`${item.id}-step-${index}`}
                               className="flex gap-3 text-slate-800 dark:text-slate-100"
                             >
-                              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xs font-black text-white">
+                              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-700 text-xs font-black text-white">
                                 {index + 1}
                               </span>
 
@@ -428,11 +436,11 @@ function HistoryList({
                   <section>
                     <div className="flex items-center justify-between gap-4">
                       <h3 className="text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-                        Original Log
+                        Stored log excerpt
                       </h3>
 
                       <span className="rounded-full bg-slate-200 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                        Raw input
+                        Stored input
                       </span>
                     </div>
 
@@ -501,7 +509,7 @@ function HistoryList({
                             isExporting ||
                             deletingId !== null
                           }
-                          className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition duration-200 hover:bg-emerald-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition duration-200 hover:bg-emerald-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           <DownloadIcon />
 

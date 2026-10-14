@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-10-08T04:50:39.786Z",
+  "synthetic": true,
+  "promptBytes": 28,
+  "sdk": "2.10.0",
+  "results": [
+    {
+      "requestId": "d72dde3b-9c81-4560-851a-90dfc3522866",
+      "model": "gemini-3.6-flash",
+      "structured": false,
+      "durationMs": 1676,
+      "ok": true
+    }
+  ]
+}

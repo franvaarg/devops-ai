@@ -189,3 +189,146 @@ test('completion marker constraint failure rolls back both usage increment and a
   await quota.releaseAnalysis(account.id, key);
   assert.equal((await quota.getAnalysisUsage(account.id)).reserved, 0);
 });
+
+const billing = require('../src/services/billingService');
+test('verified billing updates are transactional, replay safe, and use current provider state', async () => {
+  process.env.STRIPE_SECRET_KEY = 'sk_test_local_fixture';
+  process.env.STRIPE_PRICE_ID = 'price_pro';
+  const account = await user();
+  await pool.query("UPDATE users SET provider_customer_id=$2 WHERE id=$1", [account.id, 'cus_' + account.id]);
+  let status = 'active'; let reads = 0;
+  const api = billing.stripe();
+  api.subscriptions.retrieve = async id => { reads++; return { id, customer: 'cus_' + account.id, status, items: { data: [{price:{id:'price_pro'},quantity:1,current_period_end: Math.floor(Date.now()/1000)+3600}] }, cancel_at_period_end: true }; };
+  const event = { id: 'evt_' + account.id, type: 'customer.subscription.updated', data: { object: { id:'sub_'+account.id, customer:'cus_'+account.id, status:'incomplete' } } };
+  await billing.processEvent(event);
+  assert.equal((await quota.getAnalysisUsage(account.id)).plan, 'pro');
+  await billing.processEvent(event); assert.equal(reads, 1);
+  status = 'past_due';
+  await billing.processEvent({...event,id:event.id+'_failed'});
+  assert.equal((await quota.getAnalysisUsage(account.id)).plan, 'free');
+  // An older active payload cannot restore Pro when Stripe currently reports past_due.
+  await billing.processEvent({...event,id:event.id+'_old'});
+  assert.equal((await quota.getAnalysisUsage(account.id)).plan, 'free');
+  status = 'active'; await billing.processEvent({...event,id:event.id+'_paid'});
+  assert.equal((await quota.getAnalysisUsage(account.id)).plan, 'pro');
+  await pool.query('UPDATE users SET current_period_end=now()-interval \'1 second\' WHERE id=$1', [account.id]);
+  assert.equal((await quota.getAnalysisUsage(account.id)).plan, 'free');
+  const saved = await execute(account.id);
+  assert.ok(saved.id);
+});
+
+test('subscription customer mismatch never grants access or acknowledges the event', async () => {
+  const account = await user();
+  await pool.query('UPDATE users SET provider_customer_id=$2 WHERE id=$1', [account.id,'cus_'+account.id]);
+  billing.stripe().subscriptions.retrieve = async () => ({ customer: 'cus_other' });
+  const event = {id:'evt_wrong_'+account.id,type:'customer.subscription.created',data:{object:{id:'sub_wrong',customer:'cus_'+account.id}}};
+  await assert.rejects(billing.processEvent(event), {code:'BILLING_ERROR'});
+  assert.equal((await quota.getAnalysisUsage(account.id)).plan,'free');
+  assert.equal((await pool.query('SELECT * FROM billing_events WHERE id=$1',[event.id])).rows.length,0);
+});
+
+test('new decision fields persist, belong to their account, and delete with the analysis', async () => {
+  const account = await user(); const other = await user();
+  const saved = await saveAnalysis({...analysis,actionability:'Investigate',falsePositiveRisk:'High',noiseAssessment:'Legacy behavior may be expected.'},'ERROR database',account.id);
+  const history = await getHistory(account.id);
+  assert.equal(history[0].decision.actionability,'Investigate');
+  assert.equal((await getHistory(other.id)).length,0);
+  assert.equal(await deleteAnalysis(saved.id,other.id),null);
+  await deleteAnalysis(saved.id,account.id); assert.equal((await getHistory(account.id)).length,0);
+});
+
+test('raw signed webhook accepts genuine signature, rejects forgery and does not trust redirects', async () => {
+  const app = require('../src/app');
+  process.env.STRIPE_WEBHOOK_SECRET = 'whsec_local_fixture';
+  const account = await user();
+  await pool.query('UPDATE users SET provider_customer_id=$2 WHERE id=$1',[account.id,'cus_'+account.id]);
+  billing.stripe().subscriptions.retrieve = async id => ({id,customer:'cus_'+account.id,status:'active',items:{data:[{price:{id:'price_pro'},quantity:1,current_period_end:Math.floor(Date.now()/1000)+3600}]}});
+  const payload = JSON.stringify({id:'evt_signed_'+account.id,type:'customer.subscription.created',data:{object:{id:'sub_signed_'+account.id,customer:'cus_'+account.id}}});
+  const signature = billing.stripe().webhooks.generateTestHeaderString({payload,secret:process.env.STRIPE_WEBHOOK_SECRET});
+  const forged = await request(app).post('/api/billing/webhook').set('Content-Type','application/json').set('stripe-signature','forged').send(payload);
+  assert.equal(forged.status,400); assert.equal((await quota.getAnalysisUsage(account.id)).plan,'free');
+  const valid = await request(app).post('/api/billing/webhook').set('Content-Type','application/json').set('stripe-signature',signature).send(payload);
+  assert.equal(valid.status,200); assert.equal((await quota.getAnalysisUsage(account.id)).plan,'pro');
+  const tampered = await request(app).post('/api/billing/webhook').set('Content-Type','application/json').set('stripe-signature',signature).send(payload.replace('active','inactive')+' ');
+  assert.equal(tampered.status,400);
+});
+
+test('checkout reuses customer/session, prevents duplicate subscription, and portal remains available when sales disabled', async () => {
+  process.env.BILLING_ENABLED = 'true'; process.env.FRONTEND_URL = 'http://localhost:5174';
+  const account = await user(); let creates = 0; let sessions = 0;
+  const api = billing.stripe();
+  api.prices.retrieve = async () => ({active:true,type:'recurring',recurring:{interval:'month',interval_count:1,usage_type:'licensed'},billing_scheme:'per_unit',unit_amount:2900,currency:'usd'});
+  api.customers.create = async () => { creates++; return {id:'cus_checkout_'+account.id}; };
+  api.subscriptions.list = async () => ({data:[],has_more:false});
+  api.checkout.sessions.list = async () => ({data:[],has_more:false});
+  api.checkout.sessions.create = async () => { sessions++; return {id:'cs_'+account.id,url:'https://checkout.stripe.com/test',expires_at:Math.floor(Date.now()/1000)+1800}; };
+  api.checkout.sessions.retrieve = async () => ({status:'open',url:'https://checkout.stripe.com/test'});
+  assert.equal((await billing.checkout(account.id)).url,'https://checkout.stripe.com/test');
+  await billing.checkout(account.id); assert.equal(creates,1); assert.equal(sessions,1);
+  assert.equal((await quota.getAnalysisUsage(account.id)).plan,'free');
+  api.subscriptions.list = async () => ({data:[{status:'active'}],has_more:false});
+  await assert.rejects(billing.checkout(account.id),{code:'SUBSCRIPTION_EXISTS'});
+  process.env.BILLING_ENABLED = 'false';
+  api.billingPortal.sessions.create = async args => { assert.equal(args.customer,'cus_checkout_'+account.id); return {url:'https://billing.stripe.com/test'}; };
+  assert.equal((await billing.portal(account.id)).url,'https://billing.stripe.com/test');
+  await assert.rejects(billing.checkout(account.id),{code:'BILLING_UNAVAILABLE'});
+});
+
+test('history cursor returns older incidents without exposing another account', async () => {
+  const account = await user(); const other = await user();
+  const a = await saveAnalysis(analysis,'ERROR first',account.id);
+  const b = await saveAnalysis(analysis,'ERROR second',account.id);
+  await saveAnalysis(analysis,'ERROR unrelated',other.id);
+  const recent = await getHistory(account.id,{limit:1}); assert.equal(recent[0].id,b.id);
+  const older = await getHistory(account.id,{limit:1,beforeId:b.id}); assert.equal(older[0].id,a.id);
+  assert.equal((await getHistory(account.id,{beforeId:a.id})).length,0);
+});
+
+test('opt-in first and second analysis milestones are atomic and replay does not duplicate them', async () => {
+  const app = require('../src/app'); const account = await user();
+  const token = require('jsonwebtoken').sign({userId:account.id,email:account.email,tokenVersion:0},process.env.JWT_SECRET);
+  const counts = async () => (await pool.query("SELECT event,count(*)::integer AS count FROM product_events WHERE event IN ('first_analysis','second_analysis') GROUP BY event ORDER BY event")).rows;
+  const before = await counts();
+  const baseline = Object.fromEntries(before.map(row=>[row.event,row.count]));
+  const key = randomUUID();
+  const send = k => request(app).post('/api/analyze').set('Authorization',`Bearer ${token}`).set('Idempotency-Key',k).send({log:'ERROR database',analytics:true});
+  assert.equal((await send(key)).status,201); assert.equal((await send(key)).status,201);
+  assert.equal((await send(randomUUID())).status,201);
+  assert.equal((await send(randomUUID())).status,201);
+  const after = Object.fromEntries((await counts()).map(row=>[row.event,row.count]));
+  assert.equal(after.first_analysis-(baseline.first_analysis||0),1);
+  assert.equal(after.second_analysis-(baseline.second_analysis||0),1);
+});
+
+test('pre-release no-context idempotency keys still replay, while changing context conflicts', async () => {
+  const account = await user(); const key = randomUUID();
+  const saved = await execute(account.id,key);
+  const token = require('jsonwebtoken').sign({userId:account.id,email:account.email,tokenVersion:0},process.env.JWT_SECRET);
+  const app = require('../src/app');
+  const send = context => request(app).post('/api/analyze').set('Authorization',`Bearer ${token}`).set('Idempotency-Key',key).send({log:'ERROR database',context});
+  const replay = await send(''); assert.equal(replay.status,201); assert.equal(replay.body.id,saved.id);
+  assert.equal((await quota.getAnalysisUsage(account.id)).used,1);
+  const changed = await send('New operational context'); assert.equal(changed.status,409); assert.equal(changed.body.error.code,'IDEMPOTENCY_CONFLICT');
+});
+
+test('health readiness verifies migrated PostgreSQL and logout revokes existing bearer tokens', async () => {
+  const app = require('../src/app');
+  assert.equal((await request(app).get('/health/ready')).status, 200);
+  const account = await user();
+  const token = require('jsonwebtoken').sign({userId:account.id,tokenVersion:0},process.env.JWT_SECRET);
+  assert.equal((await request(app).post('/api/auth/logout').set('Authorization', `Bearer ${token}`)).status, 204);
+  assert.equal((await request(app).get('/api/history').set('Authorization', `Bearer ${token}`)).status, 401);
+  assert.equal((await pool.query('SELECT token_version FROM users WHERE id=$1', [account.id])).rows[0].token_version, 1);
+});
+
+test('authenticated HTTP history and deletion deny access to another account data', async () => {
+  const app = require('../src/app');
+  const owner = await user(); const attacker = await user();
+  const saved = await saveAnalysis(analysis, 'ERROR private synthetic database', owner.id);
+  const token = require('jsonwebtoken').sign({userId:attacker.id,tokenVersion:0},process.env.JWT_SECRET);
+  const history = await request(app).get('/api/history?search=private').set('Authorization', `Bearer ${token}`);
+  assert.equal(history.status, 200); assert.deepEqual(history.body, []);
+  const deletion = await request(app).delete('/api/history/' + saved.id).set('Authorization', `Bearer ${token}`);
+  assert.equal(deletion.status, 404);
+  assert.equal((await getHistory(owner.id))[0].id, saved.id);
+});

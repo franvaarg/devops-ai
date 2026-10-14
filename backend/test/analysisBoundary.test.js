@@ -31,3 +31,17 @@ test('missing evidence forces low confidence and insufficient-evidence diagnosis
   assert.equal(result.confidence, 'Low');
   assert.equal(result.rootCause, 'Insufficient evidence to determine a root cause.');
 });
+test('decision assessments reject invalid classifications and missing noise explanations', () => {
+  const decision = { ...valid, actionability: 'Investigate', falsePositiveRisk: 'High', noiseAssessment: 'No recovery or user impact provided.' };
+  assert.equal(parseAnalysis(JSON.stringify(decision), source).actionability, 'Investigate');
+  for (const changes of [{ actionability: 'Fix immediately' }, { falsePositiveRisk: 'Certain' }, { noiseAssessment: '' }]) assert.throws(() => parseAnalysis(JSON.stringify({ ...decision, ...changes }), source), { code: 'AI_INVALID_RESPONSE' });
+  const unsupported = parseAnalysis(JSON.stringify({ ...decision, evidence: [], actionability: 'Action Required', confidence: 'High', falsePositiveRisk: 'Low' }), source);
+  assert.equal(unsupported.actionability, 'Insufficient Evidence'); assert.equal(unsupported.falsePositiveRisk, 'High');
+});
+
+test('no evidence cannot retain unsupported outage severity', () => {
+  const result = parseAnalysis(JSON.stringify({ ...valid, severity: 'Critical', evidence: [], actionability: 'Action Required', falsePositiveRisk: 'Low', noiseAssessment: 'Unclear impact' }), source, true);
+  assert.equal(result.severity, 'Low');
+  assert.equal(result.actionability, 'Insufficient Evidence');
+  assert.equal(result.confidence, 'Low');
+});

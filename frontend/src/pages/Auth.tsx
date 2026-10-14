@@ -1,3 +1,4 @@
+import ProductFooter from "../components/ProductFooter";
 import {
   type FormEvent,
   useState,
@@ -5,6 +6,7 @@ import {
 import toast from "react-hot-toast";
 
 import {
+  trackEvent,
   login,
   register,
   requestPasswordReset,
@@ -309,12 +311,9 @@ function Auth({
         }
       );
 
+      if (mode === "register") trackEvent("signup");
       onAuthenticated(authData);
     } catch (error) {
-      console.error(
-        "Authentication error:",
-        error
-      );
 
       toast.error(
         getErrorMessage(
@@ -367,11 +366,11 @@ function Auth({
             </div>
 
             <p className="mt-8 text-xs font-bold uppercase tracking-[0.22em] text-emerald-300">
-              AI Log Intelligence
+              Incident intelligence
             </p>
 
             <h1 className="mt-4 max-w-md text-4xl font-black tracking-tight">
-              We find what hides in your logs.
+              Find what needs attention.
             </h1>
 
             <p className="mt-5 max-w-md text-base leading-7 text-slate-300">
@@ -385,7 +384,7 @@ function Auth({
           <div className="relative space-y-4">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur">
               <p className="text-sm font-bold text-white">
-                Secure personal workspace
+                Your incident history
               </p>
 
               <p className="mt-2 text-sm leading-6 text-slate-400">
@@ -395,8 +394,8 @@ function Auth({
             </div>
 
             <p className="text-xs text-slate-500">
-              React · TypeScript · Express ·
-              PostgreSQL · JWT · Gemini AI
+
+              Evidence · Severity · Next actions
             </p>
           </div>
         </section>
@@ -426,7 +425,7 @@ function Auth({
                 ? "Sign in to access your analysis dashboard and saved history."
                 : isForgot
                   ? "Enter your email and we will send a secure reset link if the account exists."
-                  : "Register to start analyzing logs and saving private results."}
+                  : "Start with 50 free analyses per month. No card required."}
             </p>
 
             <div className="mt-8 grid grid-cols-2 rounded-2xl bg-slate-100 p-1 dark:bg-slate-800">
@@ -438,7 +437,7 @@ function Auth({
                 className={`rounded-xl px-4 py-3 text-sm font-bold transition ${
                   isLogin
                     ? "bg-white text-slate-950 shadow-sm dark:bg-slate-700 dark:text-white"
-                    : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                    : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
                 }`}
               >
                 Sign in
@@ -452,7 +451,7 @@ function Auth({
                 className={`rounded-xl px-4 py-3 text-sm font-bold transition ${
                   !isLogin
                     ? "bg-white text-slate-950 shadow-sm dark:bg-slate-700 dark:text-white"
-                    : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                    : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
                 }`}
               >
                 Register
@@ -594,7 +593,7 @@ function Auth({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-5 py-4 text-sm font-black text-white shadow-lg shadow-emerald-600/20 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-emerald-600/25 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-700 to-teal-700 px-5 py-4 text-sm font-black text-white shadow-lg shadow-emerald-600/20 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-emerald-600/25 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
               >
                 {isSubmitting && (
                   <SpinnerIcon />
@@ -613,6 +612,7 @@ function Auth({
                     : "Create account"}
               </button>
             </form>
+            <ProductFooter />
 
             {isLogin && (
               <button

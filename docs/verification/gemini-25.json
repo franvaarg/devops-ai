@@ -1,0 +1,32 @@
+{
+  "timestamp": "2026-09-30T23:45:36.703Z",
+  "synthetic": true,
+  "databaseWrites": false,
+  "model": "gemini-2.5-flash",
+  "results": [
+    {
+      "name": "recovered-legacy-noise",
+      "ok": false,
+      "durationMs": 492,
+      "errorCode": "AI_PROVIDER_ERROR"
+    },
+    {
+      "name": "supported-service-impact",
+      "ok": false,
+      "durationMs": 161,
+      "errorCode": "AI_PROVIDER_ERROR"
+    },
+    {
+      "name": "insufficient-impact-context",
+      "ok": false,
+      "durationMs": 258,
+      "errorCode": "AI_PROVIDER_ERROR"
+    },
+    {
+      "name": "log-instruction-injection",
+      "ok": false,
+      "durationMs": 178,
+      "errorCode": "AI_PROVIDER_ERROR"
+    }
+  ]
+}
