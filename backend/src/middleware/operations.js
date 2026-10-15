@@ -6,6 +6,7 @@ function operations(req, res, next) {
   // Generate IDs locally; do not trust a caller's arbitrary correlation string.
   req.requestId = randomUUID();
   res.setHeader('X-Request-ID', req.requestId);
+  res.setHeader('Cache-Control', 'no-store');
   const start = performance.now();
   context.run({ requestId: req.requestId }, () => {
     const json = res.json.bind(res);
@@ -21,7 +22,9 @@ function operations(req, res, next) {
       if (recorded) return;
       recorded = true;
       // Route templates only: no query strings, user-provided path segments or tokens.
-      const route = req.route ? `${req.baseUrl || ''}${req.route.path}` : 'unmatched';
+      const base = res.locals.routeBase ?? req.baseUrl ?? '';
+      const path = req.route?.path;
+      const route = path ? (typeof path === 'string' && base && path.startsWith(base + '/') ? path : `${base}${path}`) : 'unmatched';
       context.run({ requestId: req.requestId }, () => log('http_request', {
         method: req.method, route, status: res.statusCode,
         durationMs: Math.round(performance.now() - start),

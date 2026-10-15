@@ -1,0 +1,16 @@
+{
+  "renderAccountAccess": false,
+  "vercelCLIStoredCredentialPresent": true,
+  "vercelIdentityHTTP": 403,
+  "vercelProjectListHTTP": 403,
+  "githubRemoteReadVerified": true,
+  "stagingBranchPushDryRunPassed": true,
+  "remoteMainSHA": "a66e9eeb1423b6ed85611f10898dbad606bac262",
+  "existingMainVercelIntegrationStatus": "success",
+  "stagingBranch": "staging/p0-resolution-2026-10-14",
+  "checkpointPreserved": "74106b32d27fa24661fab41c9e0a1c60551dd210",
+  "renderManifest": "deploy/render.staging.yaml",
+  "manifestValidated": true,
+  "renderManifestApplied": false,
+  "paidProductionDeploymentAuthorized": false
+}

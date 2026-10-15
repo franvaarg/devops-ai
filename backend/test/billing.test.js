@@ -12,3 +12,8 @@ test('only an eligible live subscription grants Pro', () => {
   assert.equal(subscriptionState({ ...subscription, cancel_at_period_end: true }).plan, 'pro');
 });
 test('sales stay disabled without explicit configuration', () => { delete process.env.BILLING_ENABLED; assert.equal(configured(), false); });
+
+test('malformed or multi-item subscriptions cannot grant Pro', () => {
+ assert.equal(subscriptionState({...subscription,items:{data:[{quantity:1,current_period_end:9999999999}]}}).plan,'free');
+ assert.equal(subscriptionState({...subscription,items:{data:[...subscription.items.data,...subscription.items.data]}}).plan,'free');
+});

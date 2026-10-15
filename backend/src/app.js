@@ -61,8 +61,8 @@ app.use('/api/billing/webhook', express.raw({ type: 'application/json', limit: '
 app.use('/api/billing', require('./routes/billingRoutes'));
 app.use(express.json({ limit: "256kb" }));
 
-const { rateLimit } = require('express-rate-limit');
-app.post('/api/events', rateLimit({ windowMs: 60000, limit: 30, standardHeaders: true, legacyHeaders: false }), async (req, res, next) => {
+const { createRateLimiter } = require('./middleware/rateLimiters');
+app.post('/api/events', createRateLimiter({ windowMs: 60000, limit: 30, standardHeaders: true, legacyHeaders: false }), async (req, res, next) => {
   const events = ['landing', 'signup', 'first_analysis', 'second_analysis', 'quota_reached', 'pricing_viewed', 'checkout_started'];
   if (!events.includes(req.body?.event) || Object.keys(req.body || {}).length !== 1) return next(new AppError('VALIDATION_ERROR'));
   try { await require('./database/db').query('INSERT INTO product_events(event) VALUES ($1)', [req.body.event]); res.status(204).end(); }
@@ -83,7 +83,7 @@ app.get("/api/auth/me", authenticateToken, (req, res) => {
   });
 });
 
-app.post("/api/analyze", authenticateToken, analyzeRateLimiter, async (req, res, next) => {
+async function handleAnalysis(req, res, next) {
   let reserved = false;
   let requestKey;
   try {
@@ -143,11 +143,19 @@ app.post("/api/analyze", authenticateToken, analyzeRateLimiter, async (req, res,
     }
     return next(error);
   }
-});
+}
+
+app.post('/api/analyze', authenticateToken, analyzeRateLimiter, handleAnalysis);
+app.post('/api/integrations/render/events', authenticateToken, analyzeRateLimiter,
+  require('./integrations/render').normalizeRenderEvent, handleAnalysis);
 
 app.get("/api/history", authenticateToken, async (req, res, next) => {
   try {
+    if (Object.keys(req.query).some(key => !['severity', 'search', 'limit', 'beforeId'].includes(key))) throw new AppError('VALIDATION_ERROR');
     const { severity, search, limit, beforeId } = req.query;
+    if ((severity !== undefined && (typeof severity !== 'string' || (severity && !['Low', 'Medium', 'High', 'Critical'].includes(severity)))) ||
+        (search !== undefined && (typeof search !== 'string' || search.length > 200)) ||
+        (limit !== undefined && (typeof limit !== 'string' || !/^\d+$/.test(limit) || Number(limit) < 1 || Number(limit) > 100))) throw new AppError('VALIDATION_ERROR');
     if (beforeId !== undefined && (typeof beforeId !== "string" || !Number.isInteger(Number(beforeId)) || Number(beforeId) < 1 || Number(beforeId) > 2147483647)) throw new AppError("VALIDATION_ERROR");
 
     const history = await getHistory(req.user.id, {

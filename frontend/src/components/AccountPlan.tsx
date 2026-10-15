@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { getAccount, getPlans, openBilling, trackEvent, type Account, type Plans } from '../services/api';
+import { deleteAccount, getAccount, getPlans, openBilling, trackEvent, type Account, type Plans } from '../services/api';
 export default function AccountPlan({ refresh }: { refresh: number }) {
   const [account, setAccount] = useState<Account | null>(null);
   const [plans, setPlans] = useState<Plans | null>(null);
   const [error, setError] = useState('');
+  const [deletionPassword, setDeletionPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const load = useCallback(async () => {
     try { const [a, p] = await Promise.all([getAccount(), getPlans().catch(() => null)]); setAccount(a); setPlans(p); setError(''); }
@@ -24,6 +25,16 @@ export default function AccountPlan({ refresh }: { refresh: number }) {
     catch (e) { toast.error(e instanceof Error ? e.message : 'Billing is unavailable. Retry shortly.'); }
     finally { setBusy(false); }
   }
+  async function removeAccount() {
+    if (busy || !deletionPassword) return;
+    setBusy(true);
+    try {
+      await deleteAccount(deletionPassword);
+      localStorage.removeItem('token'); localStorage.removeItem('user');
+      window.location.assign('/');
+    } catch (e) { toast.error(e instanceof Error ? e.message : 'Account deletion failed.'); }
+    finally { setBusy(false); setDeletionPassword(''); }
+  }
   if (error) return <section className="my-5 rounded-2xl border p-5" role="status">{error} <button onClick={() => void load()} className="underline">Retry</button></section>;
   if (!account) return <p className="my-5" role="status">Loading plan and usage…</p>;
   const { usage, account: details } = account;
@@ -41,6 +52,13 @@ export default function AccountPlan({ refresh }: { refresh: number }) {
     {returned === 'canceled' && <p className="mt-3">Checkout was canceled. Your plan has not changed.</p>}
     {details.cancelAtPeriodEnd && details.currentPeriodEnd && <p className="mt-3">Cancellation scheduled. Pro access ends {new Date(details.currentPeriodEnd).toLocaleDateString()}. Your account then uses Free limits.</p>}
     {['past_due', 'unpaid', 'incomplete', 'paused'].includes(details.subscriptionStatus) && <p className="mt-3">Your subscription needs attention ({details.subscriptionStatus.replaceAll('_', ' ')}). Free limits apply. Update payment details in the billing portal.</p>}
+    <details className="mt-4"><summary className="cursor-pointer font-semibold">Delete account and saved analyses</summary>
+      <p className="mt-3 text-sm">This permanently deletes your account, saved logs, context, analyses, reset tokens, and usage from the live database. Backup retention still applies. Accounts with billing records require support to complete cancellation and deletion.</p>
+      {!details.hasBillingCustomer && <form className="mt-3 flex flex-wrap gap-3" onSubmit={e => { e.preventDefault(); void removeAccount(); }}>
+        <label>Confirm with your password<input type="password" autoComplete="current-password" required value={deletionPassword} onChange={e => setDeletionPassword(e.target.value)} className="ml-2 rounded border p-2 dark:bg-slate-950" /></label>
+        <button disabled={busy || !deletionPassword} className="rounded border border-red-700 px-3 py-2 text-red-700 dark:text-red-300">Permanently delete my account</button>
+      </form>}
+    </details>
     <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">Pro offers 500 analyses per calendar month; billing renews monthly until canceled. Quotas do not roll over. Logs are limited to 16 KiB per analysis on either plan.</p>
   </section>;
 }

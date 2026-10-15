@@ -1,0 +1,51 @@
+{
+  "results": [
+    {
+      "name": "backend syntax",
+      "pass": true,
+      "durationMs": 6374
+    },
+    {
+      "name": "incident fixtures",
+      "pass": true,
+      "durationMs": 565
+    },
+    {
+      "name": "backend unit/API/security",
+      "pass": true,
+      "durationMs": 8905
+    },
+    {
+      "name": "isolated PostgreSQL",
+      "pass": true,
+      "durationMs": 10154
+    },
+    {
+      "name": "frontend lint",
+      "pass": true,
+      "durationMs": 33371
+    },
+    {
+      "name": "frontend typecheck",
+      "pass": true,
+      "durationMs": 38198
+    },
+    {
+      "name": "frontend production build",
+      "pass": true,
+      "durationMs": 34312
+    },
+    {
+      "name": "backend dependency audit",
+      "pass": true,
+      "durationMs": 2505
+    },
+    {
+      "name": "frontend dependency audit",
+      "pass": true,
+      "durationMs": 2760
+    }
+  ],
+  "productionVerified": false,
+  "ownerGates": "Backup/restore, deployed environment, live AI quality, payment lifecycle, recovery email, policies and alert delivery still require separate verification."
+}

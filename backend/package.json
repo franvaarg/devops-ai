@@ -7,7 +7,11 @@
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
     "test": "node --test --test-concurrency=1 test/*.test.js",
-    "test:integration": "node scripts/test-postgres.cjs"
+    "test:integration": "node scripts/test-postgres.cjs",
+    "check": "node scripts/check-syntax.cjs",
+    "evaluate:fixtures": "node scripts/evaluate-incidents.cjs --fixtures-only",
+    "evaluate:live": "node scripts/evaluate-incidents.cjs --live",
+    "migrate": "node scripts/migrate.cjs"
   },
   "keywords": [
     "devops",

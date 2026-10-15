@@ -1,3 +1,4 @@
+BEGIN;
 ALTER TABLE analyses ADD COLUMN IF NOT EXISTS decision JSONB NOT NULL DEFAULT '{}'::jsonb;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS cancel_at_period_end BOOLEAN NOT NULL DEFAULT false;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS billing_checkout_id TEXT;
@@ -10,3 +11,4 @@ CREATE TABLE IF NOT EXISTS product_events (
  event VARCHAR(40) NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS product_events_created ON product_events(created_at);
+COMMIT;

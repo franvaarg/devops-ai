@@ -41,3 +41,12 @@ test('hung requests have a bounded shutdown deadline', async () => {
   await new Promise(resolve => setTimeout(resolve, 15));
   assert.equal(code, 1); assert.equal(forced, true);
 });
+
+test('fatal shutdown drains before reporting a failing exit code', async () => {
+ const { installShutdown }=require('../src/operations/shutdown');
+ const app={locals:{}};const signals=new (require('node:events').EventEmitter)();let exitCode;
+ const server={close:callback=>{setImmediate(callback);},closeIdleConnections:()=>{}};
+ const stop=installShutdown(server,app,{end:async()=>{}},{signals,exit:code=>{exitCode=code;},graceMs:100});
+ stop(1);assert.equal(app.locals.draining,true);
+ await new Promise(resolve=>setImmediate(resolve));assert.equal(exitCode,1);
+});

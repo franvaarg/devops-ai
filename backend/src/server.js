@@ -9,4 +9,10 @@ const server = app.listen(PORT, "0.0.0.0", () => {
 });
 server.headersTimeout = 10000;
 server.requestTimeout = 15000;
-require('./operations/shutdown').installShutdown(server, app, require('./database/db'));
+const stop = require('./operations/shutdown').installShutdown(server, app, require('./database/db'));
+for (const event of ['uncaughtException', 'unhandledRejection']) {
+  process.once(event, error => {
+    require('./operations/logger').logFailure(event === 'uncaughtException' ? 'uncaught_exception' : 'unhandled_rejection', error);
+    stop(1);
+  });
+}

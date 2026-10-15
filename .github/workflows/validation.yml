@@ -16,6 +16,12 @@ jobs:
           cache-dependency-path: backend/package-lock.json
       - run: npm ci --ignore-scripts
         working-directory: backend
+      - run: npm run check
+        working-directory: backend
+      - run: npm run evaluate:fixtures
+        working-directory: backend
+      - run: npm audit --audit-level=moderate
+        working-directory: backend
       - run: npm test
         working-directory: backend
       - run: sudo apt-get update && sudo apt-get install -y postgresql-16
@@ -36,7 +42,47 @@ jobs:
         working-directory: frontend
       - run: npm run lint
         working-directory: frontend
+      - run: npm run typecheck
+        working-directory: frontend
+      - run: npm audit --audit-level=moderate
+        working-directory: frontend
       - run: npm run build
         working-directory: frontend
         env:
           VITE_API_BASE_URL: http://localhost:3000
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci --ignore-scripts
+        working-directory: frontend
+      - name: Install pinned browser test tools outside product dependencies
+        run: npm install --prefix "$RUNNER_TEMP/kanyi-browser" --no-save --ignore-scripts playwright@1.64.1 @axe-core/playwright@4.13.0
+      - name: Install Chromium
+        run: node "$RUNNER_TEMP/kanyi-browser/node_modules/playwright/cli.js" install --with-deps chromium
+      - name: Desktop, mobile, accessibility and failure recovery
+        working-directory: frontend
+        shell: bash
+        run: |
+          npm run dev -- --host 127.0.0.1 --port 5174 > "$RUNNER_TEMP/kanyi-vite.log" 2>&1 &
+          browser_server_pid=$!
+          trap 'kill "$browser_server_pid"' EXIT
+          curl --fail --silent --retry 20 --retry-connrefused --retry-delay 1 --max-time 5 --output /dev/null http://127.0.0.1:5174
+          export PLAYWRIGHT_MODULE="$RUNNER_TEMP/kanyi-browser/node_modules/playwright"
+          export AXE_MODULE="$RUNNER_TEMP/kanyi-browser/node_modules/@axe-core/playwright"
+          export BROWSER_REPORT_DIR="$RUNNER_TEMP/kanyi-browser-report"
+          export RESILIENCE_REPORT="$RUNNER_TEMP/kanyi-browser-report/resilience.json"
+          node scripts/verify-journey.cjs
+          node scripts/verify-resilience.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-verification
+          path: ${{ runner.temp }}/kanyi-browser-report
+          if-no-files-found: warn

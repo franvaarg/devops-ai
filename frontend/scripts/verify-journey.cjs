@@ -19,7 +19,7 @@ const AxeBuilder = require(process.env.AXE_MODULE || require.resolve('@axe-core/
       assert.equal(result.violations.length,0,JSON.stringify(accessibility[stage]));
     }
     const errors = []; page.on('pageerror',e=>errors.push(e.message));
-    let logoutCalls=0; let history=[]; let used=0; let fail=false; let sent; let paid=false;
+    let logoutCalls=0; let history=[]; let used=0; let fail=false; let sent; let paid=false; let failNetwork=false; const attemptKeys=[];
     await page.route('**/api/**', async route => {
       const url = new URL(route.request().url()); const path=url.pathname;
       let body; let status=200;
@@ -27,9 +27,10 @@ const AxeBuilder = require(process.env.AXE_MODULE || require.resolve('@axe-core/
       if(path.endsWith('/billing/plans')) body={available:true,freeLimit:50,proLimit:500,maxLogBytes:16384,pricing:{amount:2900,currency:'usd',interval:'month'}};
       else if(path.endsWith('/account')) body={account:{plan:paid?'pro':'free',subscriptionStatus:paid?'active':'inactive',hasBillingCustomer:paid,currentPeriodEnd:paid?new Date(Date.now()+86400000).toISOString():null,cancelAtPeriodEnd:paid},usage:{plan:paid?'pro':'free',used,limit:paid?500:50,reserved:0,remaining:(paid?500:50)-used}};
       else if(path.endsWith('/register')||path.endsWith('/login')) body={token:'browser-test-token',user:{id:1,name:'Test Developer',email:'test@example.test'}};
+      else if(path.endsWith('/reset-password')) body={message:'Password reset successfully.'};
       else if(path.endsWith('/logout')) {logoutCalls++;status=204;body=null;}
       else if(path.endsWith('/me')) body={user:{id:1,email:'test@example.test'}};
-      else if(path.endsWith('/analyze')) { sent=route.request().postDataJSON(); if(fail){status=502;body={error:{code:'AI_PROVIDER_ERROR',message:'Analysis is unavailable right now. Please try again shortly; unsuccessful analyses do not use your monthly allowance.'}};} else {body=analysis;history=[analysis];used++;} }
+      else if(path.endsWith('/analyze')) { attemptKeys.push(route.request().headers()['idempotency-key']); if(failNetwork) { await route.abort('failed'); return; } sent=route.request().postDataJSON(); if(fail){status=502;body={error:{code:'AI_PROVIDER_ERROR',message:'Analysis is unavailable right now. Please try again shortly; unsuccessful analyses do not use your monthly allowance.'}};} else {body=analysis;history=[analysis];used++;} }
       else if(path.endsWith('/history')) body=history;
       else if(path.endsWith('/billing/checkout')) {status=502;body={error:{code:'BILLING_ERROR',message:'Billing could not be completed. Please retry; your plan has not been changed.'}};}
       else if(path.endsWith('/events')) {status=204;body=null;}
@@ -80,12 +81,30 @@ const AxeBuilder = require(process.env.AXE_MODULE || require.resolve('@axe-core/
     assert.equal(fs.readFileSync(pdfPath).subarray(0,4).toString(),'%PDF');
     assert.ok(fs.statSync(pdfPath).size>1000);
 
+    const originalLog=await page.getByLabel('Log content',{exact:true}).inputValue();
+    const originalContext=await page.getByLabel('Operational context (optional)').inputValue();
+    failNetwork=true;
+    await page.getByRole('button',{name:'Assess incident',exact:true}).click();
+    await page.getByText('The service could not be reached. Check your connection and retry.',{exact:true}).waitFor();
+    const lostKey=attemptKeys.at(-1);
+    const pendingAttempt=await page.evaluate(()=>sessionStorage.getItem('kanyi-analysis-attempt'));
+    assert.ok(pendingAttempt && !pendingAttempt.includes(originalLog) && !pendingAttempt.includes(originalContext));
+    await page.reload();
+    await page.getByLabel('Log content',{exact:true}).fill(originalLog);
+    await page.getByLabel('Operational context (optional)').fill(originalContext);
+    failNetwork=false;
+    await page.getByRole('button',{name:'Assess incident',exact:true}).click();
+    await page.getByText('Log analyzed successfully.',{exact:true}).waitFor();
+    assert.equal(attemptKeys.at(-1),lostKey);
+    assert.equal(await page.evaluate(()=>sessionStorage.getItem('kanyi-analysis-attempt')),null);
+
     fail=true; await page.getByRole('button',{name:'Assess incident',exact:true}).click();
     await page.getByText('Analysis is unavailable right now. Please try again shortly; unsuccessful analyses do not use your monthly allowance.',{exact:true}).waitFor();
     await page.getByRole('button',{name:/Upgrade to Pro/}).click();
     await page.getByText('Billing could not be completed. Please retry; your plan has not been changed.',{exact:true}).waitFor();
     const file=page.locator('#log-file'); await file.setInputFiles({name:'unsafe.bin',mimeType:'application/octet-stream',buffer:Buffer.from('invalid')});
     await page.getByText('Choose a .log or .txt file up to 16 KiB.',{exact:true}).waitFor();
+    await page.getByRole('button',{name:/View full analysis/}).click();
     await page.getByRole('button',{name:'Delete analysis',exact:true}).click();
     await page.getByRole('button',{name:'Yes, delete analysis',exact:true}).click();
     await page.getByText('Analysis deleted successfully.',{exact:true}).waitFor();
@@ -112,8 +131,17 @@ const AxeBuilder = require(process.env.AXE_MODULE || require.resolve('@axe-core/
     await page.route('**/api/auth/me', route => route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({message:'Temporarily unavailable'})}));
     await page.reload(); await page.getByText('We could not reach your workspace. Your session has been kept.',{exact:true}).waitFor();
     assert.equal(await page.evaluate(()=>localStorage.getItem('token')),'browser-test-token');
+    await page.goto((process.env.APP_URL || 'http://127.0.0.1:5174')+'/reset-password?token='+'a'.repeat(64));
+    await page.getByRole('heading',{name:'Choose a new password',exact:true}).waitFor();
+    assert.equal(new URL(page.url()).searchParams.has('token'),false);
+    await checkAccessibility('password-reset');
+    await page.getByLabel('New password',{exact:true}).fill('a-long-unique-reset-passphrase');
+    await page.getByLabel('Confirm new password',{exact:true}).fill('a-long-unique-reset-passphrase');
+    await page.getByRole('button',{name:'Reset password',exact:true}).click();
+    await page.getByRole('button',{name:'Back to Sign In',exact:true}).click();
+    await page.getByRole('heading',{name:'Welcome back',exact:true}).waitFor();
     assert.deepEqual(errors,[]);
-    report.push({viewport:name,landing:true,interactiveDemo:true,signup:true,returningLogin:true,serverLogout:true,sample:true,analysis:true,context:true,history:true,pdfDownload:true,deleteAnalysis:true,planUsage:true,providerError:true,billingError:true,uploadValidation:true,quota:true,pendingPayment:true,paidPlanDisplay:true,cancellationDisplay:true,portalDuringPriceFailure:true,sessionOutage:true,horizontalOverflow:false,pageErrors:errors,keyboardFocus:true,accessibility});
+    report.push({viewport:name,landing:true,interactiveDemo:true,signup:true,returningLogin:true,serverLogout:true,sample:true,analysis:true,context:true,history:true,pdfDownload:true,reloadIdempotencyRecovery:true,passwordReset:true,resetTokenRemovedFromUrl:true,deleteAnalysis:true,planUsage:true,providerError:true,billingError:true,uploadValidation:true,quota:true,pendingPayment:true,paidPlanDisplay:true,cancellationDisplay:true,portalDuringPriceFailure:true,sessionOutage:true,horizontalOverflow:false,pageErrors:errors,keyboardFocus:true,accessibility});
     await context.close();
   }
   fs.writeFileSync(`${dir}/report.json`,JSON.stringify(report,null,2));

@@ -95,3 +95,15 @@ report for exact billing configuration and unverified live-provider gates.
 `GET /health/live` returns 200 for process liveness. `GET /health/ready` returns 200 only for reachable required DB/schema; 503 while draining or unavailable. Neither probe calls AI/payment providers. `POST /api/auth/logout` requires Bearer auth and returns 204 after revoking all account tokens.
 
 New decision outputs can use `Insufficient Evidence` when no observed evidence is available, with Low severity and confidence. Optional `inputSignals` records deterministic line/duplicate and timezone-timestamp counts at submission; it is not live monitoring. Older analyses omit it.
+
+## Production-hardening additions (2026-10-14)
+
+Authenticated `POST /api/integrations/render/events` accepts `{type:"deploy_failed",eventId,serviceName,logs}`. It derives an account-scoped Render idempotency key and uses the existing analysis/quota/store flow. This is caller-fed event ingestion, not a verified native webhook or remote log fetch. See docs/INCIDENT_INTEGRATIONS.md.
+
+Authenticated `DELETE /api/account` requires JSON `{password}`. A correct current password deletes a non-billing account and its live history/reset/request/usage data, returning 204. Wrong credentials return 401. Accounts with Stripe customer records return 409 `ACCOUNT_SUBSCRIPTION_ACTIVE` and require support; they are not silently detached from billing. Backup/provider retention is separate.
+
+New analyses return and persist `missingInformation: string[]`, `verificationSteps: string[]`, and `providerMetadata: {provider,model,latencyMs}`. Old history may omit these fields. Evidence must remain a literal redacted-log excerpt; context is unverified and not observed evidence. Confidence is qualitative.
+
+Provider errors distinguish AI_AUTH, AI_RATE_LIMITED, AI_QUOTA_CONFIGURATION, AI_TIMEOUT, AI_NETWORK, AI_REQUEST_REJECTED, AI_INVALID_RESPONSE and AI_PROVIDER_UNAVAILABLE. API responses carry X-Request-ID and Cache-Control: no-store; errors include their correlation ID. Rate-limit failures use JSON, including billing and event routes.
+
+History accepts only severity, search, limit and beforeId. Severity is Low/Medium/High/Critical; search is at most 200 characters; limit is an integer 1–100. beforeId must be a positive PostgreSQL integer. Unknown/malformed query parameters return 400. All history and deletion ownership remains server-side.

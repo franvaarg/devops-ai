@@ -1,0 +1,247 @@
+{
+  "timestamp": "2026-10-15T00:40:03.918Z",
+  "synthetic": true,
+  "databaseWrites": false,
+  "model": "gemini-3.6-flash",
+  "limitations": "Automated rubric checks are proxies. Root-cause correctness, diagnostic usefulness, and uncaught hallucinations require human review. Confidence is qualitative, not calibrated.",
+  "metrics": {
+    "functionalSuccessPercent": 0,
+    "structuredValidityPercent": 0,
+    "evidenceCorrectPercent": 0,
+    "requiredEvidencePercent": 0,
+    "usefulnessRubricPercent": 0,
+    "humanDiagnosticUsefulness": "NOT REVIEWED",
+    "overconfidenceFailures": 0,
+    "hallucinationRubricFailures": 0,
+    "providerFailures": 28,
+    "invalidOutputs": 0,
+    "meanLatencyMs": 2963,
+    "maxLatencyMs": 38666
+  },
+  "results": [
+    {
+      "name": "recovered-legacy-noise",
+      "category": "legacy",
+      "durationMs": 38666,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_PROVIDER_ERROR"
+    },
+    {
+      "name": "supported-service-impact",
+      "category": "database",
+      "durationMs": 15109,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_PROVIDER_ERROR"
+    },
+    {
+      "name": "insufficient-impact-context",
+      "category": "ambiguous",
+      "durationMs": 25749,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_PROVIDER_ERROR"
+    },
+    {
+      "name": "log-instruction-injection",
+      "category": "injection",
+      "durationMs": 151,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_RATE_LIMITED"
+    },
+    {
+      "name": "deployment-rejected-with-recovery",
+      "category": "deployment",
+      "durationMs": 151,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_RATE_LIMITED"
+    },
+    {
+      "name": "docker-crash-loop",
+      "category": "docker",
+      "durationMs": 180,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_RATE_LIMITED"
+    },
+    {
+      "name": "kubernetes-image-pull",
+      "category": "kubernetes",
+      "durationMs": 145,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_RATE_LIMITED"
+    },
+    {
+      "name": "ci-test-failure",
+      "category": "cicd",
+      "durationMs": 125,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_RATE_LIMITED"
+    },
+    {
+      "name": "authentication-attack-blocked",
+      "category": "authentication",
+      "durationMs": 154,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_RATE_LIMITED"
+    },
+    {
+      "name": "api-errors-recovered",
+      "category": "api",
+      "durationMs": 126,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_RATE_LIMITED"
+    },
+    {
+      "name": "benign-repetition",
+      "category": "benign",
+      "durationMs": 131,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_RATE_LIMITED"
+    },
+    {
+      "name": "node-runtime",
+      "category": "nodejs",
+      "durationMs": 127,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_RATE_LIMITED"
+    },
+    {
+      "name": "typescript-build",
+      "category": "build",
+      "durationMs": 156,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_RATE_LIMITED"
+    },
+    {
+      "name": "dependency-resolution",
+      "category": "dependency",
+      "durationMs": 152,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_RATE_LIMITED"
+    },
+    {
+      "name": "missing-environment",
+      "category": "environment",
+      "durationMs": 130,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_RATE_LIMITED"
+    },
+    {
+      "name": "vercel-build",
+      "category": "vercel",
+      "durationMs": 141,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_RATE_LIMITED"
+    },
+    {
+      "name": "render-port",
+      "category": "render",
+      "durationMs": 121,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_RATE_LIMITED"
+    },
+    {
+      "name": "postgres-auth",
+      "category": "postgresql",
+      "durationMs": 129,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_RATE_LIMITED"
+    },
+    {
+      "name": "api-client-error",
+      "category": "api4xx",
+      "durationMs": 124,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_RATE_LIMITED"
+    },
+    {
+      "name": "api-server-error",
+      "category": "api5xx",
+      "durationMs": 125,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_RATE_LIMITED"
+    },
+    {
+      "name": "dns-resolution",
+      "category": "dns",
+      "durationMs": 131,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_RATE_LIMITED"
+    },
+    {
+      "name": "dependency-timeout",
+      "category": "timeout",
+      "durationMs": 148,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_RATE_LIMITED"
+    },
+    {
+      "name": "memory-exhaustion",
+      "category": "resources",
+      "durationMs": 119,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_RATE_LIMITED"
+    },
+    {
+      "name": "github-actions",
+      "category": "github-actions",
+      "durationMs": 131,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_RATE_LIMITED"
+    },
+    {
+      "name": "incomplete-excerpt",
+      "category": "incomplete",
+      "durationMs": 136,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_RATE_LIMITED"
+    },
+    {
+      "name": "malformed-excerpt",
+      "category": "malformed",
+      "durationMs": 125,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_RATE_LIMITED"
+    },
+    {
+      "name": "irrelevant-excerpt",
+      "category": "irrelevant",
+      "durationMs": 132,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_RATE_LIMITED"
+    },
+    {
+      "name": "railway-healthcheck",
+      "category": "railway",
+      "durationMs": 138,
+      "structuredValid": false,
+      "ok": false,
+      "errorCode": "AI_RATE_LIMITED"
+    }
+  ]
+}

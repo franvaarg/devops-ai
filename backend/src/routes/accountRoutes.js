@@ -5,6 +5,7 @@ const authenticateToken = require("../middleware/authenticateToken");
 const { getAnalysisUsage } = require("../services/quotaService");
 
 const router = express.Router();
+router.use((req, res, next) => { res.locals.routeBase = req.baseUrl; next(); });
 
 router.get("/", authenticateToken, async (req, res, next) => {
   try {
@@ -37,7 +38,7 @@ router.get("/", authenticateToken, async (req, res, next) => {
         email: account.email,
         id: account.id,
         name: account.name,
-        plan: account.plan,
+        plan: usage.plan,
         subscriptionStatus: account.subscription_status,
       },
       usage,
@@ -45,6 +46,13 @@ router.get("/", authenticateToken, async (req, res, next) => {
   } catch (error) {
     return next(error);
   }
+});
+
+router.delete('/', authenticateToken, require('../middleware/rateLimiters').loginRateLimiter, async (req, res, next) => {
+  try {
+    await require('../services/accountService').deleteAccount(req.user.id, req.body?.password);
+    res.status(204).end();
+  } catch (error) { next(error); }
 });
 
 module.exports = router;

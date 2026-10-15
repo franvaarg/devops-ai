@@ -369,6 +369,11 @@ export function exportAnalysisToPdf(
 
   currentY = addSectionTitle(doc, "Decision", currentY);
   currentY = addWrappedText(doc, `${analysis.actionability || 'Actionability not assessed'} | ${analysis.confidence || 'Low'} confidence | False-positive risk: ${analysis.falsePositiveRisk || 'Not assessed'}`, currentY);
+  currentY = addSectionTitle(doc, "Unknown / missing information", currentY);
+  currentY = addSteps(doc, analysis.missingInformation?.length ? analysis.missingInformation : ['No separate missing information was recorded; this is not proof of a complete diagnosis.'], currentY);
+  currentY = addSectionTitle(doc, "Verification steps", currentY);
+  currentY = addSteps(doc, analysis.verificationSteps?.length ? analysis.verificationSteps : ['Confirm impact and cause before applying any changes.'], currentY);
+  if (analysis.providerMetadata) currentY = addWrappedText(doc, `Provider: ${analysis.providerMetadata.provider} | Model: ${analysis.providerMetadata.model} | Provider latency: ${analysis.providerMetadata.latencyMs} ms`, currentY);
   currentY = addSectionTitle(doc, "Noise assessment", currentY);
   currentY = addWrappedText(doc, analysis.noiseAssessment || 'This older analysis predates noise assessment.', currentY);
   currentY = addWrappedText(doc, 'Assessment of the submitted excerpt only. Root causes are hypotheses; verify recommendations before production changes.', currentY);

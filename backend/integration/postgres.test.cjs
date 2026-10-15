@@ -332,3 +332,78 @@ test('authenticated HTTP history and deletion deny access to another account dat
   assert.equal(deletion.status, 404);
   assert.equal((await getHistory(owner.id))[0].id, saved.id);
 });
+
+test('Render event PoC uses real ownership, quota and idempotency pipeline', async () => {
+  const app = require('../src/app'); const account = await user(); const other = await user();
+  const token = require('jsonwebtoken').sign({userId:account.id,tokenVersion:0},process.env.JWT_SECRET);
+  const event = {type:'deploy_failed',eventId:'evt_synthetic_render_1',serviceName:'api',logs:'ERROR database'};
+  const send = body => request(app).post('/api/integrations/render/events').set('Authorization',`Bearer ${token}`).send(body);
+  assert.equal((await request(app).post('/api/integrations/render/events').send(event)).status,401);
+  const first = await send(event); const replay = await send(event);
+  assert.equal(first.status,201); assert.equal(replay.body.id,first.body.id);
+  assert.equal((await quota.getAnalysisUsage(account.id)).used,1);
+  assert.equal((await getHistory(other.id)).length,0);
+  assert.match((await getHistory(account.id))[0].decision.operationalContext,/Render/);
+  assert.equal((await send({...event,logs:'different log'})).status,409);
+  assert.equal((await send({...event,eventId:'bad id'})).status,400);
+});
+
+test('account deletion checks password, preserves other users, cascades private data and revokes access', async () => {
+  const app = require('../src/app'); const account = await user(); const other = await user();
+  await execute(account.id); await execute(other.id);
+  const token = require('jsonwebtoken').sign({userId:account.id,tokenVersion:0},process.env.JWT_SECRET);
+  const send = password => request(app).delete('/api/account').set('Authorization',`Bearer ${token}`).send({password});
+  assert.equal((await send('wrong-password')).status,401);
+  assert.equal((await getHistory(account.id)).length,1);
+  assert.equal((await send('reliable-test-password')).status,204);
+  assert.equal((await getHistory(account.id)).length,0);
+  assert.equal((await pool.query('SELECT * FROM analysis_requests WHERE user_id=$1',[account.id])).rows.length,0);
+  assert.equal((await getHistory(other.id)).length,1);
+  assert.equal((await request(app).get('/api/history').set('Authorization',`Bearer ${token}`)).status,401);
+});
+
+test('account with billing relationship cannot be silently deleted', async () => {
+  const account = await user();
+  await pool.query('UPDATE users SET provider_customer_id=$2 WHERE id=$1',[account.id,'cus_delete_'+account.id]);
+  await assert.rejects(require('../src/services/accountService').deleteAccount(account.id,'reliable-test-password'),{code:'ACCOUNT_SUBSCRIPTION_ACTIVE'});
+  assert.equal((await pool.query('SELECT id FROM users WHERE id=$1',[account.id])).rows.length,1);
+});
+
+test('provider provenance and trust fields survive persistence and owner-scoped retrieval', async () => {
+ const owner=await user();
+ const saved=await saveAnalysis({...analysis, providerMetadata:{provider:'gemini',model:'fixture-model',latencyMs:123},missingInformation:['Impact unknown'],verificationSteps:['Check health']},'ERROR database',owner.id);
+ const result=(await getHistory(owner.id))[0];
+ assert.equal(result.id,saved.id);assert.equal(result.decision.providerMetadata.model,'fixture-model');
+ assert.deepEqual(result.decision.verificationSteps,['Check health']);
+});
+
+test('concurrent webhook delivery commits only once; provider failure never acknowledges event', async () => {
+ const owner=await user();await pool.query('UPDATE users SET provider_customer_id=$2 WHERE id=$1',[owner.id,'cus_concurrent_'+owner.id]);
+ let reads=0;
+ billing.stripe().subscriptions.retrieve=async id=>{reads++;return {id,customer:'cus_concurrent_'+owner.id,status:'active',items:{data:[{price:{id:'price_pro'},quantity:1,current_period_end:Math.floor(Date.now()/1000)+3600}]}};};
+ const event={id:'evt_concurrent_'+owner.id,type:'customer.subscription.updated',data:{object:{id:'sub_concurrent_'+owner.id,customer:'cus_concurrent_'+owner.id}}};
+ await Promise.all(Array.from({length:5},()=>billing.processEvent(event)));
+ assert.equal(reads,1);
+ billing.stripe().subscriptions.retrieve=async()=>{throw new Error('simulated provider outage');};
+ await assert.rejects(billing.processEvent({...event,id:event.id+'_failed'}));
+ assert.equal((await pool.query('SELECT id FROM billing_events WHERE id=$1',[event.id+'_failed'])).rows.length,0);
+ assert.equal((await quota.getAnalysisUsage(owner.id)).plan,'pro');
+});
+
+test('migration CLI applies additive migrations and ledger twice without data loss', async () => {
+ const {spawnSync}=require('node:child_process');const owner=await user();const saved=await execute(owner.id);
+ for(let i=0;i<2;i++) {
+  const result=spawnSync(process.execPath,['scripts/migrate.cjs','--apply'],{cwd:resolve(__dirname,'..'),env:process.env,encoding:'utf8',timeout:15000});
+  assert.equal(result.status,0,result.stderr);
+ }
+ assert.equal((await getHistory(owner.id))[0].id,saved.id);
+ assert.equal((await pool.query('SELECT count(*)::integer AS count FROM schema_migrations')).rows[0].count,5);
+});
+
+test('history rejects malformed filters before database work', async () => {
+ const app=require('../src/app');const owner=await user();
+ const token=require('jsonwebtoken').sign({userId:owner.id,tokenVersion:0},process.env.JWT_SECRET);
+ for(const query of ['severity=Emergency','search='+ 'x'.repeat(201),'limit=0','limit=101','search[a]=x']) {
+  assert.equal((await request(app).get('/api/history?'+query).set('Authorization',`Bearer ${token}`)).status,400);
+ }
+});

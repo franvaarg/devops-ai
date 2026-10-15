@@ -1,3 +1,5 @@
+> Current status (2026-10-14): sales remain blocked. Use [PRODUCTION_READINESS.md](PRODUCTION_READINESS.md) for current evidence. Historical provider/pricing/browser notes below do not verify this release. See [BILLING.md](BILLING.md) for exact test-mode lifecycle steps. No actual Stripe network payment or recovery email delivery was verified; live Gemini evaluation returned 28 provider failures. Do not enable BILLING_ENABLED for paying customers yet.
+
 > Latest verification (2026-10-07): see [the transformation readiness report](TRANSFORMATION_READINESS.md) and [current evidence](verification/2026-10-07/summary.json). Earlier results below remain historical and do not establish current commercial readiness.
 
 # KANYI commercial release gate — 2026-09-30

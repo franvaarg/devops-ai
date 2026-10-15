@@ -1,0 +1,41 @@
+{
+  "provider": "gemini",
+  "configuredModel": "gemini-3.6-flash",
+  "apiKeyCanListModels": true,
+  "configuredModelListed": true,
+  "tinyGenerationSucceeded": true,
+  "oneStructuredPreflightSucceeded": true,
+  "structuredPreflightLatencyMs": 4815,
+  "fullSuiteResults": "live-ai-evaluation.json",
+  "exactDailyQuota": {
+    "status": 429,
+    "providerCode": "RESOURCE_EXHAUSTED",
+    "applicationCode": "AI_QUOTA_CONFIGURATION",
+    "quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+    "quotaValue": "20",
+    "retryDelaySeconds": 83742,
+    "retryable": false
+  },
+  "otherObservedFailures": [
+    "503 UNAVAILABLE provider_overloaded",
+    "504 DEADLINE_EXCEEDED"
+  ],
+  "endpointOverridesConfigured": false,
+  "comparisonOnly": [
+    {
+      "model": "gemini-2.5-flash",
+      "result": "404 NOT_FOUND"
+    },
+    {
+      "model": "gemini-3.7-flash",
+      "result": "499 CANCELLED"
+    },
+    {
+      "model": "gemini-3.8-flash",
+      "result": "504 DEADLINE_EXCEEDED then 400 INVALID_ARGUMENT"
+    }
+  ],
+  "modelOrProviderChanged": false,
+  "validationOrRetryBudgetsWeakened": false,
+  "ownerAction": "Enable sufficient daily/project quota for 28 cases plus retries and intended users; rerun full suite and assess persistent overload."
+}

@@ -1,0 +1,175 @@
+
+> backend@1.0.0 test:integration
+> node scripts/test-postgres.cjs
+
+{"timestamp":"2026-10-14T23:50:14.080Z","event":"quota_reserved","level":"info"}
+{"timestamp":"2026-10-14T23:50:14.098Z","event":"quota_consumed","level":"info"}
+✔ migrations are rerunnable and preserve existing users and history (373.896614ms)
+{"timestamp":"2026-10-14T23:50:14.249Z","event":"quota_reserved","level":"info"}
+{"timestamp":"2026-10-14T23:50:14.266Z","event":"quota_transaction_failed","code":"QUOTA_EXCEEDED","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:14.280Z","event":"quota_transaction_failed","code":"QUOTA_EXCEEDED","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:14.295Z","event":"quota_transaction_failed","code":"QUOTA_EXCEEDED","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:14.302Z","event":"quota_transaction_failed","code":"QUOTA_EXCEEDED","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:14.348Z","event":"quota_transaction_failed","code":"QUOTA_EXCEEDED","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:14.367Z","event":"quota_transaction_failed","code":"QUOTA_EXCEEDED","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:14.386Z","event":"quota_transaction_failed","code":"QUOTA_EXCEEDED","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:14.397Z","event":"quota_transaction_failed","code":"QUOTA_EXCEEDED","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:14.403Z","event":"quota_transaction_failed","code":"QUOTA_EXCEEDED","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:14.409Z","event":"quota_transaction_failed","code":"QUOTA_EXCEEDED","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:14.417Z","event":"quota_transaction_failed","code":"QUOTA_EXCEEDED","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:14.431Z","event":"quota_transaction_failed","code":"QUOTA_EXCEEDED","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:14.449Z","event":"quota_transaction_failed","code":"QUOTA_EXCEEDED","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:14.463Z","event":"quota_transaction_failed","code":"QUOTA_EXCEEDED","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:14.468Z","event":"quota_transaction_failed","code":"QUOTA_EXCEEDED","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:14.483Z","event":"quota_consumed","level":"info"}
+✔ parallel reservations at the last slot admit exactly one provider operation (374.032819ms)
+{"timestamp":"2026-10-14T23:50:14.550Z","event":"quota_reserved","level":"info"}
+{"timestamp":"2026-10-14T23:50:14.554Z","event":"quota_transaction_failed","code":"ANALYSIS_IN_PROGRESS","expected":true,"retryable":true,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:14.555Z","event":"quota_transaction_failed","code":"ANALYSIS_IN_PROGRESS","expected":true,"retryable":true,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:14.559Z","event":"quota_transaction_failed","code":"ANALYSIS_IN_PROGRESS","expected":true,"retryable":true,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:14.562Z","event":"quota_transaction_failed","code":"ANALYSIS_IN_PROGRESS","expected":true,"retryable":true,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:14.565Z","event":"quota_transaction_failed","code":"ANALYSIS_IN_PROGRESS","expected":true,"retryable":true,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:14.567Z","event":"quota_transaction_failed","code":"ANALYSIS_IN_PROGRESS","expected":true,"retryable":true,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:14.569Z","event":"quota_transaction_failed","code":"ANALYSIS_IN_PROGRESS","expected":true,"retryable":true,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:14.576Z","event":"quota_transaction_failed","code":"ANALYSIS_IN_PROGRESS","expected":true,"retryable":true,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:14.579Z","event":"quota_transaction_failed","code":"ANALYSIS_IN_PROGRESS","expected":true,"retryable":true,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:14.597Z","event":"quota_consumed","level":"info"}
+{"timestamp":"2026-10-14T23:50:14.612Z","event":"quota_replayed","level":"info"}
+{"timestamp":"2026-10-14T23:50:14.620Z","event":"quota_transaction_failed","code":"IDEMPOTENCY_CONFLICT","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:14.636Z","event":"quota_transaction_failed","code":"RESOURCE_NOT_FOUND","expected":true,"retryable":false,"level":"warn"}
+✔ parallel identical keys reserve once; completed replay never charges again (144.363967ms)
+{"timestamp":"2026-10-14T23:50:14.679Z","event":"quota_reserved","level":"info"}
+{"timestamp":"2026-10-14T23:50:14.684Z","event":"quota_transaction_failed","code":"INTERNAL_ERROR","expected":false,"retryable":false,"level":"error"}
+{"timestamp":"2026-10-14T23:50:14.696Z","event":"quota_released","level":"info"}
+{"timestamp":"2026-10-14T23:50:14.706Z","event":"quota_released","level":"info"}
+{"timestamp":"2026-10-14T23:50:14.716Z","event":"quota_transaction_failed","code":"ANALYSIS_ATTEMPT_FAILED","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:14.728Z","event":"quota_reserved","level":"info"}
+{"timestamp":"2026-10-14T23:50:14.741Z","event":"quota_consumed","level":"info"}
+✔ failure rolls back analysis and usage, release restores slot, failed key cannot rerun (104.179008ms)
+{"timestamp":"2026-10-14T23:50:14.788Z","event":"quota_reserved","level":"info"}
+{"timestamp":"2026-10-14T23:50:14.803Z","event":"quota_reserved","level":"info"}
+{"timestamp":"2026-10-14T23:50:14.817Z","event":"quota_consumed","level":"info"}
+{"timestamp":"2026-10-14T23:50:14.845Z","event":"quota_transaction_failed","code":"ANALYSIS_ATTEMPT_FAILED","expected":true,"retryable":false,"level":"warn"}
+✔ expired process reservations recover capacity and cannot later charge (103.119218ms)
+{"timestamp":"2026-10-14T23:50:14.870Z","event":"quota_reserved","level":"info"}
+{"timestamp":"2026-10-14T23:50:14.882Z","event":"quota_consumed","level":"info"}
+{"timestamp":"2026-10-14T23:50:14.906Z","event":"quota_transaction_failed","code":"QUOTA_EXCEEDED","expected":true,"retryable":false,"level":"warn"}
+✔ plans use authoritative subscription state and user data remains isolated (65.423581ms)
+✔ constraints reject duplicate users, orphan analyses and negative usage (58.28057ms)
+✔ password reset persists token revocation and consumes reset token once (2405.189674ms)
+{"timestamp":"2026-10-14T23:50:19.070Z","event":"authentication_succeeded","requestId":"218d8cd8-9d50-4533-ad50-2fbdc012286e","level":"info"}
+{"timestamp":"2026-10-14T23:50:19.085Z","event":"http_request","requestId":"218d8cd8-9d50-4533-ad50-2fbdc012286e","method":"POST","route":"/api/auth/register","status":201,"durationMs":1247,"expected":true,"outcome":"completed","level":"info"}
+{"timestamp":"2026-10-14T23:50:20.188Z","event":"authentication_succeeded","requestId":"f8e009bb-d4fc-4e24-835a-e3f9d8ca2ebf","level":"info"}
+{"timestamp":"2026-10-14T23:50:20.189Z","event":"http_request","requestId":"f8e009bb-d4fc-4e24-835a-e3f9d8ca2ebf","method":"POST","route":"/api/auth/login","status":200,"durationMs":1080,"expected":true,"outcome":"completed","level":"info"}
+{"timestamp":"2026-10-14T23:50:20.217Z","event":"quota_reserved","requestId":"978fc686-4574-4ab6-b3b7-1bcf8c011748","level":"info"}
+{"timestamp":"2026-10-14T23:50:20.233Z","event":"quota_consumed","requestId":"978fc686-4574-4ab6-b3b7-1bcf8c011748","level":"info"}
+{"timestamp":"2026-10-14T23:50:20.235Z","event":"http_request","requestId":"978fc686-4574-4ab6-b3b7-1bcf8c011748","method":"POST","route":"/api/analyze","status":201,"durationMs":39,"expected":true,"outcome":"completed","level":"info"}
+{"timestamp":"2026-10-14T23:50:20.253Z","event":"quota_replayed","requestId":"c4964f39-6910-474d-a0b2-7d050e237898","level":"info"}
+{"timestamp":"2026-10-14T23:50:20.255Z","event":"http_request","requestId":"c4964f39-6910-474d-a0b2-7d050e237898","method":"POST","route":"/api/analyze","status":201,"durationMs":11,"expected":true,"outcome":"completed","level":"info"}
+{"timestamp":"2026-10-14T23:50:20.271Z","event":"http_request","requestId":"e874c439-101c-40db-b2ec-69849e1850a6","method":"GET","route":"/api/history","status":200,"durationMs":8,"expected":true,"outcome":"completed","level":"info"}
+{"timestamp":"2026-10-14T23:50:20.283Z","event":"http_request","requestId":"7edc1a01-bfa6-4fdc-87e8-2bb5615cd30a","method":"GET","route":"/api/history","status":401,"durationMs":4,"code":"AUTHENTICATION_REQUIRED","expected":true,"outcome":"completed","level":"warn"}
+✔ real registration, login, authenticated analysis, replay and history API (2907.393228ms)
+{"timestamp":"2026-10-14T23:50:20.311Z","event":"quota_reserved","level":"info"}
+{"timestamp":"2026-10-14T23:50:20.327Z","event":"quota_consumed","level":"info"}
+{"timestamp":"2026-10-14T23:50:20.333Z","event":"quota_released","level":"info"}
+{"timestamp":"2026-10-14T23:50:20.348Z","event":"quota_replayed","level":"info"}
+✔ late release after committed response loss cannot refund or charge completed work (63.355924ms)
+{"timestamp":"2026-10-14T23:50:20.383Z","event":"quota_reserved","level":"info"}
+{"timestamp":"2026-10-14T23:50:20.415Z","event":"quota_consumed","level":"info"}
+{"timestamp":"2026-10-14T23:50:20.423Z","event":"quota_reserved","level":"info"}
+{"timestamp":"2026-10-14T23:50:20.435Z","event":"quota_consumed","level":"info"}
+✔ same request key in different accounts does not return another account analysis (90.439568ms)
+{"timestamp":"2026-10-14T23:50:20.479Z","event":"quota_reserved","level":"info"}
+{"timestamp":"2026-10-14T23:50:20.492Z","event":"quota_consumed","level":"info"}
+✔ completion charges reservation period even across a UTC month boundary (53.176948ms)
+{"timestamp":"2026-10-14T23:50:20.519Z","event":"quota_reserved","level":"info"}
+{"timestamp":"2026-10-14T23:50:20.542Z","event":"quota_transaction_failed","code":"DATABASE_ERROR","expected":false,"databaseCode":"23503","retryable":true,"level":"error"}
+{"timestamp":"2026-10-14T23:50:20.552Z","event":"quota_released","level":"info"}
+✔ completion marker constraint failure rolls back both usage increment and analysis (59.14427ms)
+{"timestamp":"2026-10-14T23:50:20.648Z","event":"quota_reserved","level":"info"}
+{"timestamp":"2026-10-14T23:50:20.656Z","event":"quota_consumed","level":"info"}
+✔ verified billing updates are transactional, replay safe, and use current provider state (100.992277ms)
+✔ subscription customer mismatch never grants access or acknowledges the event (18.118334ms)
+✔ new decision fields persist, belong to their account, and delete with the analysis (23.01251ms)
+{"timestamp":"2026-10-14T23:50:20.725Z","event":"request_failed","requestId":"52c162cf-2c0a-4b02-abb5-b4076c03c07e","code":"BILLING_SIGNATURE_INVALID","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:20.728Z","event":"http_request","requestId":"52c162cf-2c0a-4b02-abb5-b4076c03c07e","method":"POST","route":"/api/billing/webhook","status":400,"durationMs":12,"code":"BILLING_SIGNATURE_INVALID","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:50:20.748Z","event":"http_request","requestId":"2418ca94-1b14-4d20-8175-36ef43bb4dbd","method":"POST","route":"/api/billing/webhook","status":200,"durationMs":11,"expected":true,"outcome":"completed","level":"info"}
+{"timestamp":"2026-10-14T23:50:20.763Z","event":"request_failed","requestId":"58736c76-c4de-4321-a18b-10cd0c51fd98","code":"BILLING_SIGNATURE_INVALID","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:20.764Z","event":"http_request","requestId":"58736c76-c4de-4321-a18b-10cd0c51fd98","method":"POST","route":"/api/billing/webhook","status":400,"durationMs":5,"code":"BILLING_SIGNATURE_INVALID","expected":true,"outcome":"completed","level":"warn"}
+✔ raw signed webhook accepts genuine signature, rejects forgery and does not trust redirects (66.836674ms)
+✔ checkout reuses customer/session, prevents duplicate subscription, and portal remains available when sales disabled (46.723863ms)
+✔ history cursor returns older incidents without exposing another account (35.624236ms)
+{"timestamp":"2026-10-14T23:50:20.892Z","event":"quota_reserved","requestId":"8b9a9178-b8d7-4413-944e-3b3c4b0df16a","level":"info"}
+{"timestamp":"2026-10-14T23:50:20.900Z","event":"quota_consumed","requestId":"8b9a9178-b8d7-4413-944e-3b3c4b0df16a","level":"info"}
+{"timestamp":"2026-10-14T23:50:20.904Z","event":"http_request","requestId":"8b9a9178-b8d7-4413-944e-3b3c4b0df16a","method":"POST","route":"/api/analyze","status":201,"durationMs":26,"expected":true,"outcome":"completed","level":"info"}
+{"timestamp":"2026-10-14T23:50:20.926Z","event":"quota_replayed","requestId":"64a37cc2-6bc1-4b01-83fb-29f99b24bc34","level":"info"}
+{"timestamp":"2026-10-14T23:50:20.928Z","event":"http_request","requestId":"64a37cc2-6bc1-4b01-83fb-29f99b24bc34","method":"POST","route":"/api/analyze","status":201,"durationMs":14,"expected":true,"outcome":"completed","level":"info"}
+{"timestamp":"2026-10-14T23:50:20.951Z","event":"quota_reserved","requestId":"b0d1367f-6b22-4491-b0af-e152cd22f8a8","level":"info"}
+{"timestamp":"2026-10-14T23:50:20.979Z","event":"quota_consumed","requestId":"b0d1367f-6b22-4491-b0af-e152cd22f8a8","level":"info"}
+{"timestamp":"2026-10-14T23:50:20.981Z","event":"http_request","requestId":"b0d1367f-6b22-4491-b0af-e152cd22f8a8","method":"POST","route":"/api/analyze","status":201,"durationMs":47,"expected":true,"outcome":"completed","level":"info"}
+{"timestamp":"2026-10-14T23:50:21.001Z","event":"quota_reserved","requestId":"b0663158-6fea-4ef0-9a64-c2833034841f","level":"info"}
+{"timestamp":"2026-10-14T23:50:21.011Z","event":"quota_consumed","requestId":"b0663158-6fea-4ef0-9a64-c2833034841f","level":"info"}
+{"timestamp":"2026-10-14T23:50:21.012Z","event":"http_request","requestId":"b0663158-6fea-4ef0-9a64-c2833034841f","method":"POST","route":"/api/analyze","status":201,"durationMs":19,"expected":true,"outcome":"completed","level":"info"}
+✔ opt-in first and second analysis milestones are atomic and replay does not duplicate them (165.930472ms)
+{"timestamp":"2026-10-14T23:50:21.043Z","event":"quota_reserved","level":"info"}
+{"timestamp":"2026-10-14T23:50:21.053Z","event":"quota_consumed","level":"info"}
+{"timestamp":"2026-10-14T23:50:21.075Z","event":"quota_replayed","requestId":"2314140b-5734-4c61-b497-11e17f04bf0d","level":"info"}
+{"timestamp":"2026-10-14T23:50:21.076Z","event":"http_request","requestId":"2314140b-5734-4c61-b497-11e17f04bf0d","method":"POST","route":"/api/analyze","status":201,"durationMs":14,"expected":true,"outcome":"completed","level":"info"}
+{"timestamp":"2026-10-14T23:50:21.114Z","event":"quota_transaction_failed","requestId":"341cdc96-438a-432d-80f2-bbd946cdeac2","code":"IDEMPOTENCY_CONFLICT","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:21.115Z","event":"request_failed","requestId":"341cdc96-438a-432d-80f2-bbd946cdeac2","code":"IDEMPOTENCY_CONFLICT","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:21.117Z","event":"http_request","requestId":"341cdc96-438a-432d-80f2-bbd946cdeac2","method":"POST","route":"/api/analyze","status":409,"durationMs":32,"code":"IDEMPOTENCY_CONFLICT","expected":true,"outcome":"completed","level":"warn"}
+✔ pre-release no-context idempotency keys still replay, while changing context conflicts (105.664899ms)
+{"timestamp":"2026-10-14T23:50:21.155Z","event":"http_request","requestId":"8f659a6b-ac49-437d-8cb0-9dfb85b7e4c0","method":"GET","route":"/health/ready","status":200,"durationMs":8,"expected":true,"outcome":"completed","level":"info"}
+{"timestamp":"2026-10-14T23:50:21.170Z","event":"http_request","requestId":"71bdd7aa-72b4-4370-b03f-36f7cb532a21","method":"POST","route":"/api/auth/logout","status":204,"durationMs":4,"expected":true,"outcome":"completed","level":"info"}
+{"timestamp":"2026-10-14T23:50:21.178Z","event":"http_request","requestId":"daf18641-6c1d-485c-b1ba-c9dbc3288ce3","method":"GET","route":"/api/history","status":401,"durationMs":3,"code":"AUTHENTICATION_REQUIRED","expected":true,"outcome":"completed","level":"warn"}
+✔ health readiness verifies migrated PostgreSQL and logout revokes existing bearer tokens (59.879809ms)
+{"timestamp":"2026-10-14T23:50:21.231Z","event":"http_request","requestId":"c62a1abc-87da-486e-a686-708c7decea17","method":"GET","route":"/api/history","status":200,"durationMs":4,"expected":true,"outcome":"completed","level":"info"}
+{"timestamp":"2026-10-14T23:50:21.242Z","event":"http_request","requestId":"f614ba86-26d1-4676-b979-bc30291c0c34","method":"DELETE","route":"/api/history/:id","status":404,"durationMs":6,"code":"RESOURCE_NOT_FOUND","expected":true,"outcome":"completed","level":"warn"}
+✔ authenticated HTTP history and deletion deny access to another account data (64.853006ms)
+{"timestamp":"2026-10-14T23:50:21.267Z","event":"http_request","requestId":"f5e0a931-f133-4c60-92c5-7f94e4f21a79","method":"POST","route":"/api/integrations/render/events","status":401,"durationMs":1,"code":"AUTHENTICATION_REQUIRED","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:50:21.284Z","event":"quota_reserved","requestId":"b35155e2-08f7-4454-bbf6-90d917c2816b","level":"info"}
+{"timestamp":"2026-10-14T23:50:21.295Z","event":"quota_consumed","requestId":"b35155e2-08f7-4454-bbf6-90d917c2816b","level":"info"}
+{"timestamp":"2026-10-14T23:50:21.297Z","event":"http_request","requestId":"b35155e2-08f7-4454-bbf6-90d917c2816b","method":"POST","route":"/api/integrations/render/events","status":201,"durationMs":24,"expected":true,"outcome":"completed","level":"info"}
+{"timestamp":"2026-10-14T23:50:21.316Z","event":"quota_replayed","requestId":"6ec5ddac-8a28-4043-a98e-9e8b1877f077","level":"info"}
+{"timestamp":"2026-10-14T23:50:21.318Z","event":"http_request","requestId":"6ec5ddac-8a28-4043-a98e-9e8b1877f077","method":"POST","route":"/api/integrations/render/events","status":201,"durationMs":16,"expected":true,"outcome":"completed","level":"info"}
+{"timestamp":"2026-10-14T23:50:21.344Z","event":"quota_transaction_failed","requestId":"f60fc3e9-adae-42f3-818a-a8652262c364","code":"IDEMPOTENCY_CONFLICT","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:21.344Z","event":"request_failed","requestId":"f60fc3e9-adae-42f3-818a-a8652262c364","code":"IDEMPOTENCY_CONFLICT","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:21.345Z","event":"http_request","requestId":"f60fc3e9-adae-42f3-818a-a8652262c364","method":"POST","route":"/api/integrations/render/events","status":409,"durationMs":13,"code":"IDEMPOTENCY_CONFLICT","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:50:21.355Z","event":"request_failed","requestId":"f4f9738b-ab1b-4711-abae-9aae2a14857e","code":"VALIDATION_ERROR","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:21.356Z","event":"http_request","requestId":"f4f9738b-ab1b-4711-abae-9aae2a14857e","method":"POST","route":"/api/integrations/render/events","status":400,"durationMs":5,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+✔ Render event PoC uses real ownership, quota and idempotency pipeline (113.053158ms)
+{"timestamp":"2026-10-14T23:50:21.381Z","event":"quota_reserved","level":"info"}
+{"timestamp":"2026-10-14T23:50:21.393Z","event":"quota_consumed","level":"info"}
+{"timestamp":"2026-10-14T23:50:21.402Z","event":"quota_reserved","level":"info"}
+{"timestamp":"2026-10-14T23:50:21.422Z","event":"quota_consumed","level":"info"}
+{"timestamp":"2026-10-14T23:50:21.452Z","event":"request_failed","requestId":"409bc98e-fe88-4349-bbda-5cf11220e43a","code":"AUTHENTICATION_REQUIRED","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:21.456Z","event":"http_request","requestId":"409bc98e-fe88-4349-bbda-5cf11220e43a","method":"DELETE","route":"/api/account/","status":401,"durationMs":29,"code":"AUTHENTICATION_REQUIRED","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:50:21.472Z","event":"account_deleted","requestId":"5d69ae8a-d9df-451c-879d-2b37457b6f76","level":"info"}
+{"timestamp":"2026-10-14T23:50:21.474Z","event":"http_request","requestId":"5d69ae8a-d9df-451c-879d-2b37457b6f76","method":"DELETE","route":"/api/account/","status":204,"durationMs":12,"expected":true,"outcome":"completed","level":"info"}
+{"timestamp":"2026-10-14T23:50:21.492Z","event":"http_request","requestId":"dd460f27-0230-4da7-96b2-11cad3dc7885","method":"GET","route":"/api/history","status":401,"durationMs":8,"code":"AUTHENTICATION_REQUIRED","expected":true,"outcome":"completed","level":"warn"}
+✔ account deletion checks password, preserves other users, cascades private data and revokes access (136.376118ms)
+✔ account with billing relationship cannot be silently deleted (32.969288ms)
+✔ provider provenance and trust fields survive persistence and owner-scoped retrieval (13.460703ms)
+✔ concurrent webhook delivery commits only once; provider failure never acknowledges event (56.175747ms)
+{"timestamp":"2026-10-14T23:50:21.623Z","event":"quota_reserved","level":"info"}
+{"timestamp":"2026-10-14T23:50:21.633Z","event":"quota_consumed","level":"info"}
+✔ migration CLI applies additive migrations and ledger twice without data loss (774.362684ms)
+{"timestamp":"2026-10-14T23:50:22.393Z","event":"request_failed","requestId":"b5302cd6-fb66-491b-a495-7142e609ad5c","code":"VALIDATION_ERROR","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:22.395Z","event":"http_request","requestId":"b5302cd6-fb66-491b-a495-7142e609ad5c","method":"GET","route":"/api/history","status":400,"durationMs":4,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:50:22.401Z","event":"request_failed","requestId":"46394491-0e95-4c70-b525-9f4b3d39b2d1","code":"VALIDATION_ERROR","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:22.403Z","event":"http_request","requestId":"46394491-0e95-4c70-b525-9f4b3d39b2d1","method":"GET","route":"/api/history","status":400,"durationMs":4,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:50:22.411Z","event":"request_failed","requestId":"738feaa3-223c-4d83-9cff-09855cea74f8","code":"VALIDATION_ERROR","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:22.412Z","event":"http_request","requestId":"738feaa3-223c-4d83-9cff-09855cea74f8","method":"GET","route":"/api/history","status":400,"durationMs":4,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:50:22.421Z","event":"request_failed","requestId":"d4cd7be6-804f-4e32-b9c5-f8450e048766","code":"VALIDATION_ERROR","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:22.423Z","event":"http_request","requestId":"d4cd7be6-804f-4e32-b9c5-f8450e048766","method":"GET","route":"/api/history","status":400,"durationMs":7,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:50:22.434Z","event":"request_failed","requestId":"96506990-c99b-4276-b955-b7842c6f9b65","code":"VALIDATION_ERROR","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:50:22.435Z","event":"http_request","requestId":"96506990-c99b-4276-b955-b7842c6f9b65","method":"GET","route":"/api/history","status":400,"durationMs":7,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+✔ history rejects malformed filters before database work (63.746693ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 30
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 10086.000871

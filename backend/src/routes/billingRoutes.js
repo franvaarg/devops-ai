@@ -1,10 +1,11 @@
 const express = require('express');
-const { rateLimit } = require('express-rate-limit');
+const { createRateLimiter } = require('../middleware/rateLimiters');
 const authenticate = require('../middleware/authenticateToken');
 const { AppError } = require('../operations/errors');
 const billing = require('../services/billingService');
 const router = express.Router();
-const limiter = rateLimit({ windowMs: 60000, limit: 10, standardHeaders: true, legacyHeaders: false });
+router.use((req, res, next) => { res.locals.routeBase = req.baseUrl; next(); });
+const limiter = createRateLimiter({ windowMs: 60000, limit: 10, standardHeaders: true, legacyHeaders: false });
 router.post('/webhook', async (req, res, next) => {
   let event;
   try {
@@ -12,9 +13,13 @@ router.post('/webhook', async (req, res, next) => {
     event = billing.stripe().webhooks.constructEvent(req.body, req.get('stripe-signature'), process.env.STRIPE_WEBHOOK_SECRET);
   } catch { return next(new AppError('BILLING_SIGNATURE_INVALID')); }
   try { await billing.processEvent(event); res.json({ received: true }); }
-  catch (error) { next(error); }
+  catch (error) {
+    const safe = error instanceof AppError ? error : new AppError('BILLING_ERROR');
+    require('../operations/logger').logFailure('billing_webhook_failed', safe);
+    next(safe);
+  }
 });
-router.get('/plans', rateLimit({ windowMs: 60000, limit: 60, standardHeaders: true, legacyHeaders: false }), async (_req, res, next) => {
+router.get('/plans', createRateLimiter({ windowMs: 60000, limit: 60, standardHeaders: true, legacyHeaders: false }), async (_req, res, next) => {
   try {
     const pricing = billing.configured() ? await billing.price() : null;
     res.json({ freeLimit: 50, proLimit: 500, maxLogBytes: 16384, pricing, available: !!pricing });

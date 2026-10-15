@@ -17,7 +17,7 @@ function FileUpload({
       return;
     }
 
-    if (!/\.(log|txt)$/i.test(file.name) || file.size > 16384) { toast.error("Choose a .log or .txt file up to 16 KiB."); event.target.value = ""; return; }
+    if (!/\.(log|txt)$/i.test(file.name) || file.size > 16384 || (file.type && !['text/plain', 'application/octet-stream', 'text/x-log'].includes(file.type))) { toast.error("Choose a .log or .txt file up to 16 KiB."); event.target.value = ""; return; }
     const reader = new FileReader();
 
     reader.onerror = () => toast.error("Could not read the file. Try pasting the text instead.");
@@ -29,7 +29,9 @@ function FileUpload({
       } else toast.error("This file is not a supported text log.");
     };
 
+    reader.onabort = () => toast.error("File reading was canceled. Select the file again.");
     reader.readAsText(file);
+    event.target.value = "";
   }
 
   return (

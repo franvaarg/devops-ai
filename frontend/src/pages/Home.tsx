@@ -86,6 +86,8 @@ function Home() {
   const [decision, setDecision] = useState<Partial<AnalysisResult>>({});
   const [context, setContext] = useState("");
   const [log, setLog] = useState("");
+  const analysisBusy = useRef(false);
+  const historyGeneration = useRef(0);
   const analysisAttempt = useRef<{ log: string; key: string } | null>(null);
   const [severity, setSeverity] = useState("");
   const [summary, setSummary] = useState("");
@@ -123,6 +125,7 @@ function Home() {
       severityFilter = historySeverity,
       showErrorToast = true
     ) => {
+      const generation = ++historyGeneration.current;
       try {
         setIsHistoryLoading(true);
 
@@ -132,15 +135,16 @@ function Home() {
           limit: 50,
         });
 
+        if (generation !== historyGeneration.current) return;
         setHistory(data);
         setHasMoreHistory(data.length === 50);
       } catch (error) {
 
-        if (!handleAuthError(error) && showErrorToast) {
+        if (generation === historyGeneration.current && !handleAuthError(error) && showErrorToast) {
           toast.error(getErrorMessage(error, "Could not load the analysis history."));
         }
       } finally {
-        setIsHistoryLoading(false);
+        if (generation === historyGeneration.current) setIsHistoryLoading(false);
       }
     },
     [historySearch, historySeverity]
@@ -155,25 +159,33 @@ function Home() {
   }, [loadHistory]);
 
   async function handleAnalyze() {
+    if (analysisBusy.current) return;
     if (!log.trim()) {
       toast.error("Paste or upload a log before analyzing.");
       return;
     }
 
     if (new TextEncoder().encode(log).length > 16384) { toast.error("Use an incident excerpt up to 16 KiB. Larger logs need a narrower time window."); return; }
+    analysisBusy.current = true;
     const loadingToast = toast.loading("Assessing evidence and noise…");
 
     try {
       setIsAnalyzing(true);
-      // Keep the key after ambiguous network/storage failures so retry cannot charge twice.
+      // Persist only a digest and request key, never raw logs/context. Reloads
+      // after an ambiguous response loss must recover the original operation.
+      const digest = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ log, context }))))).map(byte => byte.toString(16).padStart(2, '0')).join('');
+      let recovered: { digest?: string; key?: string } = {};
+      try { const value = JSON.parse(sessionStorage.getItem('kanyi-analysis-attempt') || '{}'); if (value && typeof value === 'object') recovered = value; } catch { /* storage unavailable */ }
       if (analysisAttempt.current?.log !== JSON.stringify({ log, context })) {
-        analysisAttempt.current = { log: JSON.stringify({ log, context }), key: crypto.randomUUID() };
+        analysisAttempt.current = { log: JSON.stringify({ log, context }), key: recovered.digest === digest && typeof recovered.key === 'string' && /^[A-Za-z0-9_-]{16,128}$/.test(recovered.key) ? recovered.key : crypto.randomUUID() };
+        try { sessionStorage.setItem('kanyi-analysis-attempt', JSON.stringify({ digest, key: analysisAttempt.current.key })); } catch { /* in-memory replay still works */ }
       }
       const data = await analyzeLog(log, analysisAttempt.current.key, context);
       setDecision(data);
       setPlanRefresh(n => n + 1);
 
       analysisAttempt.current = null;
+      try { sessionStorage.removeItem('kanyi-analysis-attempt'); } catch { /* storage unavailable */ }
 
       setSeverity(data.severity ?? "");
       setSummary(data.summary ?? "");
@@ -186,8 +198,9 @@ function Home() {
       await loadHistory(historySearch, historySeverity, false);
       toast.success("Log analyzed successfully.", { id: loadingToast });
     } catch (error) {
-      if (error instanceof ApiError && ["AI_PROVIDER_ERROR", "AI_INVALID_RESPONSE", "ANALYSIS_ATTEMPT_FAILED", "VALIDATION_ERROR", "QUOTA_EXCEEDED"].includes(error.code || "")) {
+      if (error instanceof ApiError && ["AI_PROVIDER_ERROR", "AI_TIMEOUT", "AI_NETWORK", "AI_AUTH", "AI_PROVIDER_UNAVAILABLE", "AI_QUOTA_CONFIGURATION", "AI_RATE_LIMITED", "AI_REQUEST_REJECTED", "AI_INVALID_RESPONSE", "ANALYSIS_ATTEMPT_FAILED", "VALIDATION_ERROR", "QUOTA_EXCEEDED"].includes(error.code || "")) {
         analysisAttempt.current = null;
+        try { sessionStorage.removeItem('kanyi-analysis-attempt'); } catch { /* storage unavailable */ }
       }
       if (error instanceof ApiError && error.code === "QUOTA_EXCEEDED") { setPlanRefresh(n => n + 1); trackEvent("quota_reached"); }
 
@@ -201,12 +214,14 @@ function Home() {
         { id: loadingToast }
       );
     } finally {
+      analysisBusy.current = false;
       setIsAnalyzing(false);
     }
   }
 
   function handleClearAnalysis() {
     analysisAttempt.current = null;
+    try { sessionStorage.removeItem('kanyi-analysis-attempt'); } catch { /* storage unavailable */ }
     setDecision({});
     setContext("");
     setLog("");
@@ -245,14 +260,16 @@ function Home() {
 
   async function loadOlderHistory() {
     const last = history[history.length - 1];
-    if (!last) return;
+    if (!last || isHistoryLoading) return;
+    const generation = ++historyGeneration.current;
     try {
       setIsHistoryLoading(true);
       const older = await getHistory({ search: historySearch.trim(), severity: historySeverity, beforeId: last.id, limit: 50 });
+      if (generation !== historyGeneration.current) return;
       setHistory(current => [...current, ...older.filter(item => !current.some(saved => saved.id === item.id))]);
       setHasMoreHistory(older.length === 50);
     } catch (error) { if (!handleAuthError(error)) toast.error(getErrorMessage(error, "Older analyses could not be loaded.")); }
-    finally { setIsHistoryLoading(false); }
+    finally { if (generation === historyGeneration.current) setIsHistoryLoading(false); }
   }
 
   async function handleLogout() {

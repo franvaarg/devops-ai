@@ -44,6 +44,7 @@ const analyzeRateLimiter = createRateLimiter({
 });
 
 module.exports = {
+  createRateLimiter,
   analyzeRateLimiter,
   loginRateLimiter,
   passwordRecoveryRateLimiter,

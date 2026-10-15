@@ -45,3 +45,20 @@ test('no evidence cannot retain unsupported outage severity', () => {
   assert.equal(result.actionability, 'Insufficient Evidence');
   assert.equal(result.confidence, 'Low');
 });
+
+test('redacts database URLs, credential assignments and Stripe secrets before transmission', () => {
+  for (const value of ['DATABASE_URL=postgres://host/db?sslmode=require', 'credentials=private-value', 'sk_live_12345678901234567890', 'whsec_12345678901234567890']) {
+    const safe = redactSecrets(value);
+    assert.ok(safe.includes('[REDACTED]'));
+    assert.ok(!safe.includes('private-value'));
+    assert.ok(!safe.includes('12345678901234567890'));
+    assert.ok(!safe.includes('host/db'));
+  }
+});
+test('trust fields reject invalid arrays and fabricated verification payloads', () => {
+  const extended = { ...valid, missingInformation: ['Deployment environment unknown'], verificationSteps: ['Check database health'] };
+  assert.deepEqual(parseAnalysis(JSON.stringify(extended), source), extended);
+  for (const changes of [{missingInformation: 'unknown'}, {verificationSteps: [42]}, {missingInformation: Array(21).fill('unknown')}]) {
+    assert.throws(() => parseAnalysis(JSON.stringify({...extended, ...changes}), source), {code:'AI_INVALID_RESPONSE'});
+  }
+});

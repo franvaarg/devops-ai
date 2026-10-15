@@ -1,4 +1,13 @@
 const definitions = Object.freeze({
+  ACCOUNT_SUBSCRIPTION_ACTIVE: [409, 'This account has billing records. Contact support to cancel billing and complete account deletion.'],
+  AI_CANCELLED: [408, 'Analysis was canceled. This attempt did not use your monthly allowance.'],
+  AI_TIMEOUT: [504, 'Analysis timed out. Please retry; this attempt did not use your monthly allowance.'],
+  AI_NETWORK: [502, 'The analysis provider could not be reached. Please retry shortly.'],
+  AI_PROVIDER_UNAVAILABLE: [503, 'The configured analysis provider is unavailable.'],
+  AI_AUTH: [503, 'The analysis provider configuration needs operator attention.'],
+  AI_QUOTA_CONFIGURATION: [503, 'The analysis provider allowance is unavailable. Please try again later.'],
+  AI_RATE_LIMITED: [503, 'The analysis provider is busy. Please retry shortly.'],
+  AI_REQUEST_REJECTED: [502, 'The analysis provider could not accept this request. Try a smaller relevant log excerpt.'],
   LOG_INVALID: [400, 'Use a text log up to 16 KiB. Submit the relevant incident window rather than the entire file.'],
   BILLING_UNAVAILABLE: [503, 'Subscriptions are not available yet. Your Free account remains available.'],
   BILLING_ERROR: [502, 'Billing could not be completed. Please retry; your plan has not been changed.'],

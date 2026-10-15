@@ -1,0 +1,10 @@
+{
+  "valid": true,
+  "schemaSource": "https://render.com/schema/render.yaml.json",
+  "schemaSha256": "8a3fb8da6b4f55fe686fbefa790e011d3dd7895f013f355953c572a21ab6494a",
+  "manifest": "deploy/render.staging.yaml",
+  "singleStagingService": true,
+  "automaticDeployment": false,
+  "billingEnabled": false,
+  "remoteApplied": false
+}

@@ -62,7 +62,9 @@ function ResetPassword({ token, onComplete }: ResetPasswordProps) {
           </button>
         ) : (
           <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+            <label htmlFor="reset-password" className="block text-sm font-semibold">New password</label>
             <input
+              id="reset-password"
               type="password"
               autoComplete="new-password"
               value={password}
@@ -71,7 +73,9 @@ function ResetPassword({ token, onComplete }: ResetPasswordProps) {
               disabled={isSubmitting}
               className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3.5 outline-none focus:border-emerald-400"
             />
+            <label htmlFor="reset-password-confirm" className="block text-sm font-semibold">Confirm new password</label>
             <input
+              id="reset-password-confirm"
               type="password"
               autoComplete="new-password"
               value={confirmPassword}

@@ -19,3 +19,31 @@ const confidenceBounds = {
   'authentication-attack-blocked': ['Low', 'Medium'], 'api-errors-recovered': ['Low'],
 };
 module.exports = cases.map(entry => ({ ...entry, confidences: confidenceBounds[entry.name] || ['Low', 'Medium', 'High'] }));
+
+const additional = [
+ ['node-runtime','nodejs','TypeError: Cannot read properties of undefined (reading userId)\n    at handler (/app/routes.js:42:10)\nGET /profile 500','undefined|typeerror|validation'],
+ ['typescript-build','build','src/app.ts(12,8): error TS2322: Type string is not assignable to type number.\nBuild failed. Deployment skipped.','type|typescript|assign'],
+ ['dependency-resolution','dependency','npm ERR! code ERESOLVE\nnpm ERR! unable to resolve dependency tree\nnpm ERR! peer react@18 required; found react@19','dependency|peer|version'],
+ ['missing-environment','environment','Error: Missing required environment variable DATABASE_URL\nProcess exited with code 1; deploy failed','environment|configuration|database_url'],
+ ['vercel-build','vercel','Vercel build failed: Cannot find module @app/shared\nError: Command npm run build exited with 1\nProduction deployment was not updated.','module|dependency|path|alias'],
+ ['render-port','render','Render deploy failed: No open ports detected\nApplication listening on 127.0.0.1:3000\nPrevious deployment still serving.','port|bind|localhost|127.0.0.1'],
+ ['postgres-auth','postgresql','FATAL: password authentication failed for user app\nSQLSTATE 28P01\nApplication could not establish a database connection','authentication|password|credential'],
+ ['api-client-error','api4xx','GET /projects 403\nAccess denied: required scope projects:read missing\nOther endpoints returned 200','scope|permission|authorization'],
+ ['api-server-error','api5xx','GET /checkout 500\nError: upstream inventory returned 503\nRequest failed after 2 attempts','upstream|inventory|dependency'],
+ ['dns-resolution','dns','getaddrinfo ENOTFOUND db.internal\nDatabase connection failed\nEnvironment and service status unknown','dns|host|resolution'],
+ ['dependency-timeout','timeout','ETIMEDOUT connecting to api.internal:443 after 10000ms\nGET /dashboard 504','timeout|network|upstream|connect'],
+ ['memory-exhaustion','resources','FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory\nNode process exited code 134','memory|heap|allocation'],
+ ['github-actions','github-actions','Run npm ci\nnpm ERR! npm ci can only install packages when package.json and package-lock.json are in sync\nProcess completed with exit code 1. Deploy job skipped.','lock|dependency|sync'],
+ ['incomplete-excerpt','incomplete','ERROR request failed','unknown|insufficient|possible|cannot|unclear'],
+ ['malformed-excerpt','malformed','{not-valid-json [truncated output ...','unknown|insufficient|format|truncat|cannot'],
+ ['irrelevant-excerpt','irrelevant','Shopping list: apples, bread and coffee.','insufficient|no .*evidence|cannot|not .*log|unknown'],
+ ['railway-healthcheck','railway','Railway deployment failed healthcheck path=/health status=404\nApplication started on 0.0.0.0:8080\nNo production traffic metrics supplied','health|path|404|route'],
+];
+module.exports.push(...additional.map(([name,category,log,hypothesis]) => ({name,category,log,context:'Synthetic excerpt. No additional deployment or impact facts supplied.',expected: ['Investigate','Action Required','Insufficient Evidence','Likely Noise'],severities: ['Low','Medium'],confidences:['Low','Medium','High'],hypothesis})));
+module.exports = module.exports.map(entry => ({
+ ...entry,
+ requiredEvidence: ['irrelevant','malformed','incomplete'].includes(entry.category) ? [] : [entry.log.split('\n')[0]],
+ acceptableHypotheses: [entry.hypothesis || 'possible|likely|unknown|insufficient|cannot|unavailable|configuration|connection|missing|timeout|recover|noise|fail|legacy|deploy|auth|registry|image|healthy'],
+ prohibitedHallucinations: ['I (?:have )?(?:executed|ran|verified)', 'database (?:was|has been) destroyed', 'confirmed data loss'],
+ nextStepCategories: ['check|verify|inspect|review|confirm|monitor|collect|request|investigate|identify|provide|examine|ensure|validate|obtain|look|test|compare|reproduc|capture|determine|ask|gather|locate|update|run|fix|align|install|resolve'],
+}));

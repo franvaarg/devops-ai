@@ -20,6 +20,7 @@ const {
 } = require("../security/credentialValidation");
 
 const router = express.Router();
+router.use((req, res, next) => { res.locals.routeBase = req.baseUrl; next(); });
 router.post('/logout', require('../middleware/authenticateToken'), async (req, res, next) => {
   try {
     await pool.query('UPDATE users SET token_version = token_version + 1 WHERE id = $1', [req.user.id]);

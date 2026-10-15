@@ -390,6 +390,7 @@ function HistoryList({
                     </p>
                   </section>
 
+                  {([['Unknown / missing information', item.missingInformation], ['Verification steps', item.verificationSteps]] as const).map(([title, items]) => <section key={title} className="rounded-2xl border bg-white p-5 dark:bg-slate-900"><h3 className="font-bold">{title}</h3>{items?.length ? <ul className="mt-3 list-disc pl-5">{items.map((text, index) => <li key={index}>{text}</li>)}</ul> : <p className="mt-3">Not separately recorded in this older analysis. Verify before applying changes.</p>}</section>)}
                   <section className="rounded-2xl border border-teal-200 bg-teal-50/50 p-5 dark:border-teal-900 dark:bg-teal-950/20">
                     <h3 className="text-xs font-black uppercase tracking-[0.16em] text-teal-700 dark:text-teal-300">
                       Recommendation

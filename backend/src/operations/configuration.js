@@ -1,4 +1,6 @@
 function validateStartup(env = process.env) {
+  if (env.AI_PROVIDER && env.AI_PROVIDER !== 'gemini') throw new Error('AI_PROVIDER must select a supported provider.');
+  if (env.BILLING_ENABLED && !['true', 'false'].includes(env.BILLING_ENABLED)) throw new Error('BILLING_ENABLED must be true or false.');
   if (!env.JWT_SECRET || env.JWT_SECRET.length < 32) throw new Error('JWT_SECRET must be configured with at least 32 characters.');
   if (env.TRUST_PROXY_HOPS && (!/^\d+$/.test(env.TRUST_PROXY_HOPS) || Number(env.TRUST_PROXY_HOPS) > 10)) throw new Error('TRUST_PROXY_HOPS must be an integer between 0 and 10.');
   if (env.NODE_ENV !== 'production') return;

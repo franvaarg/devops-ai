@@ -61,3 +61,15 @@ numeric account/version claims before SQL. Registration and password reset rejec
 passwords above bcrypt's 72 UTF-8 byte limit, matching login. Existing overlong
 passwords require password recovery; stored hashes are not modified. Email input
 is bounded to the existing 150-character database column.
+
+## Verified hardening boundary — 2026-10-14
+
+Redaction now includes DATABASE_URL and credential assignments plus common Stripe secret/restricted/webhook keys, in addition to authorization, cookies, JWTs, password/token/API-key assignments, cloud keys, connection credentials and private keys. It remains best effort, not a guarantee against arbitrary secrets/PII. Raw input is transiently held in browser/server memory; only the redacted log/context and validated redacted analysis are saved by the normal analysis path. Server logs use fixed metadata fields and omit raw logs, passwords, provider payloads and reset tokens. No compliance certification is claimed.
+
+A browser upload is read as text locally; the server accepts a bounded JSON log, not a file path or multipart executable. Extension, size, MIME hints and text controls are checked in the browser; byte/control limits are independently enforced by the server. MIME labels are not trusted proof of content. HTML-looking logs render as React text; the application does not run model commands, remote log URLs or arbitrary HTML. Prompt injection and incorrect hypotheses remain risks requiring human verification.
+
+API responses are no-store. Vercel headers suppress referrers, framing and MIME sniffing. Reset tokens are removed from the browser address bar as the reset screen initializes; tokens are hashed in storage, expire and are consumed once. CORS and startup enforce explicit production HTTPS origins. Verify actual deployed headers, proxy hops and JWT/recovery configuration before release. There is no claim that production settings match this checkout.
+
+Password-confirmed deletion is implemented for non-billing accounts and cascades live data. Billing-linked deletion requires support so an ongoing charge cannot outlive its account silently. The owner must operate and document cancellation/deletion and backup/provider retention. API isolation, signed webhook replay safety and concurrency are covered by local tests; the PostgreSQL application role itself is not restricted per-user by row-level security. Maintain application authorization and avoid granting database access to end users.
+
+Bearer tokens remain in localStorage, with HS256 verification and database version revocation. An XSS could steal them. Shared distributed rate limits, CSP tailored to production origins, email verification, MFA and a scoped integration credential system remain future work. Use a single backend instance initially. Recovery email delivery, Stripe network flows, production alert delivery and backup restoration were not verified. Read docs/PRODUCTION_READINESS.md before inviting users.

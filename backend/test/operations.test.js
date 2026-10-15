@@ -69,3 +69,27 @@ test('expected application errors expose their code and correlation without 500 
   assert.equal(response.body.error.requestId, response.headers['x-request-id']);
   assert.ok(records.every((r) => r.expected === true));
 });
+
+test('shared limiter returns JSON with a meaningful structured quota-independent rate-limit error', async () => {
+ const app=express();app.use(operations);
+ app.get('/limited',require('../src/middleware/rateLimiters').createRateLimiter({windowMs:60000,limit:1}),(_req,res)=>res.json({ok:true}));
+ assert.equal((await request(app).get('/limited')).status,200);
+ const rejected=await request(app).get('/limited');assert.equal(rejected.status,429);
+ assert.equal(rejected.body.error.code,'RATE_LIMITED');assert.ok(rejected.body.error.requestId);
+ assert.match(rejected.body.message,/Too many requests/);
+});
+
+test('mounted route failure logs the static mount path after error propagation', async t => {
+ const records=capture(t);const app=express();const router=express.Router();app.use(operations);
+ router.use((req,res,next)=>{res.locals.routeBase=req.baseUrl;next();});
+ router.get('/:id',(_req,_res,next)=>next(new AppError('BILLING_ERROR')));
+ app.use('/billing',router);app.use(errorHandler);
+ await request(app).get('/billing/private-id?token=secret');
+ assert.equal(records.find(r=>r.event==='http_request').route,'/billing/:id');
+ assert.ok(!JSON.stringify(records).includes('private-id'));
+});
+
+test('network classification survives the retry and public provider-error boundaries', async () => {
+ const { reliableGeneration }=require('../src/services/aiReliability');
+ await assert.rejects(providerCall('gemini',()=>reliableGeneration(async()=>{throw Object.assign(new Error('private transport message'),{code:'ECONNRESET'});},{maxAttempts:1})),{code:'AI_NETWORK',retryable:true});
+});

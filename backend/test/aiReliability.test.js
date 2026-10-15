@@ -59,3 +59,23 @@ test('a delayed backoff never starts another attempt past the deadline', async (
   await assert.rejects(reliableGeneration(async () => { calls++; throw http(503); }, { now: () => elapsed, wait: async () => { elapsed = 60000; }, random: () => 0 }));
   assert.equal(calls, 1);
 });
+
+test('provider classification distinguishes auth, input rejection, transient throttling and network failures', () => {
+  assert.equal(classifyProviderFailure({status:401}).code, 'AI_AUTH');
+  assert.equal(classifyProviderFailure({status:403}).retryable, false);
+  assert.equal(classifyProviderFailure({status:400}).code, 'AI_REQUEST_REJECTED');
+  assert.equal(classifyProviderFailure({status:429}).code, 'AI_RATE_LIMITED');
+  assert.equal(classifyProviderFailure({code:'ECONNRESET'}).code, 'AI_NETWORK');
+});
+
+test('caller cancellation aborts in-flight transport and never retries', async () => {
+ const controller=new AbortController();let calls=0;let transport;
+ const pending=reliableGeneration(async ({signal})=>{calls++;transport=signal;queueMicrotask(()=>controller.abort());return new Promise(()=>{});},{signal:controller.signal});
+ await assert.rejects(pending,{code:'AI_CANCELLED',retryable:false});
+ assert.equal(calls,1);assert.equal(transport.aborted,true);
+});
+test('already canceled work does not contact provider', async () => {
+ const controller=new AbortController();controller.abort();let calls=0;
+ await assert.rejects(reliableGeneration(async()=>{calls++;},{signal:controller.signal}),{code:'AI_CANCELLED'});
+ assert.equal(calls,0);
+});

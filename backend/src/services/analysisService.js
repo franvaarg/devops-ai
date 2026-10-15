@@ -40,7 +40,8 @@ async function saveAnalysis(analysis, originalLog, userId, database = pool) {
     JSON.stringify(analysis.steps ?? []),
     originalLog,
     userId,
-    JSON.stringify(analysis.actionability ? { actionability: analysis.actionability, falsePositiveRisk: analysis.falsePositiveRisk, noiseAssessment: analysis.noiseAssessment, operationalContext: analysis.operationalContext || "", ...(analysis.inputSignals ? { inputSignals: analysis.inputSignals } : {}) } : {}),
+    JSON.stringify(Object.fromEntries(['actionability', 'falsePositiveRisk', 'noiseAssessment', 'operationalContext', 'inputSignals', 'providerMetadata', 'missingInformation', 'verificationSteps']
+      .filter(key => analysis[key] !== undefined).map(key => [key, analysis[key]]))),
   ];
 
   const result = await database.query(query, values);

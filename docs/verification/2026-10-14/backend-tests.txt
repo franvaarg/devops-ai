@@ -1,0 +1,328 @@
+
+> backend@1.0.0 test
+> node --test --test-concurrency=1 test/*.test.js
+
+{"timestamp":"2026-10-14T23:56:52.098Z","event":"provider_attempt","durationMs":4,"provider":"gemini","outcome":"success","attempt":1,"level":"info"}
+{"timestamp":"2026-10-14T23:56:52.104Z","event":"analysis_tokens","provider":"gemini","level":"info"}
+{"timestamp":"2026-10-14T23:56:52.108Z","event":"provider_request","durationMs":18,"provider":"gemini","outcome":"success","level":"info"}
+{"timestamp":"2026-10-14T23:56:52.123Z","event":"provider_attempt","code":"AI_PROVIDER_ERROR","provider":"gemini","outcome":"failure","retryable":false,"attempt":1,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:52.125Z","event":"provider_request","durationMs":4,"code":"AI_PROVIDER_ERROR","expected":false,"provider":"gemini","outcome":"failure","level":"error"}
+{"timestamp":"2026-10-14T23:56:52.135Z","event":"provider_attempt","durationMs":0,"provider":"gemini","outcome":"success","attempt":1,"level":"info"}
+{"timestamp":"2026-10-14T23:56:52.136Z","event":"analysis_tokens","provider":"gemini","level":"info"}
+{"timestamp":"2026-10-14T23:56:52.136Z","event":"provider_request","durationMs":2,"code":"AI_INVALID_RESPONSE","expected":false,"provider":"gemini","outcome":"failure","level":"error"}
+{"timestamp":"2026-10-14T23:56:52.157Z","event":"provider_request","status":401,"durationMs":0,"code":"AI_AUTH","expected":false,"provider":"gemini","outcome":"failure","level":"error"}
+✔ Gemini request has bounded time/output/attempts and redacted input (55.527653ms)
+✔ Gemini failure and invalid JSON map to safe application errors without retries (12.698485ms)
+✔ Gemini malformed response is rejected at the real service boundary (6.897283ms)
+✔ missing Gemini configuration does not crash service loading or expose configuration (19.251316ms)
+✔ explicit provider registry supports a secondary adapter without silently falling back (445.733718ms)
+{"timestamp":"2026-10-14T23:56:52.938Z","event":"provider_attempt","status":429,"code":"AI_RATE_LIMITED","provider":"gemini","outcome":"failure","retryable":true,"attempt":1,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:52.941Z","event":"provider_retry","provider":"gemini","attempt":1,"delayMs":500,"level":"info"}
+{"timestamp":"2026-10-14T23:56:52.943Z","event":"provider_attempt","status":429,"code":"AI_RATE_LIMITED","provider":"gemini","outcome":"failure","retryable":true,"attempt":2,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:52.944Z","event":"provider_retry","provider":"gemini","attempt":2,"delayMs":1000,"level":"info"}
+{"timestamp":"2026-10-14T23:56:52.945Z","event":"provider_attempt","durationMs":1500,"provider":"gemini","outcome":"success","attempt":3,"level":"info"}
+{"timestamp":"2026-10-14T23:56:52.957Z","event":"provider_attempt","status":500,"code":"AI_PROVIDER_ERROR","provider":"gemini","outcome":"failure","retryable":true,"attempt":1,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:52.958Z","event":"provider_retry","provider":"gemini","attempt":1,"delayMs":500,"level":"info"}
+{"timestamp":"2026-10-14T23:56:52.959Z","event":"provider_attempt","status":500,"code":"AI_PROVIDER_ERROR","provider":"gemini","outcome":"failure","retryable":true,"attempt":2,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:52.959Z","event":"provider_retry","provider":"gemini","attempt":2,"delayMs":1000,"level":"info"}
+{"timestamp":"2026-10-14T23:56:52.961Z","event":"provider_attempt","durationMs":1500,"provider":"gemini","outcome":"success","attempt":3,"level":"info"}
+{"timestamp":"2026-10-14T23:56:52.963Z","event":"provider_attempt","status":502,"code":"AI_PROVIDER_ERROR","provider":"gemini","outcome":"failure","retryable":true,"attempt":1,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:52.963Z","event":"provider_retry","provider":"gemini","attempt":1,"delayMs":500,"level":"info"}
+{"timestamp":"2026-10-14T23:56:52.968Z","event":"provider_attempt","status":502,"code":"AI_PROVIDER_ERROR","provider":"gemini","outcome":"failure","retryable":true,"attempt":2,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:52.968Z","event":"provider_retry","provider":"gemini","attempt":2,"delayMs":1000,"level":"info"}
+{"timestamp":"2026-10-14T23:56:52.969Z","event":"provider_attempt","durationMs":1500,"provider":"gemini","outcome":"success","attempt":3,"level":"info"}
+{"timestamp":"2026-10-14T23:56:52.973Z","event":"provider_attempt","status":503,"code":"AI_PROVIDER_ERROR","provider":"gemini","outcome":"failure","retryable":true,"attempt":1,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:52.974Z","event":"provider_retry","provider":"gemini","attempt":1,"delayMs":500,"level":"info"}
+{"timestamp":"2026-10-14T23:56:52.974Z","event":"provider_attempt","status":503,"code":"AI_PROVIDER_ERROR","provider":"gemini","outcome":"failure","retryable":true,"attempt":2,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:52.974Z","event":"provider_retry","provider":"gemini","attempt":2,"delayMs":1000,"level":"info"}
+{"timestamp":"2026-10-14T23:56:52.976Z","event":"provider_attempt","durationMs":1500,"provider":"gemini","outcome":"success","attempt":3,"level":"info"}
+{"timestamp":"2026-10-14T23:56:52.978Z","event":"provider_attempt","status":504,"code":"AI_PROVIDER_ERROR","provider":"gemini","outcome":"failure","retryable":true,"attempt":1,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:52.979Z","event":"provider_retry","provider":"gemini","attempt":1,"delayMs":500,"level":"info"}
+{"timestamp":"2026-10-14T23:56:52.979Z","event":"provider_attempt","status":504,"code":"AI_PROVIDER_ERROR","provider":"gemini","outcome":"failure","retryable":true,"attempt":2,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:52.979Z","event":"provider_retry","provider":"gemini","attempt":2,"delayMs":1000,"level":"info"}
+{"timestamp":"2026-10-14T23:56:52.979Z","event":"provider_attempt","durationMs":1500,"provider":"gemini","outcome":"success","attempt":3,"level":"info"}
+{"timestamp":"2026-10-14T23:56:52.982Z","event":"provider_attempt","status":400,"code":"AI_REQUEST_REJECTED","provider":"gemini","outcome":"failure","retryable":false,"attempt":1,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:52.987Z","event":"provider_attempt","status":401,"code":"AI_AUTH","provider":"gemini","outcome":"failure","retryable":false,"attempt":1,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:52.989Z","event":"provider_attempt","status":403,"code":"AI_AUTH","provider":"gemini","outcome":"failure","retryable":false,"attempt":1,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:52.992Z","event":"provider_attempt","status":404,"code":"AI_REQUEST_REJECTED","provider":"gemini","outcome":"failure","retryable":false,"attempt":1,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:53.004Z","event":"provider_attempt","status":422,"code":"AI_REQUEST_REJECTED","provider":"gemini","outcome":"failure","retryable":false,"attempt":1,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:53.011Z","event":"provider_attempt","status":429,"code":"AI_RATE_LIMITED","provider":"gemini","outcome":"failure","retryable":true,"attempt":1,"level":"warn"}
+✔ HTTP 429 backs off and recovers (26.591325ms)
+✔ HTTP 500 backs off and recovers (8.902737ms)
+✔ HTTP 502 backs off and recovers (7.849713ms)
+✔ HTTP 503 backs off and recovers (6.522898ms)
+✔ HTTP 504 backs off and recovers (3.348226ms)
+✔ HTTP 400 is never retried (3.238549ms)
+✔ HTTP 401 is never retried (3.609406ms)
+✔ HTTP 403 is never retried (1.311324ms)
+✔ HTTP 404 is never retried (3.092185ms)
+✔ HTTP 422 is never retried (11.613746ms)
+✔ daily and zero quota do not retry even with RetryInfo (2.043301ms)
+✔ provider retry delay cannot exceed overall budget (2.272686ms)
+{"timestamp":"2026-10-14T23:56:53.069Z","event":"provider_attempt","code":"AI_TIMEOUT","provider":"gemini","outcome":"failure","retryable":true,"attempt":1,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:53.069Z","event":"provider_retry","provider":"gemini","attempt":1,"delayMs":500,"level":"info"}
+{"timestamp":"2026-10-14T23:56:53.070Z","event":"provider_attempt","durationMs":0,"provider":"gemini","outcome":"success","attempt":2,"level":"info"}
+{"timestamp":"2026-10-14T23:56:53.073Z","event":"provider_attempt","requestId":"retry-correlation","status":503,"code":"AI_PROVIDER_ERROR","provider":"gemini","outcome":"failure","retryable":true,"attempt":1,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:53.073Z","event":"provider_retry","requestId":"retry-correlation","provider":"gemini","attempt":1,"delayMs":500,"level":"info"}
+{"timestamp":"2026-10-14T23:56:53.074Z","event":"provider_attempt","requestId":"retry-correlation","status":503,"code":"AI_PROVIDER_ERROR","provider":"gemini","outcome":"failure","retryable":true,"attempt":2,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:53.074Z","event":"provider_retry","requestId":"retry-correlation","provider":"gemini","attempt":2,"delayMs":1000,"level":"info"}
+{"timestamp":"2026-10-14T23:56:53.074Z","event":"provider_attempt","requestId":"retry-correlation","status":503,"code":"AI_PROVIDER_ERROR","provider":"gemini","outcome":"failure","retryable":true,"attempt":3,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:53.078Z","event":"provider_attempt","code":"AI_NETWORK","provider":"gemini","outcome":"failure","retryable":true,"attempt":1,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:53.079Z","event":"provider_retry","provider":"gemini","attempt":1,"delayMs":500,"level":"info"}
+{"timestamp":"2026-10-14T23:56:53.079Z","event":"provider_attempt","durationMs":500,"provider":"gemini","outcome":"success","attempt":2,"level":"info"}
+{"timestamp":"2026-10-14T23:56:53.079Z","event":"provider_attempt","code":"AI_PROVIDER_ERROR","provider":"gemini","outcome":"failure","retryable":false,"attempt":1,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:53.080Z","event":"provider_attempt","code":"AI_PROVIDER_ERROR","provider":"gemini","outcome":"failure","retryable":false,"attempt":1,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:53.081Z","event":"provider_attempt","code":"AI_TIMEOUT","provider":"gemini","outcome":"failure","retryable":true,"attempt":1,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:53.082Z","event":"provider_retry","provider":"gemini","attempt":1,"delayMs":500,"level":"info"}
+{"timestamp":"2026-10-14T23:56:53.083Z","event":"provider_attempt","code":"AI_TIMEOUT","provider":"gemini","outcome":"failure","retryable":true,"attempt":2,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:53.084Z","event":"provider_retry","provider":"gemini","attempt":2,"delayMs":1000,"level":"info"}
+{"timestamp":"2026-10-14T23:56:53.084Z","event":"provider_attempt","code":"AI_TIMEOUT","provider":"gemini","outcome":"failure","retryable":true,"attempt":3,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:53.088Z","event":"provider_attempt","status":429,"code":"AI_RATE_LIMITED","provider":"gemini","outcome":"failure","retryable":true,"attempt":1,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:53.089Z","event":"provider_retry","provider":"gemini","attempt":1,"delayMs":2000,"level":"info"}
+{"timestamp":"2026-10-14T23:56:53.089Z","event":"provider_attempt","durationMs":2000,"provider":"gemini","outcome":"success","attempt":2,"level":"info"}
+{"timestamp":"2026-10-14T23:56:53.091Z","event":"provider_attempt","status":503,"code":"AI_PROVIDER_ERROR","provider":"gemini","outcome":"failure","retryable":true,"attempt":1,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:53.091Z","event":"provider_retry","provider":"gemini","attempt":1,"delayMs":500,"level":"info"}
+{"timestamp":"2026-10-14T23:56:53.099Z","event":"provider_attempt","code":"AI_CANCELLED","provider":"gemini","outcome":"failure","retryable":false,"attempt":1,"level":"warn"}
+✔ timeout aborts transport and can recover (57.705407ms)
+✔ exhausted transient failures stop after three attempts with same request ID (3.531747ms)
+✔ network reset recovers; unknown and malformed errors do not retry (5.256507ms)
+✔ remaining attempt timeout shrinks to fit overall deadline (6.571054ms)
+✔ RetryInfo waits at least the provider interval before successful recovery (2.354068ms)
+✔ a delayed backoff never starts another attempt past the deadline (2.846432ms)
+✔ provider classification distinguishes auth, input rejection, transient throttling and network failures (0.798301ms)
+✔ caller cancellation aborts in-flight transport and never retries (7.378685ms)
+✔ already canceled work does not contact provider (0.724605ms)
+✔ redacts credentials and preserves diagnostic context (10.807666ms)
+✔ redacts standalone JWT and cloud credentials (1.038052ms)
+✔ accepts bounded analysis with source-backed evidence (6.689678ms)
+✔ rejects invalid and fabricated model output without disclosing it (34.121872ms)
+✔ missing evidence forces low confidence and insufficient-evidence diagnosis (4.345528ms)
+✔ decision assessments reject invalid classifications and missing noise explanations (1.95828ms)
+✔ no evidence cannot retain unsupported outage severity (1.047189ms)
+✔ redacts database URLs, credential assignments and Stripe secrets before transmission (0.59243ms)
+✔ trust fields reject invalid arrays and fabricated verification payloads (3.65612ms)
+{"timestamp":"2026-10-14T23:56:54.715Z","event":"http_request","requestId":"ab4d251a-0b89-4ae0-8117-9b88e8e4550b","method":"GET","route":"/api/auth/me","status":200,"durationMs":22,"expected":true,"outcome":"completed","level":"info"}
+✔ authentication accepts a valid token for an existing user (653.053552ms)
+{"timestamp":"2026-10-14T23:56:54.760Z","event":"http_request","requestId":"738c81a8-18ed-4729-91b3-8d53125910d8","method":"GET","route":"/api/auth/me","status":401,"durationMs":5,"code":"AUTHENTICATION_REQUIRED","expected":true,"outcome":"completed","level":"warn"}
+✔ authentication rejects a valid token for a nonexistent user (28.002508ms)
+{"timestamp":"2026-10-14T23:56:54.783Z","event":"http_request","requestId":"b8dd8cbc-6fcc-4939-8050-2d7c955587b4","method":"GET","route":"/api/auth/me","status":401,"durationMs":4,"code":"AUTHENTICATION_REQUIRED","expected":true,"outcome":"completed","level":"warn"}
+✔ authentication rejects an expired token (22.470822ms)
+{"timestamp":"2026-10-14T23:56:54.804Z","event":"http_request","requestId":"2e41bde9-e7b1-4665-b260-68e6c6a9b8f0","method":"GET","route":"/api/auth/me","status":401,"durationMs":2,"code":"AUTHENTICATION_REQUIRED","expected":true,"outcome":"completed","level":"warn"}
+✔ authentication rejects a malformed token (19.523522ms)
+{"timestamp":"2026-10-14T23:56:54.825Z","event":"http_request","requestId":"1ff3a40a-9f1c-4f5b-8fb7-5b0b699c4153","method":"GET","route":"/api/auth/me","status":401,"durationMs":3,"code":"AUTHENTICATION_REQUIRED","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:54.835Z","event":"http_request","requestId":"7a337ad1-8615-4056-b490-afc9c2e78c30","method":"GET","route":"/api/auth/me","status":401,"durationMs":2,"code":"AUTHENTICATION_REQUIRED","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:54.843Z","event":"http_request","requestId":"c9727e95-bb0b-4360-a637-bbdec9792d0b","method":"GET","route":"/api/auth/me","status":401,"durationMs":2,"code":"AUTHENTICATION_REQUIRED","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:54.854Z","event":"http_request","requestId":"1f83229b-c8db-4167-b64d-efb88f7fc943","method":"GET","route":"/api/auth/me","status":401,"durationMs":2,"code":"AUTHENTICATION_REQUIRED","expected":true,"outcome":"completed","level":"warn"}
+✔ authentication rejects invalid signed claims and unexpected algorithms before querying storage (55.144385ms)
+{"timestamp":"2026-10-14T23:56:54.885Z","event":"http_request","requestId":"92a3b2b0-eff9-4c1d-be75-836068eb543b","method":"GET","route":"/api/auth/me","status":401,"durationMs":3,"code":"AUTHENTICATION_REQUIRED","expected":true,"outcome":"completed","level":"warn"}
+✔ authentication rejects a missing Authorization header (26.066475ms)
+{"timestamp":"2026-10-14T23:56:54.920Z","event":"http_request","requestId":"4e23944e-12d3-4d73-9621-0a6a47b70bc7","method":"GET","route":"/api/auth/me","status":401,"durationMs":4,"code":"AUTHENTICATION_REQUIRED","expected":true,"outcome":"completed","level":"warn"}
+✔ authentication rejects tokens revoked by a password reset (34.532817ms)
+{"timestamp":"2026-10-14T23:56:54.942Z","event":"http_request","requestId":"638e7706-fa64-4db7-b556-9d9ce609eaa0","method":"GET","route":"/","status":200,"durationMs":3,"expected":true,"outcome":"completed","level":"info"}
+✔ HTTP hardening hides Express and sets security headers (21.049786ms)
+{"timestamp":"2026-10-14T23:56:54.994Z","event":"request_failed","requestId":"721f38b7-e168-4f98-9d2f-d8cd39cfa075","code":"VALIDATION_ERROR","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:54.996Z","event":"http_request","requestId":"721f38b7-e168-4f98-9d2f-d8cd39cfa075","method":"POST","route":"unmatched","status":400,"durationMs":30,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+✔ malformed JSON receives a safe JSON error (58.857208ms)
+{"timestamp":"2026-10-14T23:56:55.048Z","event":"request_failed","requestId":"e3eb924f-1390-461f-86ca-7279aa02048f","code":"VALIDATION_ERROR","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:55.050Z","event":"http_request","requestId":"e3eb924f-1390-461f-86ca-7279aa02048f","method":"POST","route":"unmatched","status":413,"durationMs":13,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+✔ oversized request bodies receive a safe JSON error (48.046656ms)
+{"timestamp":"2026-10-14T23:56:55.094Z","event":"http_request","requestId":"a3eda5cf-beca-466e-9082-a68a8b1b0a35","method":"POST","route":"/api/auth/login","status":400,"durationMs":26,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+▶ login validates required credentials before querying the database
+  ✔ {} (43.7737ms)
+{"timestamp":"2026-10-14T23:56:55.123Z","event":"http_request","requestId":"ca3cb6ec-f0cd-4bbd-b359-eb4ec417cbf9","method":"POST","route":"/api/auth/login","status":400,"durationMs":5,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+  ✔ {"email":"user@example.test"} (27.989187ms)
+{"timestamp":"2026-10-14T23:56:55.142Z","event":"http_request","requestId":"2faf6314-7f80-4326-a624-41d8aee7e566","method":"POST","route":"/api/auth/login","status":400,"durationMs":3,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+  ✔ {"password":"password123"} (18.616778ms)
+✔ login validates required credentials before querying the database (93.519763ms)
+{"timestamp":"2026-10-14T23:56:55.167Z","event":"http_request","requestId":"0b7ed097-f5b9-4f05-8e87-14e78ee43d7d","method":"POST","route":"/api/auth/register","status":400,"durationMs":4,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+▶ registration validates input before querying the database
+  ✔ missing fields (22.793908ms)
+{"timestamp":"2026-10-14T23:56:55.190Z","event":"http_request","requestId":"55caffe5-6623-4377-a30b-f67950a7b8e0","method":"POST","route":"/api/auth/register","status":400,"durationMs":3,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+  ✔ short name (21.985621ms)
+{"timestamp":"2026-10-14T23:56:55.225Z","event":"http_request","requestId":"406a9d48-4245-41ac-a817-a84c6d50fba9","method":"POST","route":"/api/auth/register","status":400,"durationMs":3,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+  ✔ invalid email (33.755486ms)
+{"timestamp":"2026-10-14T23:56:55.246Z","event":"http_request","requestId":"e9bf4aed-1384-4cbb-a7a3-3b362a003740","method":"POST","route":"/api/auth/register","status":400,"durationMs":5,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+  ✔ short password (19.61489ms)
+{"timestamp":"2026-10-14T23:56:55.270Z","event":"http_request","requestId":"30a41884-2641-4a87-a64c-27039db9c9b6","method":"POST","route":"/api/auth/register","status":400,"durationMs":4,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+  ✔ common password (23.56884ms)
+{"timestamp":"2026-10-14T23:56:55.288Z","event":"http_request","requestId":"963f8d87-713d-4cea-a25b-0e7abe13cf6b","method":"POST","route":"/api/auth/register","status":400,"durationMs":3,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+  ✔ password based on email (17.823701ms)
+✔ registration validates input before querying the database (144.326562ms)
+{"timestamp":"2026-10-14T23:56:55.317Z","event":"http_request","requestId":"cbffd9dc-a2ab-42b9-8e65-4f8989e3844d","method":"POST","route":"/api/auth/login","status":400,"durationMs":5,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:55.325Z","event":"http_request","requestId":"ab5c2a6c-d4bc-4fa4-b2cd-800a8223fc29","method":"POST","route":"/api/auth/login","status":400,"durationMs":3,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:55.332Z","event":"http_request","requestId":"a0be69ad-1c54-4e0e-8dc4-d71017a02d66","method":"POST","route":"/api/auth/login","status":400,"durationMs":3,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:55.339Z","event":"http_request","requestId":"ba8560f9-48ee-46c8-ab25-599414e2c6b2","method":"POST","route":"/api/auth/login","status":400,"durationMs":2,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:55.346Z","event":"http_request","requestId":"d636f271-c5db-4020-a80d-1f78795edc48","method":"POST","route":"/api/auth/login","status":400,"durationMs":2,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:55.356Z","event":"http_request","requestId":"4ddcbdab-0a4b-4bd7-abd7-c1fbddf3958f","method":"POST","route":"/api/auth/login","status":400,"durationMs":3,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:55.364Z","event":"http_request","requestId":"80d4857f-f7d1-4437-bbed-142977990318","method":"POST","route":"/api/auth/login","status":400,"durationMs":2,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:55.369Z","event":"http_request","requestId":"461db98f-3d2d-42c6-bc0a-fbc20e7a98b7","method":"POST","route":"/api/auth/login","status":400,"durationMs":2,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:55.374Z","event":"http_request","requestId":"2f541cb8-d50f-452b-9e05-4b96ebf1d90f","method":"POST","route":"/api/auth/login","status":400,"durationMs":1,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:55.381Z","event":"http_request","requestId":"4f7b4ea4-0e12-4e6f-bc7c-4c6a135bc139","method":"POST","route":"/api/auth/login","status":400,"durationMs":2,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:55.388Z","event":"http_request","requestId":"668cbfe5-aa64-4269-8bdc-f3d5ad542df4","method":"POST","route":"/api/auth/login","status":429,"durationMs":2,"code":"RATE_LIMITED","expected":true,"outcome":"completed","level":"warn"}
+✔ login rate limiting returns JSON after 10 requests in 15 minutes (98.713008ms)
+{"timestamp":"2026-10-14T23:56:56.679Z","event":"authentication_succeeded","requestId":"bb15c0d9-9074-4beb-91bc-bacfb14f7faf","level":"info"}
+{"timestamp":"2026-10-14T23:56:56.681Z","event":"http_request","requestId":"bb15c0d9-9074-4beb-91bc-bacfb14f7faf","method":"POST","route":"/api/auth/register","status":201,"durationMs":1278,"expected":true,"outcome":"completed","level":"info"}
+✔ registration returns only safe user fields and stores a password hash (1292.843658ms)
+{"timestamp":"2026-10-14T23:56:56.698Z","event":"http_request","requestId":"5ed8a67d-7ebf-4729-8cd1-e9ab306d3e0c","method":"POST","route":"/api/auth/register","status":409,"durationMs":2,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+✔ duplicate registration does not disclose account existence (15.872878ms)
+{"timestamp":"2026-10-14T23:56:56.715Z","event":"http_request","requestId":"819f5fac-8609-48b5-87b1-80e7a27da519","method":"POST","route":"/api/auth/register","status":400,"durationMs":4,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:56.722Z","event":"http_request","requestId":"dfdfd25a-1db7-4b98-a705-0c9b360d3cdf","method":"POST","route":"/api/auth/register","status":400,"durationMs":2,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:56.731Z","event":"http_request","requestId":"3a7984a0-2e36-41fb-a7bb-bba16d309fd0","method":"POST","route":"/api/auth/register","status":400,"durationMs":3,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:56.736Z","event":"http_request","requestId":"a6f9653a-b29e-4007-9212-ee016b4b0dd4","method":"POST","route":"/api/auth/register","status":400,"durationMs":2,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:56.751Z","event":"http_request","requestId":"74842453-4641-4313-9686-b02263759c93","method":"POST","route":"/api/auth/register","status":400,"durationMs":3,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:56.762Z","event":"http_request","requestId":"78dfaf96-ac39-4d2d-86f5-1cc289abc97e","method":"POST","route":"/api/auth/register","status":429,"durationMs":3,"code":"RATE_LIMITED","expected":true,"outcome":"completed","level":"warn"}
+✔ registration rate limiting returns JSON after 5 requests in one hour (66.793244ms)
+{"timestamp":"2026-10-14T23:56:56.784Z","event":"http_request","requestId":"f773538b-beca-4358-b7fe-01b707cc6f90","method":"POST","route":"/api/auth/forgot-password","status":202,"durationMs":3,"expected":true,"outcome":"completed","level":"info"}
+▶ password recovery returns the same response without exposing account existence
+  ✔ existing@example.test (18.219779ms)
+{"timestamp":"2026-10-14T23:56:56.811Z","event":"http_request","requestId":"937bb85f-d5f2-4862-bb11-236cd77aa23a","method":"POST","route":"/api/auth/forgot-password","status":202,"durationMs":4,"expected":true,"outcome":"completed","level":"info"}
+  ✔ invalid-email (26.488562ms)
+✔ password recovery returns the same response without exposing account existence (47.556719ms)
+{"timestamp":"2026-10-14T23:56:56.833Z","event":"password_reset_delivery_failed","requestId":"41acc0d1-2183-460d-85b2-7734f4d9275f","code":"INTERNAL_ERROR","expected":false,"retryable":false,"level":"error"}
+{"timestamp":"2026-10-14T23:56:56.836Z","event":"http_request","requestId":"41acc0d1-2183-460d-85b2-7734f4d9275f","method":"POST","route":"/api/auth/forgot-password","status":202,"durationMs":7,"expected":true,"outcome":"completed","level":"info"}
+✔ password recovery preserves its generic response when delivery fails (25.37235ms)
+{"timestamp":"2026-10-14T23:56:56.875Z","event":"http_request","requestId":"e235d5fd-ddbb-4af3-971e-dec2460d38a1","method":"POST","route":"/api/auth/reset-password","status":200,"durationMs":4,"expected":true,"outcome":"completed","level":"info"}
+✔ password reset accepts a valid token without external services (38.548053ms)
+{"timestamp":"2026-10-14T23:56:56.906Z","event":"http_request","requestId":"cf0929d3-a7d0-432e-a35b-3cda8bc1c7f6","method":"POST","route":"/api/auth/reset-password","status":400,"durationMs":3,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+✔ password reset rejects an expired or used token (29.740641ms)
+{"timestamp":"2026-10-14T23:56:56.930Z","event":"http_request","requestId":"f66836a3-2b1b-4a09-9b46-81db6932c220","method":"POST","route":"/api/auth/reset-password","status":400,"durationMs":6,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+✔ password reset enforces the server-side password policy (24.693662ms)
+{"timestamp":"2026-10-14T23:56:56.951Z","event":"http_request","requestId":"8a4cb8cb-ceeb-4ed4-a958-2c0f85177c3c","method":"POST","route":"/api/analyze","status":400,"durationMs":3,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+▶ analysis rejects missing, blank, and non-string logs without external calls
+  ✔ missing log (19.18285ms)
+{"timestamp":"2026-10-14T23:56:56.978Z","event":"http_request","requestId":"d113c4ca-d463-40b8-bb9a-262b199ba7c2","method":"POST","route":"/api/analyze","status":400,"durationMs":5,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+  ✔ empty log (26.863087ms)
+{"timestamp":"2026-10-14T23:56:57.002Z","event":"http_request","requestId":"79a449f4-1f1d-4691-953d-95a16c245cf6","method":"POST","route":"/api/analyze","status":400,"durationMs":4,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+  ✔ whitespace log (23.054909ms)
+{"timestamp":"2026-10-14T23:56:57.025Z","event":"http_request","requestId":"dc56849a-3c34-41d7-a165-0afff38f5d13","method":"POST","route":"/api/analyze","status":400,"durationMs":4,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+  ✔ object log (24.118452ms)
+{"timestamp":"2026-10-14T23:56:57.047Z","event":"http_request","requestId":"8b9f9073-595e-444a-a39d-60ceb1a37c71","method":"POST","route":"/api/analyze","status":400,"durationMs":6,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+  ✔ array log (21.794543ms)
+{"timestamp":"2026-10-14T23:56:57.070Z","event":"http_request","requestId":"f00952bd-4554-48a3-9f7f-c8407d85e711","method":"POST","route":"/api/analyze","status":400,"durationMs":4,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+  ✔ numeric log (21.262159ms)
+✔ analysis rejects missing, blank, and non-string logs without external calls (140.155668ms)
+{"timestamp":"2026-10-14T23:56:57.105Z","event":"http_request","requestId":"30776f3a-a62d-4894-b727-72ca95be8e22","method":"POST","route":"/api/analyze","status":400,"durationMs":4,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:57.122Z","event":"http_request","requestId":"5677a9f6-908f-450d-9b06-78faa8877bf2","method":"POST","route":"/api/analyze","status":400,"durationMs":4,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:57.133Z","event":"http_request","requestId":"533422a8-65df-42ca-aab8-ed1ee3b5807a","method":"POST","route":"/api/analyze","status":400,"durationMs":4,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:57.140Z","event":"http_request","requestId":"ec7dfb40-dd40-4b46-88ae-e571354c16f6","method":"POST","route":"/api/analyze","status":400,"durationMs":2,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:57.153Z","event":"http_request","requestId":"23685e76-355d-4bfc-ba4c-160cc15416c9","method":"POST","route":"/api/analyze","status":400,"durationMs":7,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:57.168Z","event":"http_request","requestId":"056f075e-9ce8-4440-88ad-c44419d86194","method":"POST","route":"/api/analyze","status":400,"durationMs":7,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:57.180Z","event":"http_request","requestId":"dcae2862-bc31-41d3-b370-2210fe3a8fb3","method":"POST","route":"/api/analyze","status":400,"durationMs":7,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:57.188Z","event":"http_request","requestId":"95bdc3f4-ee0e-4194-805b-26454d4b8e20","method":"POST","route":"/api/analyze","status":400,"durationMs":2,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:57.197Z","event":"http_request","requestId":"37e5b24f-2171-437f-baf5-142c8551d979","method":"POST","route":"/api/analyze","status":400,"durationMs":5,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:57.207Z","event":"http_request","requestId":"72bc73e4-f90e-47d2-b689-5cdb18080a54","method":"POST","route":"/api/analyze","status":400,"durationMs":5,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:57.219Z","event":"http_request","requestId":"1dcbdb7e-54a1-44fe-9b84-2f95f16d02d5","method":"POST","route":"/api/analyze","status":400,"durationMs":3,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:57.230Z","event":"http_request","requestId":"267ea0ed-c1a9-406f-998a-f1ba7bdae635","method":"POST","route":"/api/analyze","status":400,"durationMs":5,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:57.239Z","event":"http_request","requestId":"9bd9c06b-1118-491f-8f58-9f014a485740","method":"POST","route":"/api/analyze","status":400,"durationMs":2,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:57.249Z","event":"http_request","requestId":"9f94719a-2c8f-47bc-a1dc-c28d1257ea2e","method":"POST","route":"/api/analyze","status":400,"durationMs":4,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:57.255Z","event":"http_request","requestId":"ece37897-d30a-410f-bb19-c34b089e816f","method":"POST","route":"/api/analyze","status":400,"durationMs":2,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:57.269Z","event":"http_request","requestId":"5ecf6655-73ff-49ef-97b4-fd3d9919c1bc","method":"POST","route":"/api/analyze","status":400,"durationMs":7,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:57.279Z","event":"http_request","requestId":"da7f3fe9-3c7f-446e-b3be-903e244df8d7","method":"POST","route":"/api/analyze","status":400,"durationMs":4,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:57.292Z","event":"http_request","requestId":"e5e12a04-7b71-4292-8942-efdc3c135b57","method":"POST","route":"/api/analyze","status":400,"durationMs":6,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:57.302Z","event":"http_request","requestId":"0f784bec-f0e4-4132-891e-f521952fb6c9","method":"POST","route":"/api/analyze","status":400,"durationMs":3,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:57.311Z","event":"http_request","requestId":"9edb4776-d7b7-45b8-8da4-9aece794472f","method":"POST","route":"/api/analyze","status":400,"durationMs":5,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:57.321Z","event":"http_request","requestId":"4a99379f-9116-4303-be7f-6ef2617510af","method":"POST","route":"/api/analyze","status":429,"durationMs":3,"code":"RATE_LIMITED","expected":true,"outcome":"completed","level":"warn"}
+✔ analysis rate limiting returns JSON after 20 requests without external calls (252.200546ms)
+{"timestamp":"2026-10-14T23:56:57.371Z","event":"http_request","requestId":"07544585-4df8-465c-95cf-5f1819ee94f6","method":"POST","route":"/api/analyze","status":201,"durationMs":19,"expected":true,"outcome":"completed","level":"info"}
+✔ successful analysis is persisted within the quota transaction (46.959256ms)
+{"timestamp":"2026-10-14T23:56:57.395Z","event":"request_failed","requestId":"4e4daee6-36c0-4e4a-b7a9-c38e6262a4fa","code":"AI_PROVIDER_ERROR","expected":false,"retryable":true,"level":"error"}
+{"timestamp":"2026-10-14T23:56:57.397Z","event":"http_request","requestId":"4e4daee6-36c0-4e4a-b7a9-c38e6262a4fa","method":"POST","route":"/api/analyze","status":502,"durationMs":5,"code":"AI_PROVIDER_ERROR","expected":false,"outcome":"completed","level":"error"}
+{"timestamp":"2026-10-14T23:56:57.406Z","event":"request_failed","requestId":"989d506d-ff48-4fca-a5e3-ddf4649aa231","code":"AI_PROVIDER_ERROR","expected":false,"retryable":true,"level":"error"}
+{"timestamp":"2026-10-14T23:56:57.407Z","event":"http_request","requestId":"989d506d-ff48-4fca-a5e3-ddf4649aa231","method":"POST","route":"/api/analyze","status":502,"durationMs":5,"code":"AI_PROVIDER_ERROR","expected":false,"outcome":"completed","level":"error"}
+✔ provider failure follows reservation and does not persist (35.142221ms)
+{"timestamp":"2026-10-14T23:56:57.430Z","event":"http_request","requestId":"3620a4d7-bae6-4a22-a03d-7bbec36fa5dc","method":"POST","route":"/api/analyze","status":201,"durationMs":6,"expected":true,"outcome":"completed","level":"info"}
+▶ analysis preserves plain text, stack traces, and JSON formatting
+  ✔ plain text (22.629948ms)
+{"timestamp":"2026-10-14T23:56:57.479Z","event":"http_request","requestId":"368796a2-b1ab-463b-809b-1a9b83ccba1a","method":"POST","route":"/api/analyze","status":201,"durationMs":5,"expected":true,"outcome":"completed","level":"info"}
+  ✔ multiline stack trace (47.040976ms)
+{"timestamp":"2026-10-14T23:56:57.493Z","event":"http_request","requestId":"91da32da-7a05-4405-ba71-67b12bd39bdc","method":"POST","route":"/api/analyze","status":201,"durationMs":4,"expected":true,"outcome":"completed","level":"info"}
+  ✔ structured JSON (16.350181ms)
+✔ analysis preserves plain text, stack traces, and JSON formatting (88.134386ms)
+{"timestamp":"2026-10-14T23:56:57.518Z","event":"request_failed","requestId":"4635e93d-5a6e-47d6-934f-868fb269c583","code":"AI_INVALID_RESPONSE","expected":false,"retryable":false,"level":"error"}
+{"timestamp":"2026-10-14T23:56:57.519Z","event":"http_request","requestId":"4635e93d-5a6e-47d6-934f-868fb269c583","method":"POST","route":"/api/analyze","status":502,"durationMs":5,"code":"AI_INVALID_RESPONSE","expected":false,"outcome":"completed","level":"error"}
+✔ invalid AI response follows reservation and does not persist (23.84886ms)
+{"timestamp":"2026-10-14T23:56:57.538Z","event":"request_failed","requestId":"9490447a-cb04-4809-8900-368e738dbfc1","code":"INTERNAL_ERROR","expected":false,"retryable":false,"level":"error"}
+{"timestamp":"2026-10-14T23:56:57.540Z","event":"http_request","requestId":"9490447a-cb04-4809-8900-368e738dbfc1","method":"POST","route":"/api/analyze","status":500,"durationMs":5,"code":"INTERNAL_ERROR","expected":false,"outcome":"completed","level":"error"}
+✔ persistence failure is propagated from the quota transaction (21.387158ms)
+{"timestamp":"2026-10-14T23:56:57.562Z","event":"request_failed","requestId":"914c4fff-9d3f-4650-bd5a-b6367033df6a","code":"QUOTA_EXCEEDED","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:57.563Z","event":"http_request","requestId":"914c4fff-9d3f-4650-bd5a-b6367033df6a","method":"POST","route":"/api/analyze","status":429,"durationMs":8,"code":"QUOTA_EXCEEDED","expected":true,"outcome":"completed","level":"warn"}
+✔ analysis quota exhaustion blocks Gemini and database saves (21.92622ms)
+{"timestamp":"2026-10-14T23:56:57.578Z","event":"http_request","requestId":"0c5fae54-70be-411c-9bd3-950667fe6bac","method":"GET","route":"/api/account/","status":200,"durationMs":3,"expected":true,"outcome":"completed","level":"info"}
+✔ account summary exposes safe billing state and monthly usage (14.660647ms)
+{"timestamp":"2026-10-14T23:56:57.596Z","event":"http_request","requestId":"3847c1d2-4019-4a38-8a91-1b113cf20249","method":"GET","route":"/api/history","status":200,"durationMs":5,"expected":true,"outcome":"completed","level":"info"}
+✔ history passes the authenticated user ID to the service (18.153604ms)
+{"timestamp":"2026-10-14T23:56:57.615Z","event":"http_request","requestId":"dc219efa-4e7c-45d9-ac59-9d23061ae6af","method":"GET","route":"/api/history","status":401,"durationMs":3,"code":"AUTHENTICATION_REQUIRED","expected":true,"outcome":"completed","level":"warn"}
+✔ history does not run for a token whose user does not exist (18.198394ms)
+{"timestamp":"2026-10-14T23:56:57.633Z","event":"http_request","requestId":"e6981aa6-628f-478f-9231-b28a3ffdd958","method":"DELETE","route":"/api/history/:id","status":404,"durationMs":3,"code":"RESOURCE_NOT_FOUND","expected":true,"outcome":"completed","level":"warn"}
+✔ history deletion passes both analysis and authenticated user IDs (18.146555ms)
+{"timestamp":"2026-10-14T23:56:57.653Z","event":"http_request","requestId":"e7b844e0-475b-49b6-929c-3f0a02a579be","method":"POST","route":"/api/analyze","status":201,"durationMs":3,"expected":true,"outcome":"completed","level":"info"}
+✔ analysis redacts credentials before provider calls and persistence (19.050038ms)
+{"timestamp":"2026-10-14T23:56:57.676Z","event":"request_failed","requestId":"1dd42470-63a2-4b77-8ac6-e5198518c73d","code":"VALIDATION_ERROR","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:57.678Z","event":"http_request","requestId":"1dd42470-63a2-4b77-8ac6-e5198518c73d","method":"POST","route":"/api/analyze","status":400,"durationMs":5,"code":"VALIDATION_ERROR","expected":true,"outcome":"completed","level":"warn"}
+✔ invalid idempotency keys are rejected before quota and provider calls (26.501602ms)
+{"timestamp":"2026-10-14T23:56:57.700Z","event":"request_failed","requestId":"620eba6a-9873-4921-b18b-6c042f597808","code":"LOG_INVALID","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:57.701Z","event":"http_request","requestId":"620eba6a-9873-4921-b18b-6c042f597808","method":"POST","route":"/api/analyze","status":400,"durationMs":8,"code":"LOG_INVALID","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:57.706Z","event":"request_failed","requestId":"a4e01414-f244-49c4-a966-8759a884be0c","code":"LOG_INVALID","expected":true,"retryable":false,"level":"warn"}
+{"timestamp":"2026-10-14T23:56:57.707Z","event":"http_request","requestId":"a4e01414-f244-49c4-a966-8759a884be0c","method":"POST","route":"/api/analyze","status":400,"durationMs":2,"code":"LOG_INVALID","expected":true,"outcome":"completed","level":"warn"}
+✔ invalid text logs are rejected before quota reservation or AI calls (28.658109ms)
+{"timestamp":"2026-10-14T23:56:57.728Z","event":"http_request","requestId":"ba65f9de-876d-47f6-8118-a4c1d18a201b","method":"GET","route":"/api/billing/plans","status":200,"durationMs":4,"expected":true,"outcome":"completed","level":"info"}
+{"timestamp":"2026-10-14T23:56:57.736Z","event":"http_request","requestId":"95a9c3fe-b863-4127-8c83-df6582c58b47","method":"POST","route":"/api/billing/checkout","status":401,"durationMs":2,"code":"AUTHENTICATION_REQUIRED","expected":true,"outcome":"completed","level":"warn"}
+{"timestamp":"2026-10-14T23:56:57.755Z","event":"request_failed","requestId":"68eee9ba-22a1-44f2-b554-705f56490561","code":"BILLING_UNAVAILABLE","expected":false,"retryable":false,"level":"error"}
+{"timestamp":"2026-10-14T23:56:57.759Z","event":"http_request","requestId":"68eee9ba-22a1-44f2-b554-705f56490561","method":"POST","route":"/api/billing/checkout","status":503,"durationMs":13,"code":"BILLING_UNAVAILABLE","expected":false,"outcome":"completed","level":"error"}
+✔ billing does not offer checkout without configuration or authentication (54.5719ms)
+✔ only an eligible live subscription grants Pro (5.287539ms)
+✔ sales stay disabled without explicit configuration (0.66182ms)
+✔ malformed or multi-item subscriptions cannot grant Pro (0.881316ms)
+✔ production rejects missing recovery, provider and malformed origins without exposing their values (6.980838ms)
+✔ local development can keep external services and billing unconfigured (0.590636ms)
+✔ email validation rejects empty and malformed addresses (3.247324ms)
+✔ password policy rejects short, common, repeated, and identity passwords (2.230566ms)
+✔ registration and reset cannot accept passwords login rejects or silently truncates (0.908761ms)
+✔ hosted database URLs cannot disable certificate or hostname verification (10.305897ms)
+✔ local DB parameters remain compatible and invalid URLs do not expose credentials (2.632153ms)
+✔ incident rubric detects fabricated evidence, overconfidence and unsupported executed commands (7.957147ms)
+✔ every incident fixture defines a complete evidence and diagnostic rubric (2.226685ms)
+{"timestamp":"2026-10-14T23:57:00.364Z","event":"readiness_failed","code":"DATABASE_ERROR","expected":false,"databaseCode":"28P01","retryable":true,"level":"error"}
+✔ liveness is independent of DB; readiness conceals authentication and schema failures (142.710826ms)
+{"timestamp":"2026-10-14T23:57:00.415Z","event":"server_draining","level":"info"}
+{"timestamp":"2026-10-14T23:57:00.416Z","event":"server_stopped","level":"info"}
+{"timestamp":"2026-10-14T23:57:00.417Z","event":"server_draining","level":"info"}
+✔ readiness checks schema and remains unavailable throughout shutdown (29.783571ms)
+✔ shutdown stops admission before draining and closes database once (2.708029ms)
+{"timestamp":"2026-10-14T23:57:00.423Z","event":"server_shutdown_timeout","code":"SHUTDOWN_TIMEOUT","expected":false,"level":"error"}
+{"timestamp":"2026-10-14T23:57:00.436Z","event":"server_draining","level":"info"}
+✔ hung requests have a bounded shutdown deadline (17.962211ms)
+{"timestamp":"2026-10-14T23:57:00.440Z","event":"server_stopped","level":"info"}
+✔ fatal shutdown drains before reporting a failing exit code (7.347563ms)
+✔ exact repetition and explicit timezone timestamps are counted without inferring impact (9.089791ms)
+✔ timestamps without timezone or date are not treated as stale (0.656578ms)
+✔ HTTP correlation and safe logging omit inputs, query strings and exception details (134.122446ms)
+✔ structured logger drops unrecognized fields and carries async request context (2.984507ms)
+✔ all error classes have safe public messages and expectedness (2.803536ms)
+✔ provider wrapper records latency/outcomes and never retries or leaks errors (8.424507ms)
+✔ expected application errors expose their code and correlation without 500 classification (28.286546ms)
+{"timestamp":"2026-10-14T23:57:02.229Z","event":"http_request","requestId":"af373965-3710-45d9-89a9-55fbd67d9906","method":"GET","route":"/limited","status":200,"durationMs":74,"expected":true,"outcome":"completed","level":"info"}
+{"timestamp":"2026-10-14T23:57:02.247Z","event":"http_request","requestId":"ef223c90-6595-45da-831a-a8b874040d05","method":"GET","route":"/limited","status":429,"durationMs":4,"code":"RATE_LIMITED","expected":true,"outcome":"completed","level":"warn"}
+✔ shared limiter returns JSON with a meaningful structured quota-independent rate-limit error (174.047657ms)
+{"timestamp":"2026-10-14T23:57:02.279Z","event":"provider_attempt","code":"AI_NETWORK","provider":"gemini","outcome":"failure","retryable":true,"attempt":1,"level":"warn"}
+{"timestamp":"2026-10-14T23:57:02.280Z","event":"provider_request","durationMs":7,"code":"AI_NETWORK","expected":false,"provider":"gemini","outcome":"failure","level":"error"}
+✔ mounted route failure logs the static mount path after error propagation (18.877653ms)
+✔ network classification survives the retry and public provider-error boundaries (8.643809ms)
+{"timestamp":"2026-10-14T23:57:02.536Z","event":"provider_request","durationMs":4,"provider":"brevo","outcome":"success","level":"info"}
+{"timestamp":"2026-10-14T23:57:02.553Z","event":"provider_request","durationMs":1,"code":"EMAIL_PROVIDER_ERROR","expected":false,"provider":"brevo","outcome":"failure","level":"error"}
+{"timestamp":"2026-10-14T23:57:02.564Z","event":"provider_request","durationMs":1,"code":"EMAIL_PROVIDER_ERROR","expected":false,"provider":"brevo","outcome":"failure","level":"error"}
+✔ password-reset email is sent through Brevo with the configured sender (28.734066ms)
+✔ password-reset email reports Brevo failures without exposing response data (5.609767ms)
+✔ password-reset email aborts a timed-out Brevo request (10.807799ms)
+✔ successful password-reset issuance stores only the emailed token hash (20.797988ms)
+✔ email delivery failure rolls back the new token and preserves the previous token (2.190175ms)
+✔ successful replacement invalidates the previous reset token (3.359004ms)
+✔ concurrent password-reset requests leave exactly one valid token (4.172696ms)
+ℹ tests 126
+ℹ suites 0
+ℹ pass 126
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 10953.770479

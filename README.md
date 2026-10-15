@@ -2,7 +2,7 @@
 
 KANYI helps developers turn noisy log excerpts into prioritized incident assessments. It separates actionability, severity, confidence and false-positive risk, grounds observed evidence in exact source excerpts, and keeps past assessments searchable.
 
-The [current transformation audit and plan](docs/TRANSFORMATION_AUDIT.md) records the latest work. A paid product needs more than a working diagnosis. See [the commercial release gate](docs/COMMERCIAL_RELEASE.md) for implemented customer behavior, cost assumptions, precise owner setup, evidence boundaries and what still prevents charging customers.
+The [current production readiness evidence](docs/PRODUCTION_READINESS.md) records the latest implementation, verification and blockers. A paid product needs more than a working diagnosis. See [the commercial release gate](docs/COMMERCIAL_RELEASE.md) for implemented customer behavior, cost assumptions, precise owner setup, evidence boundaries and what still prevents charging customers.
 
 ## Customer workflow
 
@@ -73,3 +73,9 @@ A desktop/mobile browser workflow is available in `frontend/scripts/verify-journ
 Logs and context go to Gemini after best-effort secret redaction and are stored with the result. Remove confidential data before submission. Deletion removes the live stored analysis; backup/provider retention is an owner policy/configuration decision. Evidence validation establishes provenance, not causal certainty. No unsupported certifications, testimonials or accuracy claims are made.
 
 Copyright © 2026 Francisco (Fran) Vargas. All rights reserved. Existing ownership and license terms apply.
+
+## Release documentation
+
+Run `node scripts/release-check.cjs` for local checks. See [architecture](docs/ARCHITECTURE.md), [deployment](docs/DEPLOYMENT.md), [AI provider](docs/AI_PROVIDER.md), [database](docs/DATABASE.md), [billing](docs/BILLING.md), [backup/restore](docs/BACKUP_RESTORE.md), [incident integrations](docs/INCIDENT_INTEGRATIONS.md) and [release checklist](docs/RELEASE_CHECKLIST.md). The authenticated Render event PoC and password-confirmed non-billing account deletion are implemented; native webhook delivery and paid-account deletion automation are not.
+
+Do not infer deployed readiness from local tests. The 2026-10-14 live provider run returned no validated results, the configured database rejected authentication, and the deployed API lacked this branch's readiness/billing routes. Billing and recovery delivery require owner setup and network verification before external users or paid launch.

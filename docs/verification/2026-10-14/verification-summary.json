@@ -1,0 +1,58 @@
+{
+  "timestamp": "2026-10-14T23:58:01.716683+00:00",
+  "baselineCommit": "74106b32d27fa24661fab41c9e0a1c60551dd210",
+  "workingTreeChangesUncommitted": true,
+  "backendTests": {
+    "tests": 126,
+    "pass": 126,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0
+  },
+  "postgresTests": {
+    "tests": 30,
+    "pass": 30,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0
+  },
+  "frontendLint": "PASS",
+  "frontendTypecheck": "PASS",
+  "frontendProductionBuild": "PASS",
+  "backendSyntax": "PASS",
+  "backendESLint": "NOT CONFIGURED",
+  "backendStaticTypecheck": "NOT APPLICABLE (JavaScript)",
+  "browserViewports": [
+    "desktop",
+    "mobile"
+  ],
+  "accessibilityViolations": 0,
+  "browserResilience": {
+    "syntheticHttpFixtures": true,
+    "liveProvider": false,
+    "duplicateSubmissionGuard": true,
+    "malformedSuccessRejected": true,
+    "sameKeyRecovery": true,
+    "boundedTimeoutRecovery": true
+  },
+  "dependencyAdvisories": {
+    "backend": 0,
+    "frontend": 0
+  },
+  "liveAI": {
+    "cases": 28,
+    "validResults": 0,
+    "providerFailures": 28,
+    "humanQualityReview": "NOT REVIEWED"
+  },
+  "configuredDatabase": "28P01",
+  "deployedReadinessHTTP": 404,
+  "deployedPlansHTTP": 404,
+  "realStripeNetworkFlow": "NOT VERIFIED",
+  "realRecoveryEmail": "NOT VERIFIED",
+  "productionBackupRestore": "NOT VERIFIED",
+  "productionDeploymentPerformed": false,
+  "githubActionsExecution": "NOT VERIFIED",
+  "verdict": "NOT READY",
+  "qualitativeReadinessScore": 64
+}

@@ -1,0 +1,28 @@
+{
+  "timestamp": "2026-10-15T00:52:33.358Z",
+  "environment": "existing configured deployment, not new staging",
+  "origin": "https://devops-ai.onrender.com",
+  "readOnly": true,
+  "results": [
+    {
+      "endpoint": "/",
+      "networkOrTimeout": true
+    },
+    {
+      "endpoint": "/health/live",
+      "networkOrTimeout": true
+    },
+    {
+      "endpoint": "/health/ready",
+      "networkOrTimeout": true
+    },
+    {
+      "endpoint": "/api/billing/plans",
+      "networkOrTimeout": true
+    },
+    {
+      "endpoint": "/api/history",
+      "networkOrTimeout": true
+    }
+  ]
+}

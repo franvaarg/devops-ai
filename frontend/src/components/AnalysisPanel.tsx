@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import type { InputSignals } from '../services/api';
 
 type AnalysisPanelProps = {
+  missingInformation?: string[];
+  verificationSteps?: string[];
   inputSignals?: InputSignals;
   operationalContext?: string;
   actionability?: string;
@@ -56,7 +58,7 @@ function AnalysisSection({
 }
 
 function AnalysisPanel({
-  actionability, falsePositiveRisk, noiseAssessment, operationalContext, inputSignals,
+  missingInformation, verificationSteps, actionability, falsePositiveRisk, noiseAssessment, operationalContext, inputSignals,
   severity,
   summary,
   evidence,
@@ -156,6 +158,12 @@ function AnalysisPanel({
           <p>{rootCause || "No root cause available."}</p>
         </AnalysisSection>
 
+        <AnalysisSection title="Unknown / missing information">
+          {missingInformation?.length ? <ul className="list-disc pl-5">{missingInformation.map((item, i) => <li key={i}>{item}</li>)}</ul> : <p>No additional missing information was recorded. This does not establish that the diagnosis is complete.</p>}
+        </AnalysisSection>
+        <AnalysisSection title="Verification steps">
+          {verificationSteps?.length ? <ol className="list-decimal pl-5">{verificationSteps.map((item, i) => <li key={i}>{item}</li>)}</ol> : <p>This older analysis has no separate verification steps. Confirm impact and cause before applying changes.</p>}
+        </AnalysisSection>
         <AnalysisSection title="Recommendation">
           <p>
             {recommendation ||

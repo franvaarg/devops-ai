@@ -16,7 +16,9 @@ function App() {
   const [sessionError, setSessionError] = useState(false);
   const [showAuth, setShowAuth] = useState(window.location.hash === "#login");
   const [resetToken, setResetToken] = useState(() =>
-    new URLSearchParams(window.location.search).get("token")
+    { const token = new URLSearchParams(window.location.search).get("token");
+      if (token) window.history.replaceState({}, '', window.location.pathname);
+      return token; }
   );
   const [isAuthenticated, setIsAuthenticated] =
     useState(false);
@@ -26,6 +28,7 @@ function App() {
 
   useEffect(() => {
     async function validateSession() {
+      if (resetToken) { setIsLoading(false); return; }
       const token = localStorage.getItem("token");
 
       if (!token) {
@@ -51,7 +54,7 @@ function App() {
     }
 
     void validateSession();
-  }, []);
+  }, [resetToken]);
 
   function handleAuthenticated(
     authData: AuthResponse
@@ -70,7 +73,9 @@ function App() {
   }
 
   function handlePasswordResetComplete() {
-    window.history.replaceState({}, "", window.location.pathname);
+    window.history.replaceState({}, "", window.location.pathname + "#login");
+    setShowAuth(true);
+    setSessionError(false);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setResetToken(null);

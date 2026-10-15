@@ -1,5 +1,6 @@
 const { redactSecrets } = require('../security/redactSecrets');
 const decisionFields = ['actionability', 'falsePositiveRisk', 'noiseAssessment'];
+const optionalFields = ['missingInformation', 'verificationSteps'];
 const fields = ['severity', 'summary', 'evidence', 'rootCause', 'confidence', 'recommendation', 'steps'];
 
 function invalid() {
@@ -10,7 +11,7 @@ function invalid() {
 
 function validateAnalysis(value, source) {
   const extended = value && decisionFields.some((key) => Object.hasOwn(value, key));
-  const expected = extended ? [...fields, ...decisionFields] : fields;
+  const expected = [...fields, ...(extended ? decisionFields : []), ...optionalFields.filter(key => value && Object.hasOwn(value, key))];
   if (!value || typeof value !== 'object' || Array.isArray(value) ||
       Object.keys(value).length !== expected.length ||
       !expected.every((key) => Object.hasOwn(value, key))) throw invalid();
@@ -21,7 +22,7 @@ function validateAnalysis(value, source) {
   for (const key of ['summary', 'rootCause', 'recommendation']) {
     if (!validText(value[key])) throw invalid();
   }
-  for (const key of ['evidence', 'steps']) {
+  for (const key of ['evidence', 'steps', ...optionalFields.filter(key => Object.hasOwn(value, key))]) {
     if (!Array.isArray(value[key]) || value[key].length > 20 || !value[key].every(validText)) throw invalid();
   }
   // Only literal excerpts can be labeled observed evidence. Matching an excerpt

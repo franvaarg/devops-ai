@@ -80,10 +80,14 @@ async function portal(userId) {
 function subscriptionState(s) {
   const item = s.items?.data?.[0];
   const end = item?.current_period_end || s.current_period_end;
-  const eligible = s.items?.data?.length === 1 && item.price.id === process.env.STRIPE_PRICE_ID && item.quantity === 1 && !s.pause_collection && ['active', 'trialing'].includes(s.status) && end * 1000 > Date.now();
+  const eligible = s.items?.data?.length === 1 && item.price?.id === process.env.STRIPE_PRICE_ID && item.quantity === 1 && !s.pause_collection && ['active', 'trialing'].includes(s.status) && end * 1000 > Date.now();
   return { plan: eligible ? 'pro' : 'free', status: s.status, end: end || null, cancel: !!s.cancel_at_period_end };
 }
 async function processEvent(event) {
+  const supported = ['customer.subscription.created', 'customer.subscription.updated', 'customer.subscription.deleted',
+    'customer.subscription.paused', 'customer.subscription.resumed', 'checkout.session.completed',
+    'checkout.session.async_payment_succeeded', 'invoice.paid', 'invoice.payment_failed'];
+  if (!supported.includes(event.type)) return;
   const obj = event.data.object;
   const subscriptionId = event.type.startsWith('customer.subscription.') ? obj.id :
     event.type.startsWith('checkout.session.') ? obj.subscription :

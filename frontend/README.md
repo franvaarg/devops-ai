@@ -1,75 +1,9 @@
-# React + TypeScript + Vite
+# KANYI frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React/TypeScript/Vite static application. Use Node 22+, `npm ci`, then `npm run dev`. `npm run lint`, `npm run typecheck`, and `npm run build` validate the release. Vercel serves dist; Docker builds dist and serves it through Nginx.
 
-Currently, two official plugins are available:
+Set VITE_API_BASE_URL to the API origin for separate hosting; leave it empty for same-origin Docker proxying. Vite loads supported .env files or real process/build environment variables, not the historical file named `env`. Frontend configuration is public: never put secrets in VITE_* variables. Set legal identity, support and approved policy URLs as documented in .env.example.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+`verify-journey.cjs` tests desktop/mobile workflows and axe accessibility with explicit API fixtures. `verify-resilience.cjs` tests duplicate clicks, malformed success rejection and timeout/same-key recovery. Install Playwright/axe as test tooling and set PLAYWRIGHT_MODULE/AXE_MODULE if installed outside this package. Start a local server on 5174 or set APP_URL. These tests do not prove live AI/payment/email/database behavior; real PostgreSQL/API tests live in backend.
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
+See ../docs/DEPLOYMENT.md and ../docs/PRODUCTION_READINESS.md for production gates and current evidence.

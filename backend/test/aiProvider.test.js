@@ -2,6 +2,7 @@ const assert = require('node:assert/strict');
 const { test } = require('node:test');
 const sdkPath = require.resolve('@google/genai');
 const servicePath = require.resolve('../src/services/aiService');
+const adapterPath = require.resolve('../src/services/geminiProvider');
 function harness(t, generateContent) {
   const original = require.cache[sdkPath];
   const apiKey = process.env.GEMINI_API_KEY;
@@ -11,9 +12,11 @@ function harness(t, generateContent) {
     GoogleGenAI: class { models = { generateContent }; }
   } };
   delete require.cache[servicePath];
+  delete require.cache[adapterPath];
   t.after(() => {
     if (original) require.cache[sdkPath] = original; else delete require.cache[sdkPath];
     delete require.cache[servicePath];
+  delete require.cache[adapterPath];
     if (apiKey === undefined) delete process.env.GEMINI_API_KEY; else process.env.GEMINI_API_KEY = apiKey;
     if (env === undefined) delete process.env.NODE_ENV; else process.env.NODE_ENV = env;
   });
@@ -28,7 +31,7 @@ test('Gemini request has bounded time/output/attempts and redacted input', async
     assert.ok(request.config.abortSignal instanceof AbortSignal);
     assert.equal(request.config.maxOutputTokens, 2048);
     assert.ok(!request.contents.includes('secret-password'));
-    return { text: JSON.stringify({ actionability: 'Investigate', falsePositiveRisk: 'High', noiseAssessment: 'Insufficient context to distinguish incident from noise.', severity: 'Low', summary: 'Error observed', evidence: ['ERROR'], rootCause: 'Possibly configuration', confidence: 'Low', recommendation: 'Check configuration', steps: [] }) };
+    return { text: JSON.stringify({ actionability: 'Investigate', falsePositiveRisk: 'High', noiseAssessment: 'Insufficient context to distinguish incident from noise.', severity: 'Low', summary: 'Error observed', evidence: ['ERROR'], rootCause: 'Possibly configuration', confidence: 'Low', recommendation: 'Check configuration', steps: [], missingInformation: ['Impact unknown'], verificationSteps: ['Check health'] }) };
   });
   const result = await analyzeLog('ERROR password=secret-password');
   assert.equal(result.severity, 'Low'); assert.equal(calls, 1);
@@ -50,6 +53,16 @@ test('missing Gemini configuration does not crash service loading or expose conf
   void unused;
   delete process.env.GEMINI_API_KEY;
   delete require.cache[servicePath];
+  delete require.cache[adapterPath];
   const service = require(servicePath);
-  await assert.rejects(service.analyzeLog('ERROR'), error => error.code === 'AI_PROVIDER_ERROR' && error.retryable === false && !error.message.includes('GEMINI_API_KEY'));
+  await assert.rejects(service.analyzeLog('ERROR'), error => error.code === 'AI_AUTH' && error.retryable === false && !error.message.includes('GEMINI_API_KEY'));
+});
+
+test('explicit provider registry supports a secondary adapter without silently falling back', async () => {
+  const { createAnalyzer } = require('../src/services/aiService');
+  let calls=0;
+  const secondary={ analyzeLog:async log=>{calls++;return {summary:log};} };
+  assert.equal((await createAnalyzer({secondary},'secondary')('synthetic')).summary,'synthetic');
+  assert.equal(calls,1);
+  assert.throws(()=>createAnalyzer({secondary},'missing'),{code:'AI_PROVIDER_UNAVAILABLE'});
 });
