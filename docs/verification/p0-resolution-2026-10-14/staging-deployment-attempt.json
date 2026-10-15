@@ -1,0 +1,27 @@
+{
+  "runtimeSourceCommit": "1a713cb0292e0c3e802bcc36795fb23c73343c3d",
+  "branch": "staging/p0-resolution-2026-10-14",
+  "checkpointCommit": "74106b32d27fa24661fab41c9e0a1c60551dd210",
+  "remoteMainUnchanged": "a66e9eeb1423b6ed85611f10898dbad606bac262",
+  "initialVercelGitStatus": "success",
+  "vercelDeploymentDetails": "https://vercel.com/franvaargs-projects/devops-ai/AC9MXoUhP5WGxvBo3FkbRbqScoz1",
+  "previewURLAndHTTPVerified": false,
+  "vercelAccountAPIStatus": 403,
+  "stagingRenderBackendDeployed": false,
+  "renderManifestValidated": true,
+  "renderAccountAccess": false,
+  "existingBackendReadinessRetryHTTP": 404,
+  "existingBackendIsNotStaging": true,
+  "initialGithubRun": {
+    "id": 38662828589,
+    "backend": "success",
+    "frontend": "success",
+    "browser": "failure",
+    "browserFailure": "axe contrast scan observed intermediate inherited dark-mode transition colors"
+  },
+  "ciCorrection": "Bounded wait for finite animations to settle; unchanged accessibility rules and application styling",
+  "fullPostDeploymentSmoke": "BLOCKED: no verified isolated backend/database/provider capacity",
+  "localReleaseChecks": "PASS",
+  "applicationFeaturesAddedInThisP0Turn": false,
+  "paidProductionChanged": false
+}

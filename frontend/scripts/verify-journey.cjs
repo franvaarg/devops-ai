@@ -13,6 +13,11 @@ const AxeBuilder = require(process.env.AXE_MODULE || require.resolve('@axe-core/
     const accessibility = {};
     async function checkAccessibility(stage) {
       await page.waitForTimeout(350);
+      // Inherited color transitions can propagate through nested elements after
+      // the theme class changes. Audit the settled UI, not an intermediate frame.
+      await page.waitForFunction(() => document.getAnimations().every(animation =>
+        animation.playState !== 'running' || !Number.isFinite(animation.effect?.getComputedTiming().endTime ?? 0)
+      ), undefined, { timeout: 5000 });
       const result = await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
       accessibility[stage] = result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,failureSummary:n.failureSummary}))}));
       if(result.violations.length) fs.writeFileSync(`${dir}/${name}-accessibility.json`,JSON.stringify(accessibility,null,2));

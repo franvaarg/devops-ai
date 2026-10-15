@@ -1,0 +1,24 @@
+{
+  "provider": "gemini",
+  "model": "gemini-3.6-flash",
+  "cases": 28,
+  "validAnalyses": 0,
+  "providerFailures": 28,
+  "failureBreakdown": {
+    "AI_PROVIDER_ERROR": 3,
+    "AI_RATE_LIMITED": 25
+  },
+  "successRatePercent": 0,
+  "failedOperationMeanLatencyMs": 2963,
+  "failedOperationMaxLatencyMs": 38666,
+  "observedMalformedOutputs": 0,
+  "malformedOutputRate": null,
+  "evidenceValidity": null,
+  "hallucinationFailures": null,
+  "overconfidenceFailures": null,
+  "qualityMetricsReason": "No model output reached validation; quality rates cannot be inferred from provider failures.",
+  "dailyFreeTierLimit": 20,
+  "providerReportedRetryDelaySeconds": 83742,
+  "modelChanged": false,
+  "retryOrValidationBypass": false
+}
