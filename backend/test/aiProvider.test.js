@@ -63,6 +63,13 @@ test('provider completion failures fail closed even with parseable JSON', async 
   const { analyzeLog } = harness(t, async () => ({candidates:[{finishReason:'MAX_TOKENS'}],text:'{}'}));
   await assert.rejects(analyzeLog('ERROR request failed'),{code:'AI_INVALID_RESPONSE'});
 });
+test('real adapter mock preserves typed JSON impact through redaction and safety validation',async(t)=>{
+  const log=JSON.stringify({level:'error',service:'gateway',environment:'production',requests:250,failed_requests:250});
+  const {analyzeLog}=harness(t,async()=>({candidates:[{finishReason:'STOP'}],text:JSON.stringify(require('../scripts/validate-ai-reliability.cjs').candidate(log,'dismissive'))}));
+  const result=await analyzeLog(log);
+  assert.equal(result.severity,'Critical');assert.equal(result.actionability,'Action Required');
+  assert.ok(result.evidence.includes(log));assert.equal(result.safetyReview.humanReviewRequired,true);
+});
 test('Gemini failure and invalid JSON map to safe application errors without retries', async (t) => {
   let calls = 0;
   const { analyzeLog } = harness(t, async () => { calls++; throw new Error('secret-provider-response'); });

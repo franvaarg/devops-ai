@@ -4,15 +4,18 @@ function classifyProviderFailure(error) {
   if (error?.code === 'AI_CANCELLED') return { code: 'AI_CANCELLED', retryable: false, retryAfterMs: 0 };
   let detail;
   try { detail = JSON.parse(error?.message)?.error; } catch { /* No raw error logging. */ }
-  const providerCode = /^[A-Z_]+$/.test(detail?.status || '') ? detail.status : undefined;
-  const reason = /overloaded|high demand/i.test(detail?.message || '') ? 'provider_overloaded' : undefined;
+  const providerStatus = typeof detail?.status==='string' ? detail.status : '';
+  const providerMessage = typeof detail?.message==='string' ? detail.message : '';
+  const providerCode = /^[A-Z_]+$/.test(providerStatus) ? providerStatus : undefined;
+  const reason = /overloaded|high demand/i.test(providerMessage) ? 'provider_overloaded' : undefined;
   const status = Number.isInteger(error?.status) ? error.status : undefined;
-  const details = Array.isArray(detail?.details) ? detail.details : [];
+  const details = Array.isArray(detail?.details) ? detail.details.filter(d=>d&&typeof d==='object'&&!Array.isArray(d)) : [];
   const retryInfo = details.find(d => d['@type'] === 'type.googleapis.com/google.rpc.RetryInfo');
-  const delay = /^(\d+(?:\.\d+)?)s$/.exec(retryInfo?.retryDelay || '');
+  const delay = /^(\d+(?:\.\d+)?)s$/.exec(typeof retryInfo?.retryDelay==='string' ? retryInfo.retryDelay : '');
   const retryAfterMs = delay ? Math.ceil(Number(delay[1]) * 1000) : 0;
   const hardQuota = details.some(d => d['@type'] === 'type.googleapis.com/google.rpc.QuotaFailure' &&
-    d.violations?.some(v => /perday|permonth/i.test(v.quotaId || '') || Number(v.quotaValue) === 0));
+    Array.isArray(d.violations) && d.violations.some(v => v && typeof v==='object' &&
+      (/perday|permonth/i.test(`${typeof v.quotaId==='string'?v.quotaId:''} ${typeof v.quotaMetric==='string'?v.quotaMetric:''}`.replace(/[^a-z0-9]/gi,'')) || v.quotaValue===0 || v.quotaValue==='0')));
   const timeout = ['AbortError', 'TimeoutError'].includes(error?.name) || error?.code === 'AI_TIMEOUT';
   const network = error?.code === 'AI_NETWORK' || ['ECONNRESET', 'ETIMEDOUT', 'EPIPE', 'EAI_AGAIN', 'UND_ERR_CONNECT_TIMEOUT', 'UND_ERR_SOCKET'].includes(error?.cause?.code || error?.code);
   const retryable = !hardQuota && (timeout || network || [500, 502, 503, 504].includes(status) ||
@@ -35,9 +38,14 @@ async function reliableGeneration(operation, options = {}) {
     let timer;
     let onCancel;
     let failureError;
+    let transportSettled = false;
+    const operationPromise = Promise.resolve().then(() => {
+      if (callerSignal?.aborted) throw cancelled();
+      return operation({ timeout, signal: controller.signal });
+    }).then(value=>{transportSettled=true;return value;},error=>{transportSettled=true;throw error;});
     try {
       const value = await Promise.race([
-        Promise.resolve().then(() => { if (callerSignal?.aborted) throw cancelled(); return operation({ timeout, signal: controller.signal }); }),
+        operationPromise,
         new Promise((_, reject) => {
           onCancel = () => { controller.abort(); reject(cancelled()); };
           callerSignal?.addEventListener('abort', onCancel, { once: true });
@@ -53,6 +61,13 @@ async function reliableGeneration(operation, options = {}) {
     } catch (error) { failureError = error instanceof Error ? error : new Error("Provider failure"); lastError = failureError; }
     finally { clearTimeout(timer); callerSignal?.removeEventListener('abort', onCancel); }
     const failure = classifyProviderFailure(failureError);
+    if (failure.code==='AI_TIMEOUT' && !transportSettled) {
+      // Cancellation is cooperative. Drain only within a small remaining-budget
+      // grace; never start another attempt while the previous transport is live.
+      const grace = Math.min(25, Math.max(0, deadlineMs-(now()-started)));
+      if(grace>0)await Promise.race([operationPromise.catch(()=>{}),sleep(grace)]);
+      if(!transportSettled){failure.retryable=false;failure.reason='transport_not_settled';}
+    }
     log('provider_attempt', { provider: 'gemini', attempt, outcome: 'failure', status: failure.status, providerCode: failure.providerCode, reason: failure.reason, code: failure.code, retryable: failure.retryable });
     const delay = Math.max(failure.retryAfterMs, 500 * 2 ** (attempt - 1) + Math.floor(random() * 250));
     if (!failure.retryable || attempt === maxAttempts || now() - started + delay >= deadlineMs) {

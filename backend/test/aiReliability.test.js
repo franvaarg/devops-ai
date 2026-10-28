@@ -25,7 +25,7 @@ test('provider retry delay cannot exceed overall budget', async () => {
 test('timeout aborts transport and can recover', async () => {
   let count = 0, firstSignal;
   const result = await reliableGeneration(async ({ signal }) => {
-    if (++count === 1) { firstSignal = signal; return new Promise(() => {}); } return 'recovered';
+    if (++count === 1) { firstSignal = signal; return new Promise((_,reject) => signal.addEventListener('abort',()=>reject(Object.assign(new Error('aborted'),{name:'AbortError'})),{once:true})); } return 'recovered';
   }, { attemptMs: 5, deadlineMs: 1000, wait: async () => {}, random: () => 0, now: () => 0 });
   assert.equal(result, 'recovered'); assert.equal(firstSignal.aborted, true); assert.equal(count, 2);
 });
@@ -78,4 +78,9 @@ test('already canceled work does not contact provider', async () => {
  const controller=new AbortController();controller.abort();let calls=0;
  await assert.rejects(reliableGeneration(async()=>{calls++;},{signal:controller.signal}),{code:'AI_CANCELLED'});
  assert.equal(calls,0);
+});
+test('jitter stays within its bound and preserves exponential backoff',async()=>{
+ const timer=clock();let attempts=0;
+ await reliableGeneration(async()=>{if(++attempts<3)throw http(503);return true;},{...timer,random:()=>0.999});
+ assert.deepEqual(timer.waits,[749,1249]);assert.equal(attempts,3);
 });

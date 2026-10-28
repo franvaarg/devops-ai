@@ -20,6 +20,7 @@ const { resetPassword } = require('../src/services/passwordResetService');
 const root = resolve(__dirname, '../..');
 const analysis = { severity: 'High', summary: 'Database failed', evidence: ['ERROR database'], rootCause: 'Possibly unavailable', confidence: 'Low', recommendation: 'Check health', steps: ['Check database'] };
 let userCount = 0;
+let providerFault;
 async function user(plan = 'free', status = 'inactive') {
   const email = `test-${++userCount}@example.test`;
   const result = await pool.query('INSERT INTO users(name,email,password,plan,subscription_status) VALUES ($1,$2,$3,$4,$5) RETURNING *', ['Test User', email, await bcrypt.hash('reliable-test-password', 4), plan, status]);
@@ -133,7 +134,7 @@ test('real registration, login, authenticated analysis, replay and history API',
   // Provider only is replaced: HTTP, JWT, services, SQL and transactions are real.
   const path = require.resolve('../src/services/aiService');
   let calls = 0;
-  require.cache[path] = { id: path, filename: path, loaded: true, exports: { analyzeLog: async () => { calls++; return analysis; } } };
+  require.cache[path] = { id: path, filename: path, loaded: true, exports: { analyzeLog: async () => { calls++; return providerFault ? providerFault() : analysis; } } };
   const app = require('../src/app');
   const response = await request(app).post('/api/auth/register').send({ name: 'API Tester', email: 'api@example.test', password: 'a-robust-integration-passphrase' });
   assert.equal(response.status, 201);
@@ -429,4 +430,62 @@ test('history rejects malformed filters before database work', async () => {
  for(const query of ['severity=Emergency','search='+ 'x'.repeat(201),'limit=0','limit=101','search[a]=x']) {
   assert.equal((await request(app).get('/api/history?'+query).set('Authorization',`Bearer ${token}`)).status,400);
  }
+});
+
+function analysisClient(account) {
+ const app=require('../src/app');
+ const token=require('jsonwebtoken').sign({userId:account.id,tokenVersion:0},process.env.JWT_SECRET);
+ return {app,token,send:key=>request(app).post('/api/analyze').set('Authorization',`Bearer ${token}`).set('Idempotency-Key',key).send({log:'ERROR database'})};
+}
+test('HTTP provider failure releases reservation, preserves request ID and never charges or retries a failed key',async()=>{
+ const owner=await user(),client=analysisClient(owner),key=randomUUID();let calls=0,observedId;
+ providerFault=async()=>{calls++;observedId=require('../src/operations/logger').context.getStore().requestId;throw Object.assign(new (require('../src/operations/errors').AppError)('AI_RATE_LIMITED'),{privateDetail:'synthetic-secret'});};
+ try {
+  const result=await client.send(key);
+  assert.equal(result.status,503);assert.equal(result.body.error.code,'AI_RATE_LIMITED');
+  assert.equal(result.body.error.requestId,result.headers['x-request-id']);assert.equal(observedId,result.headers['x-request-id']);
+  assert.ok(!JSON.stringify(result.body).includes('synthetic-secret'));
+  assert.equal((await quota.getAnalysisUsage(owner.id)).used,0);assert.equal((await quota.getAnalysisUsage(owner.id)).reserved,0);
+  assert.equal((await getHistory(owner.id)).length,0);
+  assert.equal((await client.send(key)).status,409);assert.equal(calls,1);
+ }finally{providerFault=undefined;}
+});
+test('real SQL insert failure rolls back HTTP persistence and usage, releases reservation and permits a fresh attempt',async()=>{
+ const owner=await user(),client=analysisClient(owner),key=randomUUID();
+ assert.ok(Number.isInteger(owner.id));
+ await pool.query(`CREATE FUNCTION validation_insert_fault() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.user_id=${owner.id} THEN RAISE EXCEPTION 'synthetic-disk-full' USING ERRCODE='53100'; END IF; RETURN NEW; END $$`);
+ await pool.query('CREATE TRIGGER validation_insert_fault BEFORE INSERT ON analyses FOR EACH ROW EXECUTE FUNCTION validation_insert_fault()');
+ try {
+  const result=await client.send(key);
+  assert.equal(result.status,503);assert.equal(result.body.error.code,'DATABASE_ERROR');
+  assert.ok(!JSON.stringify(result.body).includes('synthetic-disk-full'));
+  assert.equal((await quota.getAnalysisUsage(owner.id)).used,0);assert.equal((await quota.getAnalysisUsage(owner.id)).reserved,0);
+  assert.equal((await getHistory(owner.id)).length,0);
+  assert.equal((await client.send(key)).status,409);
+ }finally{
+  await pool.query('DROP TRIGGER validation_insert_fault ON analyses');
+  await pool.query('DROP FUNCTION validation_insert_fault()');
+ }
+ assert.equal((await client.send(randomUUID())).status,201);
+ assert.equal((await quota.getAnalysisUsage(owner.id)).used,1);
+});
+test('sixteen concurrent HTTP requests at last slot invoke the provider exactly once',async()=>{
+ const owner=await user();await seedUsage(owner.id,49);const client=analysisClient(owner);let calls=0;
+ providerFault=async()=>{calls++;await new Promise(resolve=>setTimeout(resolve,10));return analysis;};
+ try {
+  const responses=await Promise.all(Array.from({length:16},()=>client.send(randomUUID())));
+  assert.equal(responses.filter(r=>r.status===201).length,1);
+  assert.equal(responses.filter(r=>r.status===429&&r.body.error.code==='QUOTA_EXCEEDED').length,15);
+  assert.equal(calls,1);assert.equal((await quota.getAnalysisUsage(owner.id)).used,50);
+  assert.equal((await getHistory(owner.id)).length,1);
+ }finally{providerFault=undefined;}
+});
+test('HTTP same-key work and history stay isolated across accounts',async()=>{
+ const a=await user(),b=await user(),first=analysisClient(a),second=analysisClient(b),key=randomUUID();
+ const [ra,rb]=await Promise.all([first.send(key),second.send(key)]);
+ assert.equal(ra.status,201);assert.equal(rb.status,201);assert.notEqual(ra.body.id,rb.body.id);
+ const history=await request(first.app).get('/api/history').set('Authorization',`Bearer ${first.token}`);
+ assert.deepEqual(history.body.map(row=>row.id),[ra.body.id]);
+ assert.equal((await request(first.app).delete(`/api/history/${rb.body.id}`).set('Authorization',`Bearer ${first.token}`)).status,404);
+ assert.equal((await getHistory(b.id)).length,1);
 });

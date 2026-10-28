@@ -1,0 +1,22 @@
+{
+  "timestamp": "2026-10-28T23:07:49.577Z",
+  "status": "VERIFIED OFFLINE",
+  "providerCalls": 0,
+  "method": "One warmup round, ten alternating engine-order rounds over 49 identical source/proposal pairs. Policy-only wall time; no SDK, network, DB, redaction or JSON parsing. Not service latency or a production SLO.",
+  "milliseconds": {
+    "baseline": {
+      "samples": 490,
+      "p50": 0.054,
+      "p95": 0.289,
+      "max": 9.357,
+      "mean": 0.229
+    },
+    "final": {
+      "samples": 490,
+      "p50": 0.165,
+      "p95": 2.215,
+      "max": 47.602,
+      "mean": 1.072
+    }
+  }
+}

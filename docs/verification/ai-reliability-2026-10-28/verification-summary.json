@@ -1,0 +1,168 @@
+{
+  "timestamp": "2026-10-28T23:18:30.907Z",
+  "baselineCommit": "f6daf77d2074e42f2c344bdf1e2767a5cdb90f9f",
+  "status": "VERIFIED OFFLINE",
+  "baseline": {
+    "backendTests": 160,
+    "postgresTests": 31
+  },
+  "final": {
+    "backendTests": 223,
+    "postgresTests": 35,
+    "syntax": "PASS",
+    "legacyFixtures": 28,
+    "frontendLint": "PASS",
+    "typescript": "PASS",
+    "productionBuild": "PASS"
+  },
+  "security": {
+    "backend": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "frontend": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    }
+  },
+  "httpLatencyMs": {
+    "scope": "Actual Express/PostgreSQL integration response time with stubbed provider and a 10ms artificial provider delay in the last-slot concurrency test. NOT live Gemini latency.",
+    "byStatus": {
+      "201": {
+        "requests": 11,
+        "p50": 57,
+        "p95": 436,
+        "max": 436
+      },
+      "409": {
+        "requests": 3,
+        "p50": 20,
+        "p95": 22,
+        "max": 22
+      },
+      "429": {
+        "requests": 15,
+        "p50": 259,
+        "p95": 379,
+        "max": 379
+      },
+      "503": {
+        "requests": 2,
+        "p50": 70,
+        "p95": 72,
+        "max": 72
+      }
+    }
+  },
+  "live": {
+    "status": "NOT VERIFIED",
+    "keyPresent": true,
+    "projectIdentityAvailable": false,
+    "quotaRemainingVerified": false,
+    "billingTierVerified": false,
+    "generationRequests": 0,
+    "costUSD": 0,
+    "budget": {
+      "activeRequests": 0,
+      "activeCostUSD": 0,
+      "conditionalFutureRequests": 3,
+      "conditionalMaxOutputTokensPerRequest": 2048,
+      "conditionalConcurrency": 1,
+      "conditionalCostUSD": 0,
+      "requires": "Verified remaining free-tier allowance and RPM/TPM limits before any call; no application retries; stop on first quota/provider error. Paid capacity requires separate approval."
+    }
+  },
+  "noProductionDataAccess": true,
+  "noDeploy": true,
+  "noPush": true,
+  "diagnostic": {
+    "scope": "VERIFIED OFFLINE synthetic in-sample policy contracts, NOT Gemini accuracy",
+    "cases": 49,
+    "proposalVariants": 147,
+    "counters": {
+      "severity": {
+        "passed": 49,
+        "total": 49
+      },
+      "actionability": {
+        "passed": 49,
+        "total": 49
+      },
+      "falsePositiveRisk": {
+        "passed": 49,
+        "total": 49
+      },
+      "evidenceGrounded": {
+        "passed": 49,
+        "total": 49
+      },
+      "requiredSupport": {
+        "passed": 49,
+        "total": 49
+      },
+      "rootCausePlausible": {
+        "passed": 49,
+        "total": 49
+      },
+      "remediationUseful": {
+        "passed": 49,
+        "total": 49
+      },
+      "confidenceSupported": {
+        "passed": 49,
+        "total": 49
+      },
+      "noUnsupportedCertainty": {
+        "passed": 49,
+        "total": 49
+      },
+      "noUnsupportedRecovery": {
+        "passed": 49,
+        "total": 49
+      },
+      "dangerousActionContained": {
+        "passed": 49,
+        "total": 49
+      }
+    },
+    "criticalAsHarmless": 0
+  },
+  "confidence": {
+    "scope": "VERIFIED OFFLINE support compliance; empirical calibration NOT VERIFIED",
+    "baselineOverconfidence": 2,
+    "baselineUnderconfidence": 7,
+    "finalOverconfidence": 0,
+    "finalUnderconfidence": 0,
+    "bins": {
+      "Low": {
+        "count": 37,
+        "rootCauseRubricPassed": 37,
+        "supportLabelMatches": 37
+      },
+      "Medium": {
+        "count": 11,
+        "rootCauseRubricPassed": 11,
+        "supportLabelMatches": 11
+      },
+      "High": {
+        "count": 1,
+        "rootCauseRubricPassed": 1,
+        "supportLabelMatches": 1
+      }
+    }
+  },
+  "operational": {
+    "scope": "VERIFIED OFFLINE; live availability NOT VERIFIED",
+    "faultScenariosPassed": 11,
+    "totalFaultScenarios": 11,
+    "malformedSamples": 5
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "timestamp": "2026-10-28T23:14:29.978Z",
+  "status": "VERIFIED OFFLINE",
+  "providerCalls": 0,
+  "scope": "Scripted transport faults; virtual wait/deadline latency is not provider service latency. PostgreSQL/concurrent quota tests run separately.",
+  "passed": 11,
+  "total": 11,
+  "results": [
+    {
+      "name": "503-recovery-and-request-id",
+      "passed": true,
+      "observed": {
+        "attempts": 3,
+        "virtualLatencyMs": 1500,
+        "waits": [
+          500,
+          1000
+        ]
+      },
+      "wallDurationMs": 10.79
+    },
+    {
+      "name": "429-retry-info",
+      "passed": true,
+      "observed": {
+        "attempts": 2,
+        "virtualLatencyMs": 2000,
+        "waits": [
+          2000
+        ]
+      },
+      "wallDurationMs": 1.618
+    },
+    {
+      "name": "daily-quota-metric-no-retry",
+      "passed": true,
+      "observed": {
+        "attempts": 1,
+        "virtualLatencyMs": 0,
+        "retryable": false
+      },
+      "wallDurationMs": 2.893
+    },
+    {
+      "name": "provider-outage-is-bounded",
+      "passed": true,
+      "observed": {
+        "attempts": 3,
+        "virtualLatencyMs": 1500
+      },
+      "wallDurationMs": 5.31
+    },
+    {
+      "name": "retry-info-beyond-deadline",
+      "passed": true,
+      "observed": {
+        "attempts": 1,
+        "virtualLatencyMs": 0
+      },
+      "wallDurationMs": 0.948
+    },
+    {
+      "name": "noncooperative-timeout-no-overlap",
+      "passed": true,
+      "observed": {
+        "attempts": 1,
+        "maxActive": 1
+      },
+      "wallDurationMs": 38.43
+    },
+    {
+      "name": "cooperative-timeout-recovery",
+      "passed": true,
+      "observed": {
+        "attempts": 2,
+        "maxActive": 1
+      },
+      "wallDurationMs": 7.559
+    },
+    {
+      "name": "cancellation-never-retries",
+      "passed": true,
+      "observed": {
+        "attempts": 1
+      },
+      "wallDurationMs": 2.188
+    },
+    {
+      "name": "deadline-budget-shrinks",
+      "passed": true,
+      "observed": {
+        "timeouts": [
+          20000,
+          20000,
+          3500
+        ],
+        "virtualLatencyMs": 45000
+      },
+      "wallDurationMs": 1.863
+    },
+    {
+      "name": "malformed-provider-details-safe",
+      "passed": true,
+      "observed": {
+        "malformedResponses": 5
+      },
+      "wallDurationMs": 1.305
+    },
+    {
+      "name": "parallel-request-contexts-isolated",
+      "passed": true,
+      "observed": {
+        "concurrentRequests": 16,
+        "totalAttempts": 32
+      },
+      "wallDurationMs": 9.859
+    }
+  ]
+}

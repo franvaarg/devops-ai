@@ -1,0 +1,110 @@
+{
+  "timestamp": "2026-10-28T22:37:29.832Z",
+  "status": "VERIFIED OFFLINE",
+  "providerCalls": 0,
+  "scope": "Scripted transport faults; virtual wait/deadline latency is not provider service latency. PostgreSQL/concurrent quota tests run separately.",
+  "passed": 8,
+  "total": 11,
+  "results": [
+    {
+      "name": "503-recovery-and-request-id",
+      "passed": true,
+      "observed": {
+        "attempts": 3,
+        "virtualLatencyMs": 1500,
+        "waits": [
+          500,
+          1000
+        ]
+      },
+      "wallDurationMs": 11.672
+    },
+    {
+      "name": "429-retry-info",
+      "passed": true,
+      "observed": {
+        "attempts": 2,
+        "virtualLatencyMs": 2000,
+        "waits": [
+          2000
+        ]
+      },
+      "wallDurationMs": 2.724
+    },
+    {
+      "name": "daily-quota-metric-no-retry",
+      "passed": false,
+      "error": "{\"attempts\":3,\"virtualLatencyMs\":2000,\"retryable\":true}\n\n3 !== 1\n",
+      "wallDurationMs": 7.313
+    },
+    {
+      "name": "provider-outage-is-bounded",
+      "passed": true,
+      "observed": {
+        "attempts": 3,
+        "virtualLatencyMs": 1500
+      },
+      "wallDurationMs": 3.947
+    },
+    {
+      "name": "retry-info-beyond-deadline",
+      "passed": true,
+      "observed": {
+        "attempts": 1,
+        "virtualLatencyMs": 0
+      },
+      "wallDurationMs": 1.458
+    },
+    {
+      "name": "noncooperative-timeout-no-overlap",
+      "passed": false,
+      "error": "{\"attempts\":3,\"maxActive\":3}\n\n3 !== 1\n",
+      "wallDurationMs": 28.299
+    },
+    {
+      "name": "cooperative-timeout-recovery",
+      "passed": true,
+      "observed": {
+        "attempts": 2,
+        "maxActive": 1
+      },
+      "wallDurationMs": 9.621
+    },
+    {
+      "name": "cancellation-never-retries",
+      "passed": true,
+      "observed": {
+        "attempts": 1
+      },
+      "wallDurationMs": 3.873
+    },
+    {
+      "name": "deadline-budget-shrinks",
+      "passed": true,
+      "observed": {
+        "timeouts": [
+          20000,
+          20000,
+          3500
+        ],
+        "virtualLatencyMs": 45000
+      },
+      "wallDurationMs": 1.984
+    },
+    {
+      "name": "malformed-provider-details-safe",
+      "passed": false,
+      "error": "Got unwanted exception.\nActual message: \"Cannot read properties of null (reading '@type')\"",
+      "wallDurationMs": 1.53
+    },
+    {
+      "name": "parallel-request-contexts-isolated",
+      "passed": true,
+      "observed": {
+        "concurrentRequests": 16,
+        "totalAttempts": 32
+      },
+      "wallDurationMs": 6.05
+    }
+  ]
+}
