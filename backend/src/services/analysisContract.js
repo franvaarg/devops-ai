@@ -1,4 +1,5 @@
 const { redactSecrets } = require('../security/redactSecrets');
+const { applySafety } = require('./analysisSafety');
 const decisionFields = ['actionability', 'falsePositiveRisk', 'noiseAssessment'];
 const optionalFields = ['missingInformation', 'verificationSteps'];
 const fields = ['severity', 'summary', 'evidence', 'rootCause', 'confidence', 'recommendation', 'steps'];
@@ -31,6 +32,7 @@ function validateAnalysis(value, source) {
   const safe = Object.fromEntries(expected.map((key) => [key,
     Array.isArray(value[key]) ? value[key].map(redactSecrets) : redactSecrets(value[key])
   ]));
+  if (extended) return applySafety(safe, source);
   if (safe.evidence.length === 0) {
     safe.confidence = 'Low';
     safe.severity = 'Low';
@@ -44,7 +46,8 @@ function parseAnalysis(text, source, requireDecision = false) {
   if (typeof text !== 'string' || Buffer.byteLength(text, 'utf8') > 65536) throw invalid();
   let value;
   try { value = JSON.parse(text); } catch { throw invalid(); }
-  if (requireDecision && !decisionFields.every(key => value && Object.hasOwn(value, key))) throw invalid();
+  if (requireDecision && (![...decisionFields, ...optionalFields].every(key => value && Object.hasOwn(value, key)) ||
+      !Array.isArray(value.verificationSteps) || !value.verificationSteps.length)) throw invalid();
   return validateAnalysis(value, source);
 }
 module.exports = { parseAnalysis, validateAnalysis };

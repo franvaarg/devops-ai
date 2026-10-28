@@ -10,8 +10,12 @@ function redactSecrets(input) {
     .replace(/\beyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\b/g, REDACTED)
     .replace(/\b(?:AKIA|ASIA)[A-Z0-9]{16}\b/g, REDACTED)
     .replace(/\b(?:sk_(?:live|test)_[a-zA-Z0-9]+|rk_(?:live|test)_[a-zA-Z0-9]+|whsec_[a-zA-Z0-9]+|gh[pousr]_[a-zA-Z0-9_]{20,}|github_pat_[a-zA-Z0-9_]+|AIza[a-zA-Z0-9_-]{30,}|sk-[a-zA-Z0-9_-]{20,})\b/g, REDACTED)
-    .replace(/((?:set-cookie|cookie|authorization)\s*:\s*)[^\r\n]+/gi, `$1${REDACTED}`)
-    .replace(/(["']?\b(?:database[_-]?url|credentials?|password|passwd|pwd|[\w-]*secret[\w-]*|[\w-]*token|[\w-]*api[_-]?key|session[_-]?id|cookie|authorization)["']?\s*[:=]\s*)(?:"[^"\r\n]*"|'[^'\r\n]*'|[^\s,;&}\]]+)/gi, `$1"${REDACTED}"`);
+    // Header lines may contain several cookies; redact the whole header, but
+    // do not mistake prose such as 'ERROR authorization: permission denied' for one.
+    .replace(/^([ \t]*(?:set-cookie|cookie|authorization)\s*:\s*)[^\r\n]+/gmi, `$1"${REDACTED}"`)
+    .replace(/((?:set-cookie|cookie)\s*:\s*)[^\r\n]+/gi, `$1"${REDACTED}"`)
+    .replace(/(["']?\bauthorization["']?\s*[:=]\s*)(?!\s*(?:permission denied|access denied)\b)(?:"[^"\r\n]*"|'[^'\r\n]*'|\[REDACTED\]|[^\s,;&}\]]+)/gi, `$1"${REDACTED}"`)
+    .replace(/(["']?\b(?:database[_-]?url|credentials?|password|passwd|pwd|[\w-]*secret[\w-]*|[\w-]*token|[\w-]*api[_-]?key|session[_-]?id|cookie)["']?\s*[:=]\s*)(?:"[^"\r\n]*"|'[^'\r\n]*'|\[REDACTED\]|[^\s,;&}\]]+)/gi, `$1"${REDACTED}"`);
 }
 
 module.exports = { redactSecrets };

@@ -1,0 +1,145 @@
+{
+  "syntheticStoredReplay": true,
+  "providerCalls": 0,
+  "databaseWrites": false,
+  "limitations": "Replays stored outputs against current fixture text and deterministic policy, not a live accuracy evaluation. Original rubric bounds are not broadened to hide conservative behavior changes.",
+  "results": [
+    {
+      "name": "recovered-legacy-noise",
+      "before": {
+        "severity": "Low",
+        "actionability": "Likely Noise",
+        "confidence": "High"
+      },
+      "after": {
+        "severity": "Low",
+        "actionability": "Likely Noise",
+        "confidence": "Low",
+        "humanReviewRequired": true
+      },
+      "failedCurrentRubricChecks": []
+    },
+    {
+      "name": "supported-service-impact",
+      "before": {
+        "severity": "High",
+        "actionability": "Action Required",
+        "confidence": "High"
+      },
+      "after": {
+        "severity": "High",
+        "actionability": "Action Required",
+        "confidence": "Low",
+        "humanReviewRequired": true
+      },
+      "failedCurrentRubricChecks": []
+    },
+    {
+      "name": "insufficient-impact-context",
+      "before": {
+        "severity": "Medium",
+        "actionability": "Investigate",
+        "confidence": "Low"
+      },
+      "after": {
+        "severity": "Medium",
+        "actionability": "Investigate",
+        "confidence": "Low",
+        "humanReviewRequired": true
+      },
+      "failedCurrentRubricChecks": []
+    },
+    {
+      "name": "log-instruction-injection",
+      "before": {
+        "severity": "Low",
+        "actionability": "Likely Noise",
+        "confidence": "High"
+      },
+      "after": {
+        "severity": "Medium",
+        "actionability": "Investigate",
+        "confidence": "Low",
+        "humanReviewRequired": true
+      },
+      "failedCurrentRubricChecks": [
+        "severity"
+      ]
+    },
+    {
+      "name": "deployment-rejected-with-recovery",
+      "before": {
+        "severity": "Low",
+        "actionability": "Investigate",
+        "confidence": "Medium"
+      },
+      "after": {
+        "severity": "Medium",
+        "actionability": "Investigate",
+        "confidence": "Low",
+        "humanReviewRequired": true
+      },
+      "failedCurrentRubricChecks": []
+    },
+    {
+      "name": "docker-crash-loop",
+      "before": {
+        "severity": "Critical",
+        "actionability": "Action Required",
+        "confidence": "High"
+      },
+      "after": {
+        "severity": "High",
+        "actionability": "Action Required",
+        "confidence": "Medium",
+        "humanReviewRequired": true
+      },
+      "failedCurrentRubricChecks": []
+    },
+    {
+      "name": "authentication-attack-blocked",
+      "before": {
+        "severity": "Low",
+        "actionability": "Likely Noise",
+        "confidence": "High"
+      },
+      "after": {
+        "severity": "Medium",
+        "actionability": "Investigate",
+        "confidence": "Low",
+        "humanReviewRequired": true
+      },
+      "failedCurrentRubricChecks": []
+    },
+    {
+      "name": "api-errors-recovered",
+      "before": {
+        "severity": "Low",
+        "actionability": "Likely Noise",
+        "confidence": "Medium"
+      },
+      "after": {
+        "severity": "Medium",
+        "actionability": "Investigate",
+        "confidence": "Low",
+        "humanReviewRequired": true
+      },
+      "failedCurrentRubricChecks": []
+    },
+    {
+      "name": "benign-repetition",
+      "before": {
+        "severity": "Low",
+        "actionability": "Likely Noise",
+        "confidence": "High"
+      },
+      "after": {
+        "severity": "Low",
+        "actionability": "Likely Noise",
+        "confidence": "Low",
+        "humanReviewRequired": true
+      },
+      "failedCurrentRubricChecks": []
+    }
+  ]
+}

@@ -107,9 +107,10 @@ async function handleAnalysis(req, res, next) {
     let savedAnalysis = reservation.replay;
     if (!savedAnalysis) {
       reserved = true;
+      const inputSignals = require('./services/logSignals').logSignals(redactedLog);
       const analysis = await analyzeLog(redactedLog, safeContext);
       analysis.operationalContext = safeContext;
-      analysis.inputSignals = require('./services/logSignals').logSignals(redactedLog);
+      analysis.inputSignals = analysis.inputSignals || inputSignals;
       savedAnalysis = await completeAnalysis(req.user.id, requestKey,
         async (client) => {
           const saved = await saveAnalysis(analysis, redactedLog, req.user.id, client);

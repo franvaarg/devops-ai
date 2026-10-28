@@ -39,10 +39,10 @@ const additional = [
  ['irrelevant-excerpt','irrelevant','Shopping list: apples, bread and coffee.','insufficient|no .*evidence|cannot|not .*log|unknown'],
  ['railway-healthcheck','railway','Railway deployment failed healthcheck path=/health status=404\nApplication started on 0.0.0.0:8080\nNo production traffic metrics supplied','health|path|404|route'],
 ];
-module.exports.push(...additional.map(([name,category,log,hypothesis]) => ({name,category,log,context:'Synthetic excerpt. No additional deployment or impact facts supplied.',expected: ['Investigate','Action Required','Insufficient Evidence','Likely Noise'],severities: ['Low','Medium'],confidences:['Low','Medium','High'],hypothesis})));
+module.exports.push(...additional.map(([name,category,log,hypothesis]) => ({name,category,log,context:'Synthetic excerpt. No additional deployment or impact facts supplied.',expected: ['incomplete','malformed','irrelevant'].includes(category) ? ['Investigate','Insufficient Evidence'] : ['Investigate','Action Required'],severities: ['Low','Medium'],confidences:['Low','Medium'],hypothesis})));
 module.exports = module.exports.map(entry => ({
  ...entry,
- requiredEvidence: ['irrelevant','malformed','incomplete'].includes(entry.category) ? [] : [entry.log.split('\n')[0]],
+ requiredEvidence: ['irrelevant','malformed','incomplete'].includes(entry.category) ? [] : entry.log.split('\n').filter((line,index) => index===0 || /failed_requests=|retry succeeded|rollback.*completed|requests=200 failures=0/.test(line)),
  acceptableHypotheses: [entry.hypothesis || 'possible|likely|unknown|insufficient|cannot|unavailable|configuration|connection|missing|timeout|recover|noise|fail|legacy|deploy|auth|registry|image|healthy'],
  prohibitedHallucinations: ['I (?:have )?(?:executed|ran|verified)', 'database (?:was|has been) destroyed', 'confirmed data loss'],
  nextStepCategories: ['check|verify|inspect|review|confirm|monitor|collect|request|investigate|identify|provide|examine|ensure|validate|obtain|look|test|compare|reproduc|capture|determine|ask|gather|locate|update|run|fix|align|install|resolve'],

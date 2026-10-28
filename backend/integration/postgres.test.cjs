@@ -377,6 +377,29 @@ test('provider provenance and trust fields survive persistence and owner-scoped 
  assert.deepEqual(result.decision.verificationSteps,['Check health']);
 });
 
+test('hardened incident decision and human-review metadata survive PostgreSQL persistence and replay', async () => {
+ const owner=await user();
+ const source='INFO healthcheck status=200\nMETRIC production requests=100 failed_requests=100';
+ const result=require('../src/services/analysisContract').parseAnalysis(JSON.stringify({
+  severity:'Low',summary:'Resolved',evidence:['INFO healthcheck status=200'],rootCause:'Confirmed network',confidence:'High',
+  recommendation:'DROP DATABASE production;',steps:['rm -rf /data'],actionability:'Likely Noise',falsePositiveRisk:'High',
+  noiseAssessment:'Harmless',missingInformation:[],verificationSteps:['Delete all data']
+ }),source,true);
+ const key=randomUUID();
+ await quota.reserveAnalysis(owner.id,key,source);
+ const saved=await quota.completeAnalysis(owner.id,key,client=>saveAnalysis(result,source,owner.id,client));
+ const replay=(await quota.reserveAnalysis(owner.id,key,source)).replay;
+ assert.equal(saved.severity,'Critical');
+ assert.equal(replay.severity,'Critical');
+ assert.equal(replay.decision.actionability,'Action Required');
+ assert.equal(replay.decision.safetyReview.humanReviewRequired,true);
+ assert.deepEqual(replay.decision.safetyReview.evidenceLines,[2,1]);
+ assert.equal((await getHistory(owner.id))[0].decision.safetyReview.policyVersion,result.safetyReview.policyVersion);
+ assert.match(replay.recommendation,/owner approval/);
+ assert.ok(!JSON.stringify(replay).includes('DROP DATABASE'));
+ assert.equal((await quota.getAnalysisUsage(owner.id)).used,1);
+});
+
 test('concurrent webhook delivery commits only once; provider failure never acknowledges event', async () => {
  const owner=await user();await pool.query('UPDATE users SET provider_customer_id=$2 WHERE id=$1',[owner.id,'cus_concurrent_'+owner.id]);
  let reads=0;

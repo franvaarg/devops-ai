@@ -36,13 +36,16 @@ test('decision assessments reject invalid classifications and missing noise expl
   assert.equal(parseAnalysis(JSON.stringify(decision), source).actionability, 'Investigate');
   for (const changes of [{ actionability: 'Fix immediately' }, { falsePositiveRisk: 'Certain' }, { noiseAssessment: '' }]) assert.throws(() => parseAnalysis(JSON.stringify({ ...decision, ...changes }), source), { code: 'AI_INVALID_RESPONSE' });
   const unsupported = parseAnalysis(JSON.stringify({ ...decision, evidence: [], actionability: 'Action Required', confidence: 'High', falsePositiveRisk: 'Low' }), source);
-  assert.equal(unsupported.actionability, 'Insufficient Evidence'); assert.equal(unsupported.falsePositiveRisk, 'High');
+  // F2: a model extraction failure must not hide a source-backed DB failure.
+  assert.equal(unsupported.actionability, 'Investigate'); assert.equal(unsupported.falsePositiveRisk, 'Medium');
+  assert.deepEqual(unsupported.evidence, [source]);
 });
 
-test('no evidence cannot retain unsupported outage severity', () => {
-  const result = parseAnalysis(JSON.stringify({ ...valid, severity: 'Critical', evidence: [], actionability: 'Action Required', falsePositiveRisk: 'Low', noiseAssessment: 'Unclear impact' }), source, true);
-  assert.equal(result.severity, 'Low');
-  assert.equal(result.actionability, 'Insufficient Evidence');
+test('empty model evidence cannot downgrade a source-backed database failure to harmless Low', () => {
+  const result = parseAnalysis(JSON.stringify({ ...valid, severity: 'Critical', evidence: [], actionability: 'Action Required', falsePositiveRisk: 'Low', noiseAssessment: 'Unclear impact', missingInformation: ['Impact unknown'], verificationSteps: ['Check health'] }), source, true);
+  assert.equal(result.severity, 'Medium');
+  assert.equal(result.actionability, 'Investigate');
+  assert.deepEqual(result.evidence, [source]);
   assert.equal(result.confidence, 'Low');
 });
 

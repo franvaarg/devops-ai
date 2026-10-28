@@ -40,7 +40,7 @@ async function saveAnalysis(analysis, originalLog, userId, database = pool) {
     JSON.stringify(analysis.steps ?? []),
     originalLog,
     userId,
-    JSON.stringify(Object.fromEntries(['actionability', 'falsePositiveRisk', 'noiseAssessment', 'operationalContext', 'inputSignals', 'providerMetadata', 'missingInformation', 'verificationSteps']
+    JSON.stringify(Object.fromEntries(['actionability', 'falsePositiveRisk', 'noiseAssessment', 'operationalContext', 'inputSignals', 'providerMetadata', 'missingInformation', 'verificationSteps', 'safetyReview']
       .filter(key => analysis[key] !== undefined).map(key => [key, analysis[key]]))),
   ];
 
