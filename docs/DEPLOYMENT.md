@@ -19,3 +19,7 @@ Deploy order: green release checks; approved backup/restore evidence; drain anal
 2026-10-14 read-only probes of the configured Render API returned 404 for /health/ready and /api/billing/plans. The configured database connection failed with 28P01. This does not verify this branch in production. The actual frontend production URL and hosting credentials are not established in this checkout. Fix these owner gates before any external-user invitation.
 
 GitHub Actions also defines a browser job with pinned Playwright/axe tools installed outside product dependencies, Chromium, fixture-backed journeys/resilience checks and uploaded reports. These commands were verified locally; execution in GitHub Actions itself remains unverified.
+
+## Early-access intake addition — 2026-10-29
+
+Migration 006 is additive and required by readiness. Existing volumes require the reviewed forward migration runner; no production migration has been performed. Keep `EARLY_ACCESS_ENABLED=false` until [the early-access checklist](EARLY_ACCESS.md) passes. Approve legal/support/retention details and verify real deployed form-to-SQL persistence separately from offline tests. This does not clear existing product/provider/billing launch gates.

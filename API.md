@@ -107,3 +107,7 @@ New analyses return and persist `missingInformation: string[]`, `verificationSte
 Provider errors distinguish AI_AUTH, AI_RATE_LIMITED, AI_QUOTA_CONFIGURATION, AI_TIMEOUT, AI_NETWORK, AI_REQUEST_REJECTED, AI_INVALID_RESPONSE and AI_PROVIDER_UNAVAILABLE. API responses carry X-Request-ID and Cache-Control: no-store; errors include their correlation ID. Rate-limit failures use JSON, including billing and event routes.
 
 History accepts only severity, search, limit and beforeId. Severity is Low/Medium/High/Critical; search is at most 200 characters; limit is an integer 1–100. beforeId must be a positive PostgreSQL integer. Unknown/malformed query parameters return 400. All history and deletion ownership remains server-side.
+
+## Public early-access requests
+
+`POST /api/early-access` persists validated lead requests when explicitly enabled. Required fields: email, role, useCase. Optional: company, teamSize; website honeypot must be empty. Identical new/duplicate acknowledgement after SQL completion; no public lead lookup. See [EARLY_ACCESS.md](docs/EARLY_ACCESS.md) for enum values, limits, errors, retention and enablement.

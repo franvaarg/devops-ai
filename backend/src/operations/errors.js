@@ -1,4 +1,6 @@
 const definitions = Object.freeze({
+  LEAD_INVALID: [400, 'Check your email, professional role and primary use case. Do not include logs or sensitive data.'],
+  EARLY_ACCESS_UNAVAILABLE: [503, 'Access requests are temporarily unavailable. Please try again later.'],
   ACCOUNT_SUBSCRIPTION_ACTIVE: [409, 'This account has billing records. Contact support to cancel billing and complete account deletion.'],
   AI_CANCELLED: [408, 'Analysis was canceled. This attempt did not use your monthly allowance.'],
   AI_TIMEOUT: [504, 'Analysis timed out. Please retry; this attempt did not use your monthly allowance.'],

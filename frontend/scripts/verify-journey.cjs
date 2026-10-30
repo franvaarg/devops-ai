@@ -44,7 +44,7 @@ const AxeBuilder = require(process.env.AXE_MODULE || require.resolve('@axe-core/
       await route.fulfill({status,contentType:'application/json',body:body===null?'':JSON.stringify(body)});
     });
     await page.goto(process.env.APP_URL || 'http://127.0.0.1:5174');
-    await page.getByRole('heading',{name:/Find the incident/}).waitFor();
+    await page.getByRole('heading',{name:/Turn application logs/}).waitFor();
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
     await page.keyboard.press('Tab');
     assert.equal(await page.evaluate(()=>document.activeElement.tagName),'A');
@@ -56,7 +56,7 @@ const AxeBuilder = require(process.env.AXE_MODULE || require.resolve('@axe-core/
     await page.getByText('Investigate', {exact:true}).waitFor();
     await checkAccessibility('landing');
     await page.screenshot({path:`${dir}/${name}-landing.png`,fullPage:true});
-    await page.getByRole('button',{name:'Analyze your first log free →'}).click();
+    await page.getByRole('button',{name:'Sign in',exact:true}).click();
     await page.getByRole('button',{name:'Register',exact:true}).click();
     await checkAccessibility('signup');
     await page.getByLabel('Full name').fill('Test Developer');
@@ -123,9 +123,9 @@ const AxeBuilder = require(process.env.AXE_MODULE || require.resolve('@axe-core/
     await page.route('**/api/billing/plans', route => route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({message:'Billing temporarily unavailable'})}));
     await page.reload(); await page.getByRole('button',{name:'Manage subscription'}).waitFor();
     await page.getByRole('button',{name:'Sign out',exact:true}).click();
-    await page.getByRole('heading',{name:/Find the incident/}).waitFor();
+    await page.getByRole('heading',{name:/Turn application logs/}).waitFor();
     assert.equal(logoutCalls,1);
-    await page.getByRole('button',{name:'Sign in / Start free',exact:true}).click();
+    await page.getByRole('button',{name:'Sign in',exact:true}).click();
     await page.getByRole('heading',{name:'Welcome back',exact:true}).waitFor();
     assert.equal(await page.evaluate(()=>localStorage.getItem('token')),null);
     await page.getByLabel('Email address').fill('test@example.test');

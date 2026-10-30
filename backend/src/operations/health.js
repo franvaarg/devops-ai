@@ -17,7 +17,8 @@ function installHealth(app, pool) {
         SELECT status, expires_at FROM analysis_requests LIMIT 0;
         SELECT token_hash FROM password_reset_tokens LIMIT 0;
         SELECT id FROM billing_events LIMIT 0;
-        SELECT event FROM product_events LIMIT 0`).finally(() => { pending = undefined; });
+        SELECT event FROM product_events LIMIT 0;
+        SELECT email, professional_role, primary_use_case, company, team_size, created_at FROM early_access_leads LIMIT 0`).finally(() => { pending = undefined; });
       await pending;
       return res.status(app.locals.draining ? 503 : 200).json({ status: app.locals.draining ? 'unavailable' : 'ready' });
     } catch (error) {

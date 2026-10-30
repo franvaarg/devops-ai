@@ -1,3 +1,5 @@
+import { marketingOnly } from '../config/publicMode';
+
 export type InputSignals = { lineCount: number; duplicateLineCount: number; timestampedLineCount: number; olderThanSevenDaysCount: number; futureTimestampCount: number };
 export type HistoryItem = {
   missingInformation?: string[];
@@ -309,11 +311,20 @@ export async function openBilling(action: 'checkout' | 'portal') {
   window.location.assign(data.url);
 }
 export function trackEvent(event: string) {
-  if (localStorage.getItem('analytics') !== 'yes') return;
+  if (marketingOnly || localStorage.getItem('analytics') !== 'yes') return;
   void fetch(`${API_BASE_URL}/api/events`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event }), keepalive: true }).catch(() => {});
 }
 
 export async function deleteAccount(password: string): Promise<void> {
   const response = await request(`${API_BASE_URL}/api/account`, { method: 'DELETE', headers: getAuthHeaders(), body: JSON.stringify({ password }) });
   if (!response.ok) await getResponseData(response);
+}
+
+export type EarlyAccessRequest = { email: string; role: string; useCase: string; company: string; teamSize: string; website: string };
+export async function requestEarlyAccess(input: EarlyAccessRequest): Promise<void> {
+  const response = await request(`${API_BASE_URL}/api/early-access`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input),
+  });
+  const data = await getResponseData<{ received?: boolean }>(response);
+  if (data.received !== true) throw new ApiError('Your request could not be confirmed. Please retry.', 502, 'MALFORMED_RESPONSE');
 }

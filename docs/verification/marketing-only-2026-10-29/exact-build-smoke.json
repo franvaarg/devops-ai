@@ -1,0 +1,12 @@
+{
+  "scope": "Exact documented marketing build, served locally",
+  "marketingOnly": true,
+  "frontendIntake": false,
+  "apiOriginEmpty": true,
+  "apiRequests": 0,
+  "staleSessionIgnored": true,
+  "analyticsSuppressed": true,
+  "openingSoon": true,
+  "noFormOrSignIn": true,
+  "syntheticDemo": true
+}

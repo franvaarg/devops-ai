@@ -1,0 +1,17 @@
+{
+  "repository": "franvaarg/devops-ai",
+  "githubDefaultBranch": "main",
+  "publicDomain": "devops-ai-chi.vercel.app",
+  "vercelApiReadStatus": 403,
+  "productionBranchVerified": false,
+  "owningProjectVerified": false,
+  "productionBuildVariablesVerified": false,
+  "fallbackBranch": "review/kanyi-marketing-only-2026-10-29",
+  "requiredProductionValues": {
+    "VITE_MARKETING_ONLY": "true",
+    "VITE_EARLY_ACCESS_ENABLED": "false",
+    "VITE_API_BASE_URL": ""
+  },
+  "liveConfigurationChanged": false,
+  "credentialsRefreshedOrChanged": false
+}

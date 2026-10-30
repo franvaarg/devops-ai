@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 import Landing from "./pages/Landing";
+import { marketingOnly } from "./config/publicMode";
 const Home = lazy(() => import("./pages/Home"));
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
@@ -12,9 +13,14 @@ import {
   type AuthResponse,
 } from "./services/api";
 
-function App() {
+function ProductApp() {
   const [sessionError, setSessionError] = useState(false);
   const [showAuth, setShowAuth] = useState(window.location.hash === "#login");
+  useEffect(() => {
+    const syncNavigation = () => setShowAuth(window.location.hash === '#login');
+    window.addEventListener('hashchange', syncNavigation);
+    return () => window.removeEventListener('hashchange', syncNavigation);
+  }, []);
   const [resetToken, setResetToken] = useState(() =>
     { const token = new URLSearchParams(window.location.search).get("token");
       if (token) window.history.replaceState({}, '', window.location.pathname);
@@ -122,4 +128,7 @@ function App() {
   return <Suspense fallback={<p role="status" className="p-8">Loading your workspace…</p>}><Home /></Suspense>;
 }
 
-export default App;
+// The product component (including all session/reset hooks) never mounts here.
+export default function App() {
+  return marketingOnly ? <Landing /> : <ProductApp />;
+}

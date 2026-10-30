@@ -1,0 +1,8 @@
+{
+  "syntheticHttpFixtures": true,
+  "liveProvider": false,
+  "duplicateSubmissionGuard": true,
+  "malformedSuccessRejected": true,
+  "sameKeyRecovery": true,
+  "boundedTimeoutRecovery": true
+}

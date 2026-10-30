@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+ <rect width="1200" height="630" fill="#f5f8f5"/>
+ <path d="M840 0H1200V630H1020Z" fill="#e7f0e9"/>
+ <rect x="70" y="64" width="46" height="48" rx="10" fill="#096348"/>
+ <text x="82" y="99" fill="white" font-family="sans-serif" font-size="34" font-weight="bold">K</text>
+ <text x="132" y="100" fill="#142e2a" font-family="sans-serif" font-size="34" font-weight="bold">KANYI</text>
+ <text x="72" y="174" fill="#096348" font-family="sans-serif" font-size="19" letter-spacing="3">AI-POWERED INCIDENT TRIAGE</text>
+ <g font-family="sans-serif" font-size="66" font-weight="bold" letter-spacing="-2"><text x="68" y="276" fill="#142e2a">Turn application logs into</text><text x="68" y="356" fill="#096348">actionable incident insights.</text></g>
+ <text x="72" y="428" fill="#526660" font-family="sans-serif" font-size="24">Potential causes. Supporting evidence. Structured troubleshooting.</text>
+ <rect x="72" y="492" width="285" height="58" rx="8" fill="#096348"/>
+ <text x="94" y="529" fill="white" font-family="sans-serif" font-size="22" font-weight="bold">Explore the Demo</text>
+ <path d="M72 590H1128" stroke="#d5e2dc"/>
+</svg>

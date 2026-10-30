@@ -1,0 +1,56 @@
+{
+  "scope": "Local frontend with synthetic HTTP fixtures; not live collection",
+  "layouts": [
+    {
+      "width": 320,
+      "overflow": false,
+      "axeViolations": 0,
+      "keyboardSkipLink": true,
+      "demo": true,
+      "darkPreferenceReadable": true,
+      "reducedMotion": true
+    },
+    {
+      "width": 390,
+      "overflow": false,
+      "axeViolations": 0,
+      "keyboardSkipLink": true,
+      "demo": true,
+      "darkPreferenceReadable": true,
+      "reducedMotion": true
+    },
+    {
+      "width": 768,
+      "overflow": false,
+      "axeViolations": 0,
+      "keyboardSkipLink": true,
+      "demo": true,
+      "darkPreferenceReadable": true,
+      "reducedMotion": true
+    },
+    {
+      "width": 1440,
+      "overflow": false,
+      "axeViolations": 0,
+      "keyboardSkipLink": true,
+      "demo": true,
+      "darkPreferenceReadable": true,
+      "reducedMotion": true
+    }
+  ],
+  "form": {
+    "keyboardOrderAndVisibleFocus": true,
+    "failure": "Error shown; values preserved; no false success",
+    "invalid": "Error shown; values preserved; no false success",
+    "rate": "Error shown; values preserved; no false success",
+    "network": "Error shown; values preserved; no false success",
+    "malformed": "Error shown; values preserved; no false success",
+    "successAndDuplicateAcknowledgement": true,
+    "synchronousDuplicateGuard": true,
+    "noSuccessBeforeConfirmation": true,
+    "requiredFields": true
+  },
+  "navigation": {
+    "signInAndBrowserBack": true
+  }
+}

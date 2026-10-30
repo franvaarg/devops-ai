@@ -1,20 +1,77 @@
-import ProductFooter from "../components/ProductFooter";
+import { useEffect } from 'react';
+import ProductFooter from '../components/ProductFooter';
 import PublicDemo from '../components/PublicDemo';
-import { useEffect, useState } from 'react';
-import { getPlans, trackEvent, type Plans } from '../services/api';
-export default function Landing({ onStart }: { onStart: () => void }) {
-  const [plans, setPlans] = useState<Plans | null>(null);
+import EarlyAccessForm from '../components/EarlyAccessForm';
+import { trackEvent } from '../services/api';
+import { earlyAccessEnabled, marketingOnly } from '../config/publicMode';
 
-  useEffect(() => { void getPlans().then(setPlans).catch(() => {}); trackEvent('landing'); }, []);
-  const price = plans?.pricing ? new Intl.NumberFormat('en-US', { style: 'currency', currency: plans.pricing.currency }).format(plans.pricing.amount / 100) + ' / month' : 'Subscriptions opening soon';
-  return <main className="marketing">
-    <nav aria-label="Main navigation"><a className="brand" href="#">KANYI<span>Incident intelligence</span></a><div><a href="#demo">Try the demo</a><a href="#how">How it works</a><a href="#pricing" onClick={() => trackEvent('pricing_viewed')}>Pricing</a><button onClick={onStart}>Sign in / Start free</button></div></nav>
-    <section className="hero"><div><p className="eyebrow">For developers investigating noisy logs</p><h1>Find the incident.<br /><em>Cut through the noise.</em></h1><p className="intro">Turn a log excerpt into a prioritized incident assessment: what matters, what might be noise, and what to check next.</p><button className="primary" onClick={onStart}>Analyze your first log free →</button><p className="fine">50 analyses per calendar month. No card required.</p></div>
-    <PublicDemo /></section>
-    <section id="how"><p className="eyebrow">From log excerpt to a decision</p><h2>Spend less time deciding where to start.</h2><div className="three-cols">{[['1. Bring the relevant window','Paste text or upload a .log or .txt excerpt up to 16 KiB. Remove sensitive data first.'],['2. Separate signal from noise','Assess impact, severity, recovery signals, and the risk that an apparent incident is benign.'],['3. Verify and act','Inspect exact evidence excerpts, follow prioritized checks, and revisit saved assessments.']].map(([title, body]) => <article key={title}><h3>{title}</h3><p>{body}</p></article>)}</div></section>
-    <section><p className="eyebrow">Why a dedicated product?</p><h2>A consistent incident workflow, every time.</h2><p className="intro">A general assistant can explain logs. KANYI brings the same decision structure to each investigation and keeps the results searchable.</p><div className="three-cols">{[['Decisions before prose','Severity and actionability are distinct. A scary ERROR label is not enough to establish an outage.'],['Evidence you can inspect','Observed evidence must match the submitted log. Root causes remain hypotheses, and missing evidence lowers confidence.'],['A record you can return to','Search prior incidents, filter by severity, export an assessment, or delete stored logs and results.']].map(([title, body]) => <article key={title}><h3>{title}</h3><p>{body}</p></article>)}</div><p className="fine">KANYI uses Google Gemini. Assessments can be wrong; validate recommendations against your environment. It does not monitor your systems or automatically fix them.</p></section>
-    <section id="pricing"><p className="eyebrow">Simple individual plans</p><h2>Try the workflow. Upgrade when you use it regularly.</h2><div className="three-cols"><article><h3>Free</h3><strong className="price">$0</strong><p>50 analyses / calendar month</p><p>Structured assessments, searchable history, exports, and deletion.</p><button onClick={onStart}>Start free</button></article><article className="featured"><h3>Pro</h3><strong className="price">{price}</strong><p>500 analyses / calendar month</p><p>The same evidence standards, with 10× the monthly capacity for recurring investigations.</p><button onClick={onStart}>{plans?.available ? 'Create account to upgrade' : 'Start with Free'}</button></article><article><h3>Team</h3><strong className="price">Planned</strong><p>Shared workspaces and team permissions are under consideration.</p><p>Individual accounts are available today. Team features are not sold.</p></article></div><p className="fine">16 KiB per log on both plans. Quotas reset on the first day of each month in UTC, do not roll over, and are separate from your subscription renewal date. Failed analyses do not consume quota. Pro renews monthly until canceled; manage cancellation in the billing portal. Taxes, if applicable, are shown at checkout.</p></section>
-    <section><h2>Before you paste production logs</h2><div className="faq">{[['Will this catch every incident?','No. KANYI assesses only the excerpt you submit. Missing timestamps, recovery signals, impact, or deployment context can change the conclusion. Confidence is qualitative, not a measured probability.'],['What about legacy warnings and false positives?','Each new assessment explicitly considers noise and false-positive risk. Expected retries and deprecation warnings may not need intervention. Verify against your normal baseline.'],['Where do my logs go?','KANYI attempts to redact common secrets, then sends the excerpt to Google Gemini and stores the redacted log and result in its database. Redaction is incomplete: remove credentials and personal data yourself. Stored analyses remain until you delete them. Backup deletion and provider retention depend on the operator’s configuration.'],['Can I cancel?','When subscriptions are enabled, the Stripe billing portal provides cancellation, invoices, and payment method management. A cancellation scheduled for period end retains Pro until that period ends. Failed payment or expired billing periods revert analysis capacity to Free. History remains accessible.']].map(([q,a]) => <details key={q}><summary>{q}</summary><p>{a}</p></details>)}</div></section>
-    <footer><ProductFooter /><p><strong>KANYI</strong> · Make your next incident decision clearer.</p><button onClick={onStart}>Start free →</button></footer>
+const steps = [
+  ['01', 'Bring the relevant excerpt', 'Paste application logs or upload a .log or .txt file up to 16 KiB. Add context about the environment and recent changes.'],
+  ['02', 'Review the assessment', 'Explore severity, actionability, potential causes, and the evidence behind the assessment. See where context is missing.'],
+  ['03', 'Verify your next step', 'Use structured troubleshooting checks to guide your investigation. Revisit saved assessments and export a PDF when needed.'],
+];
+const questions = [
+  ['What does early access include?', 'Request access to evaluate KANYI’s individual-account incident triage workflow. Submitting a request does not create an account or guarantee an invitation. We’ll contact you about availability.'],
+  ['Can I connect my monitoring tools?', 'The current workflow uses pasted excerpts and text uploads. Native monitoring connectors and continuous log collection are not available.'],
+  ['Can my team share a workspace?', 'KANYI currently uses individual accounts. Shared workspaces and team permissions are not available. Team size helps us understand who is interested.'],
+  ['Will KANYI identify the root cause every time?', 'No. An excerpt can omit the information needed to establish a cause or incident impact. Causes are hypotheses, confidence is qualitative, and recommendations require human verification.'],
+  ['What can I submit for analysis?', 'A relevant text excerpt up to 16 KiB, pasted directly or uploaded as a .log or .txt file, with optional operational context. Remove credentials and personal data before submission. Do not submit logs through the early-access form.'],
+  ['Where do submitted logs go?', 'After best-effort secret redaction, logs and operational context are sent to Google Gemini. KANYI stores the redacted input and result until the analysis is deleted. Redaction is incomplete. Provider and backup retention depend on the operator’s policies and configuration.'],
+];
+
+export default function Landing({ onStart }: { onStart?: () => void }) {
+  const accessLabel = earlyAccessEnabled ? 'Request Early Access' : 'Early access opening soon';
+  const visibleQuestions = questions.map(([question, answer], index) => {
+    if (!earlyAccessEnabled && index === 0) return [question, 'Early access is not open yet. Explore the synthetic demo to see the individual-account incident triage workflow. This site is not accepting access requests.'];
+    if (!earlyAccessEnabled && index === 2) return [question, 'KANYI currently uses individual accounts. Shared workspaces and team permissions are not available.'];
+    if (!earlyAccessEnabled && index === 4) return [question, 'The application supports a relevant text excerpt up to 16 KiB, pasted directly or uploaded as a .log or .txt file, with optional operational context. Remove credentials and personal data before submission. The synthetic demo does not accept your logs.'];
+    return [question, answer];
+  });
+  useEffect(() => { trackEvent('landing'); }, []);
+  return <main className="marketing" id="top">
+    <a className="skip-link" href="#main-content">Skip to content</a>
+    <div className="nav-shell"><nav aria-label="Main navigation">
+      <a className="brand" href="#top" aria-label="KANYI home"><span className="brand-mark" aria-hidden="true">K</span>KANYI</a>
+      <div className="nav-sections"><a href="#demo">Product</a><a href="#how">How it works</a><a href="#data">Data handling</a></div>
+      <div className="nav-actions">{onStart && <button className="sign-in" onClick={onStart}>Sign in</button>}<a className="button primary" href="#early-access" onClick={() => trackEvent('access_cta_clicked')}>{accessLabel}<span aria-hidden="true"> ↗</span></a></div>
+    </nav></div>
+    <section className="hero" id="main-content" aria-labelledby="hero-title">
+      <div className="hero-copy"><p className="eyebrow"><span className="status-dot" aria-hidden="true" /> AI-Powered Incident Triage</p>
+        <h1 id="hero-title">Turn application logs into <em>actionable incident insights.</em></h1>
+        <p className="intro">Review potential root causes, assess severity, inspect supporting evidence, and get structured troubleshooting recommendations from a log excerpt.</p>
+        <div className="hero-actions"><a className="button primary" href="#early-access" onClick={() => trackEvent('access_cta_clicked')}>{accessLabel}<span aria-hidden="true"> ↗</span></a><a className="button secondary" href="#demo" onClick={() => trackEvent('demo_opened')}>Explore the Demo<span aria-hidden="true"> ↓</span></a></div>
+        <p className="hero-note">Explore synthetic examples. No account required.</p>
+        <div className="hero-signals"><span>Potential causes</span><span>Source evidence</span><span>Next checks</span></div>
+      </div>
+      <div className="hero-product"><div className="product-bar"><span><i aria-hidden="true" /> KANYI / incident assessment</span><span>EXAMPLE</span></div><PublicDemo /></div>
+    </section>
+    <div className="audience-strip"><p>Built for investigations across engineering, DevOps, and technical support.</p><span>Human judgment stays in the loop.</span></div>
+    <section id="how" aria-labelledby="how-title"><div className="section-heading"><div><p className="eyebrow">The workflow</p><h2 id="how-title">From a log excerpt<br />to a clearer next step.</h2></div><p>A focused workflow for the moment you have logs, but need a structured way to investigate.</p></div>
+      <div className="three-cols workflow-cards">{steps.map(([number, title, body]) => <article key={number}><span className="step-number">{number}</span><h3>{title}</h3><p>{body}</p></article>)}</div>
+    </section>
+    <section className="use-cases" aria-labelledby="use-cases-title"><p className="eyebrow">Where KANYI fits</p><h2 id="use-cases-title">For the questions behind the error.</h2><div className="three-cols">
+      {[
+        ['Application errors', 'What needs attention?', 'Investigate request failures, dependency timeouts, and database errors using the evidence in your excerpt.'],
+        ['Failed deployments', 'What should I check first?', 'Review startup and deployment logs for possible configuration or dependency issues. Verify current impact separately.'],
+        ['Support escalations', 'What can we establish?', 'Turn a supplied log excerpt into an assessment of potential causes, supporting evidence, and missing context.'],
+      ].map(([label, title, body]) => <article key={label}><p className="card-label">{label}</p><h3>{title}</h3><p>{body}</p></article>)}
+      </div><p className="section-note">A focused tool for individual accounts. Shared workspaces and native monitoring integrations are not available.</p>
+    </section>
+    <section className="evidence-section" aria-labelledby="evidence-title"><div><p className="eyebrow">Evidence before certainty</p><h2 id="evidence-title">See the reasoning.<br />Keep your judgment.</h2><p className="intro">An error line is a starting point. KANYI helps structure the investigation without treating every warning as an outage.</p><a className="text-link" href="#demo">Inspect the example evidence <span aria-hidden="true">↗</span></a></div><div className="evidence-list">{[
+      ['Evidence you can inspect', 'Review source excerpts alongside the assessment. Matching evidence to a log does not establish that the diagnosis is correct.'],
+      ['Uncertainty made explicit', 'Potential causes remain hypotheses. Confidence is qualitative, and missing context can change the conclusion.'],
+      ['Checks for a human to verify', 'Review troubleshooting recommendations against your environment. KANYI does not execute fixes or monitor current system health.'],
+    ].map(([title, body], index) => <article key={title}><span aria-hidden="true">0{index + 1}</span><div><h3>{title}</h3><p>{body}</p></div></article>)}</div></section>
+    <section id="data" className="data-section" aria-labelledby="data-title"><div><p className="eyebrow">Transparent data handling</p><h2 id="data-title">Know where your logs go.</h2><p>{marketingOnly ? 'The following describes the application workflow. This site’s synthetic demo does not accept or process your logs.' : 'Review your organization’s data requirements before submitting an excerpt.'}</p></div><div className="data-grid">
+      <article><h3>Before submission</h3><p>Remove credentials and personal data yourself. KANYI attempts to redact common secrets, but redaction is incomplete.</p></article>
+      <article><h3>Processing and storage</h3><p>Redacted logs and context are sent to Google Gemini. Inputs and results are stored in KANYI’s database until you delete the analysis.</p></article>
+      <article><h3>Deletion boundaries</h3><p>Analysis deletion removes the live database record. Provider and backup retention follow the operator’s policies and configuration.</p></article>
+    </div></section>
+    {earlyAccessEnabled ? <section id="early-access" className="access-section" aria-labelledby="access-title"><div><p className="eyebrow">Request early access</p><h2 id="access-title">Bring your investigation<br />into focus.</h2><p className="intro">Tell us how you investigate incidents. We’ll review your request and contact you about early-access availability.</p><ul className="access-benefits"><li>Evaluate the individual-account workflow</li><li>Share the use cases that matter to your team</li><li>No production logs or password needed to request access</li></ul><p className="section-note">An access request does not guarantee an invitation.</p></div><EarlyAccessForm /></section> : <section id="early-access" className="access-section" aria-labelledby="access-title">
+      <div><p className="eyebrow">Early access</p><h2 id="access-title">Bring your investigation<br />into focus.</h2><p className="intro">Explore the synthetic demo to see KANYI’s approach to incident triage.</p></div>
+      <div className="access-confirmation"><h3>Early access opening soon</h3><p>We’re not accepting access requests yet. There is no signup form or waiting list on this site.</p><a className="button primary" href="#demo">Explore the Demo<span aria-hidden="true"> ↑</span></a></div>
+    </section>}
+    <section className="faq-section" aria-labelledby="faq-title"><div><p className="eyebrow">A few things to know</p><h2 id="faq-title">Before you get started.</h2></div><div className="faq">{visibleQuestions.map(([question, answer]) => <details key={question}><summary>{question}</summary><p>{answer}</p></details>)}</div></section>
+    <footer><div className="footer-top"><a className="brand" href="#top"><span className="brand-mark" aria-hidden="true">K</span>KANYI</a><p>A clearer next step for your incident investigation.</p><a className="text-link" href="#early-access" onClick={() => trackEvent('access_cta_clicked')}>{accessLabel} <span aria-hidden="true">↗</span></a></div><ProductFooter marketingOnly={marketingOnly} /></footer>
   </main>;
 }

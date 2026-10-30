@@ -421,7 +421,7 @@ test('migration CLI applies additive migrations and ledger twice without data lo
   assert.equal(result.status,0,result.stderr);
  }
  assert.equal((await getHistory(owner.id))[0].id,saved.id);
- assert.equal((await pool.query('SELECT count(*)::integer AS count FROM schema_migrations')).rows[0].count,5);
+ assert.equal((await pool.query('SELECT count(*)::integer AS count FROM schema_migrations')).rows[0].count,6);
 });
 
 test('history rejects malformed filters before database work', async () => {
@@ -488,4 +488,38 @@ test('HTTP same-key work and history stay isolated across accounts',async()=>{
  assert.deepEqual(history.body.map(row=>row.id),[ra.body.id]);
  assert.equal((await request(first.app).delete(`/api/history/${rb.body.id}`).set('Authorization',`Bearer ${first.token}`)).status,404);
  assert.equal((await getHistory(b.id)).length,1);
+});
+
+test('lead HTTP submission persists in real PostgreSQL and concurrent duplicates preserve the first request', async () => {
+  const express = require('express');
+  const { createEarlyAccessRouter } = require('../src/routes/earlyAccessRoutes');
+  const { operations, errorHandler } = require('../src/middleware/operations');
+  const app = express(); app.use(operations);
+  app.use('/api/early-access', createEarlyAccessRouter({ database: pool, enabled: () => true }));
+  app.use(errorHandler);
+  const input = { email: ' SQL-Lead@Example.test ', role: 'DevOps / SRE', useCase: 'Failed deployments', company: 'Example', teamSize: '1–5', website: '' };
+  const first = await request(app).post('/api/early-access').send(input);
+  assert.equal(first.status, 200); assert.deepEqual(first.body, { received: true });
+  const duplicates = await Promise.all(Array.from({ length: 3 }, () => request(app).post('/api/early-access').send({ ...input, company: 'Must not overwrite' })));
+  assert.ok(duplicates.every(result => result.status === 200 && result.body.received));
+  const saved = await pool.query('SELECT * FROM early_access_leads WHERE email=$1', ['sql-lead@example.test']);
+  assert.equal(saved.rows.length, 1); assert.equal(saved.rows[0].company, 'Example');
+  assert.equal(saved.rows[0].professional_role, input.role); assert.equal(saved.rows[0].primary_use_case, input.useCase);
+  assert.ok(saved.rows[0].created_at instanceof Date);
+  await pool.query(readFileSync(join(root, 'database/migrations/006_early_access_leads.sql'), 'utf8'));
+  assert.equal((await pool.query('SELECT id FROM early_access_leads WHERE email=$1', ['sql-lead@example.test'])).rows.length, 1);
+  assert.equal((await request(app).get('/api/early-access')).status, 404);
+});
+
+test('missing lead table fails closed without a success acknowledgement', async () => {
+  const express = require('express');
+  const { createEarlyAccessRouter } = require('../src/routes/earlyAccessRoutes');
+  const { errorHandler } = require('../src/middleware/operations');
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN'); await client.query('ALTER TABLE early_access_leads RENAME TO unavailable_leads');
+    const app = express(); app.use('/api/early-access', createEarlyAccessRouter({ database: client, enabled: () => true })); app.use(errorHandler);
+    const result = await request(app).post('/api/early-access').send({ email: 'unavailable@example.test', role: 'Founder', useCase: 'Application errors' });
+    assert.equal(result.status, 503); assert.equal(result.body.received, undefined);
+  } finally { await client.query('ROLLBACK'); client.release(); }
 });

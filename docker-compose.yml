@@ -14,6 +14,7 @@ services:
 
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./database/migrations/006_early_access_leads.sql:/docker-entrypoint-initdb.d/006_early_access_leads.sql:ro
       - ./database/init.sql:/docker-entrypoint-initdb.d/000_init.sql:ro
       - ./database/migrations/005_production_indexes.sql:/docker-entrypoint-initdb.d/005_production_indexes.sql:ro
       - ./database/migrations/004_commercial_product.sql:/docker-entrypoint-initdb.d/004_commercial_product.sql:ro

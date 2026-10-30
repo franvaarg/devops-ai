@@ -59,11 +59,12 @@ app.use(
 );
 app.use('/api/billing/webhook', express.raw({ type: 'application/json', limit: '256kb' }));
 app.use('/api/billing', require('./routes/billingRoutes'));
+app.use('/api/early-access', require('./routes/earlyAccessRoutes').createEarlyAccessRouter({ database: require('./database/db') }));
 app.use(express.json({ limit: "256kb" }));
 
 const { createRateLimiter } = require('./middleware/rateLimiters');
 app.post('/api/events', createRateLimiter({ windowMs: 60000, limit: 30, standardHeaders: true, legacyHeaders: false }), async (req, res, next) => {
-  const events = ['landing', 'signup', 'first_analysis', 'second_analysis', 'quota_reached', 'pricing_viewed', 'checkout_started'];
+  const events = ['landing', 'signup', 'first_analysis', 'second_analysis', 'quota_reached', 'pricing_viewed', 'checkout_started', 'access_cta_clicked', 'demo_opened', 'access_submit_started', 'access_request_received'];
   if (!events.includes(req.body?.event) || Object.keys(req.body || {}).length !== 1) return next(new AppError('VALIDATION_ERROR'));
   try { await require('./database/db').query('INSERT INTO product_events(event) VALUES ($1)', [req.body.event]); res.status(204).end(); }
   catch (error) { next(error); }
