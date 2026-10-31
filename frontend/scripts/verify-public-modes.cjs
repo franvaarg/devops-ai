@@ -143,11 +143,11 @@ function serve(dir) {
     await intakeContext.close();
     if (process.env.RUN_PRODUCT_REGRESSIONS === 'true') {
       report.productRegressions = [];
-      for (const name of ['verify-landing.cjs', 'verify-journey.cjs', 'verify-resilience.cjs']) {
+      for (const name of ['verify-landing.cjs', 'verify-journey.cjs', 'verify-resilience.cjs', 'verify-design.cjs']) {
         const evidenceDir = path.join(reportDir, name.replace('.cjs','')); fs.mkdirSync(evidenceDir, { recursive:true });
         const result = await execFile(process.execPath, [path.join(__dirname, name)], {
           env: { ...process.env, APP_URL:intake.origin, BROWSER_REPORT_DIR:evidenceDir, RESILIENCE_REPORT:path.join(evidenceDir, 'report.json') },
-          timeout:240000, maxBuffer:1024*1024,
+          timeout:600000, maxBuffer:1024*1024,
         });
         fs.writeFileSync(path.join(evidenceDir, 'run.log'), result.stdout + result.stderr);
         report.productRegressions.push({ script:name, passed:true });

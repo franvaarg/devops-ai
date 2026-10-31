@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { WorkspaceBar } from '../components/ui/Workspace';
 import ProductFooter from '../components/ProductFooter';
 import PublicDemo from '../components/PublicDemo';
 import EarlyAccessForm from '../components/EarlyAccessForm';
@@ -49,7 +50,7 @@ export default function Landing({ onStart }: { onStart?: () => void }) {
         <p className="hero-note">Free synthetic demo. No login, credit card, or personal information required.</p>
         <div className="hero-signals"><span>Potential causes</span><span>Source evidence</span><span>Next checks</span></div>
       </div>
-      <div className="hero-product"><div className="product-bar"><span><i aria-hidden="true" /> KANYI / incident assessment</span><span>EXAMPLE</span></div><PublicDemo /></div>
+      <div className="hero-product"><WorkspaceBar label="KANYI / incident assessment" detail="SYNTHETIC" /><PublicDemo /></div>
     </section>
     <div className="audience-strip"><p>Built for investigations across engineering, DevOps, and technical support.</p><span>Human judgment stays in the loop.</span></div>
     <section id="how" aria-labelledby="how-title"><div className="section-heading"><div><p className="eyebrow">The workflow</p><h2 id="how-title">From a log excerpt<br />to a clearer next step.</h2></div><p>A focused workflow for the moment you have logs, but need a structured way to investigate.</p></div>

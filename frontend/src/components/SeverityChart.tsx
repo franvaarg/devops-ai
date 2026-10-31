@@ -64,22 +64,22 @@ function SeverityChart({
 
   const isDark = theme === "dark";
 
-  const gridColor = isDark ? "#334155" : "#e2e8f0";
+  const gridColor = isDark ? "#30363d" : "#e2e8f0";
   const axisColor = isDark ? "#94a3b8" : "#64748b";
   const secondaryAxisColor = isDark
     ? "#64748b"
     : "#94a3b8";
   const pieStrokeColor = isDark
-    ? "#0f172a"
+    ? "#181b1f"
     : "#ffffff";
 
   const tooltipStyles = {
-    borderRadius: "16px",
+    borderRadius: "4px",
     border: `1px solid ${
-      isDark ? "#334155" : "#e2e8f0"
+      isDark ? "#30363d" : "#e2e8f0"
     }`,
     backgroundColor: isDark
-      ? "#0f172a"
+      ? "#181b1f"
       : "#ffffff",
     boxShadow: isDark
       ? "0 12px 32px rgba(0, 0, 0, 0.35)"
@@ -140,10 +140,10 @@ function SeverityChart({
   }
 
   return (
-    <section className="mt-8 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/20">
-      <div className="border-b border-slate-100 bg-gradient-to-r from-emerald-50/80 via-white to-teal-50/80 p-6 dark:border-slate-800 dark:from-emerald-950/40 dark:via-slate-900 dark:to-teal-950/40 sm:p-7">
+    <section className="mt-8 overflow-hidden rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/20">
+      <div className="border-b border-slate-100 p-6 dark:border-slate-800 sm:p-7">
         <div className="flex items-start gap-4">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-teal-100 text-teal-700 dark:bg-teal-950/70 dark:text-teal-300">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-teal-100 text-teal-700 dark:bg-teal-950/70 dark:text-teal-300">
             <ChartIcon />
           </div>
 
@@ -152,7 +152,7 @@ function SeverityChart({
               Severity distribution
             </p>
 
-            <h3 className="mt-2 text-xl font-black tracking-tight text-slate-950 dark:text-white sm:text-2xl">
+            <h3 className="mt-2 text-xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-2xl">
               Analyses by Severity
             </h3>
 
@@ -170,20 +170,20 @@ function SeverityChart({
             {[1, 2].map((item) => (
               <div
                 key={item}
-                className="rounded-3xl border border-slate-200 bg-slate-50/70 p-5 dark:border-slate-800 dark:bg-slate-950/40"
+                className="rounded-lg border border-slate-200 bg-slate-50/70 p-5 dark:border-slate-800 dark:bg-slate-950/40"
               >
                 <div className="h-5 w-36 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
 
                 <div className="mt-3 h-4 w-52 animate-pulse rounded bg-slate-100 dark:bg-slate-800" />
 
-                <div className="mt-8 h-64 animate-pulse rounded-2xl bg-slate-200/70 dark:bg-slate-800/80" />
+                <div className="mt-8 h-64 animate-pulse rounded-md bg-slate-200/70 dark:bg-slate-800/80" />
               </div>
             ))}
           </div>
         ) : !hasData ? (
-          <div className="flex min-h-80 items-center justify-center rounded-3xl border border-dashed border-emerald-200 bg-emerald-50/50 px-6 text-center dark:border-emerald-900 dark:bg-emerald-950/20">
+          <div className="flex min-h-80 items-center justify-center rounded-lg border border-dashed border-emerald-200 bg-emerald-50/50 px-6 text-center dark:border-emerald-900 dark:bg-emerald-950/20">
             <div>
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-emerald-600 shadow-sm dark:bg-slate-900 dark:text-emerald-400 dark:shadow-black/20">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-md bg-white text-emerald-600 dark:bg-slate-900 dark:text-emerald-400 dark:shadow-black/20">
                 <ChartIcon />
               </div>
 
@@ -199,10 +199,10 @@ function SeverityChart({
           </div>
         ) : (
           <div className="grid gap-6 lg:grid-cols-2">
-            <article className="rounded-3xl border border-slate-200 bg-slate-50/60 p-5 transition duration-300 hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/50 dark:border-slate-800 dark:bg-slate-950/40 dark:hover:border-slate-700 dark:hover:shadow-black/30 sm:p-6">
+            <article className="rounded-lg border border-slate-200 bg-slate-50/60 p-5 transition duration-300 hover:border-slate-300 dark:border-slate-800 dark:bg-slate-950/40 dark:hover:border-slate-700 dark:hover:shadow-black/30 sm:p-6">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <h4 className="font-black tracking-tight text-slate-900 dark:text-white">
+                  <h4 className="font-semibold tracking-tight text-slate-900 dark:text-white">
                     Incident Count
                   </h4>
 
@@ -267,7 +267,7 @@ function SeverityChart({
                       labelStyle={{
                         color: isDark
                           ? "#f8fafc"
-                          : "#0f172a",
+                          : "#181b1f",
                         fontWeight: 700,
                         marginBottom: "4px",
                       }}
@@ -286,7 +286,7 @@ function SeverityChart({
                     <Bar
                       dataKey="total"
                       name="Analyses"
-                      radius={[10, 10, 4, 4]}
+                      radius={[3, 3, 0, 0]}
                       maxBarSize={58}
                     >
                       {chartData.map((item) => (
@@ -305,10 +305,10 @@ function SeverityChart({
               </div>
             </article>
 
-            <article className="rounded-3xl border border-slate-200 bg-slate-50/60 p-5 transition duration-300 hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/50 dark:border-slate-800 dark:bg-slate-950/40 dark:hover:border-slate-700 dark:hover:shadow-black/30 sm:p-6">
+            <article className="rounded-lg border border-slate-200 bg-slate-50/60 p-5 transition duration-300 hover:border-slate-300 dark:border-slate-800 dark:bg-slate-950/40 dark:hover:border-slate-700 dark:hover:shadow-black/30 sm:p-6">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <h4 className="font-black tracking-tight text-slate-900 dark:text-white">
+                  <h4 className="font-semibold tracking-tight text-slate-900 dark:text-white">
                     Percentage Distribution
                   </h4>
 
@@ -324,7 +324,7 @@ function SeverityChart({
 
               <div className="relative mt-5 h-80 w-full">
                 <div className="pointer-events-none absolute left-1/2 top-[42%] z-10 -translate-x-1/2 -translate-y-1/2 text-center">
-                  <p className="text-3xl font-black tracking-tight text-slate-950 dark:text-white">
+                  <p className="text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">
                     {totalAnalyses}
                   </p>
 
@@ -347,7 +347,7 @@ function SeverityChart({
                       innerRadius={68}
                       outerRadius={108}
                       paddingAngle={4}
-                      cornerRadius={7}
+                      cornerRadius={3}
                       stroke={pieStrokeColor}
                       strokeWidth={3}
                     >
@@ -368,7 +368,7 @@ function SeverityChart({
                       labelStyle={{
                         color: isDark
                           ? "#f8fafc"
-                          : "#0f172a",
+                          : "#181b1f",
                         fontWeight: 700,
                       }}
                       itemStyle={{

@@ -36,14 +36,14 @@ function SeverityCard({
           ? `Remove ${label} severity filter`
           : `Filter analyses by ${label} severity`
       }
-      className={`group w-full rounded-2xl border bg-white p-4 text-left shadow-sm transition duration-300 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200 dark:bg-slate-900 dark:border-slate-800 dark:shadow-black/20 dark:focus-visible:ring-emerald-800 disabled:cursor-wait disabled:opacity-70 ${
+      className={`group w-full rounded-md border bg-white p-4 text-left  transition duration-300 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200 dark:bg-slate-900 dark:border-slate-800 dark:shadow-black/20 dark:focus-visible:ring-emerald-800 disabled:cursor-wait disabled:opacity-70 ${
         isActive
           ? activeClasses
           : `border-slate-200 dark:border-slate-800 ${borderClasses}`
       } ${
         loading
           ? ""
-          : "cursor-pointer hover:-translate-y-0.5 hover:shadow-md dark:hover:shadow-black/30 active:translate-y-0"
+          : "cursor-pointer   dark:hover:shadow-black/30 "
       }`}
     >
       <div className="flex items-center justify-between gap-4">
@@ -52,7 +52,7 @@ function SeverityCard({
             className={`h-2.5 w-2.5 rounded-full transition duration-300 ${dotClasses} ${
               isActive
                 ? "scale-125 ring-4 ring-current/10"
-                : "group-hover:scale-110"
+                : ""
             }`}
             aria-hidden="true"
           />
@@ -80,7 +80,7 @@ function SeverityCard({
           <div className="h-8 w-10 animate-pulse rounded-lg bg-slate-200 dark:bg-slate-700" />
         ) : (
           <p
-            className={`text-2xl font-black tracking-tight ${valueClasses}`}
+            className={`text-2xl font-semibold tracking-tight ${valueClasses}`}
           >
             {value}
           </p>

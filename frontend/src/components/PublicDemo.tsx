@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { DecisionMetrics, EvidencePanel, SourceExcerpt } from './ui/Workspace';
 
 const examples = [
   { name: 'Failing orders', log: '10:42 WARN legacy cache API deprecated\n10:43 ERROR database connection refused\n10:43 GET /orders 503\n10:44 GET /orders 503', action: 'Action Required', severity: 'High', confidence: 'Medium', risk: 'Low', summary: 'Orders are failing. The warning may be unrelated.', cause: 'Connection failures coincide with repeated 503 responses. Database unavailability is a possible cause; the excerpt does not establish why it failed.', evidence: '10:43 GET /orders 503', next: 'Check database health and connectivity from the application before changing configuration.' },
@@ -16,13 +17,13 @@ export default function PublicDemo() {
     <select id="demo-scenario" value={selected} onChange={event => setSelected(Number(event.target.value))} className="my-3 w-full rounded-lg border border-slate-300 bg-white p-3 text-slate-900">
       {examples.map((entry, index) => <option key={entry.name} value={index}>{entry.name}</option>)}
     </select>
-    <pre>{example.log}</pre>
+    <SourceExcerpt>{example.log}</SourceExcerpt>
     <div aria-live="polite">
-      <div className="decision-grid">{[['Actionability', example.action], ['Severity', example.severity], ['Confidence', example.confidence], ['False-positive risk', example.risk]].map(([label, value]) => <div key={label}>{label}<strong>{value}</strong></div>)}</div>
-      <h3>{example.summary}</h3><p><strong>Potential cause:</strong> {example.cause}</p><p><strong>Recommended next step:</strong> {example.next}</p>
+      <DecisionMetrics actionability={example.action} severity={example.severity} confidence={example.confidence} risk={example.risk} />
+      <h3>{example.summary}</h3><EvidencePanel title="Potential cause:"><p>{example.cause}</p></EvidencePanel><EvidencePanel title="Recommended next step:"><p>{example.next}</p></EvidencePanel>
     </div>
     <button aria-expanded={expanded} aria-controls="demo-evidence" onClick={() => setExpanded(value => !value)}>{expanded ? 'Hide source evidence' : 'Inspect source evidence'}</button>
-    {expanded && <div id="demo-evidence" className="mt-3"><pre>{example.evidence}</pre><p className="fine">This excerpt is copied directly from the selected synthetic log.</p></div>}
+    {expanded && <div id="demo-evidence" className="mt-3"><SourceExcerpt>{example.evidence}</SourceExcerpt><p className="fine">This excerpt is copied directly from the selected synthetic log.</p></div>}
     <p className="fine">Prepared synthetic examples, not live AI analysis. This free demo runs locally in your browser without login, uploads, backend requests, or payments. Real analyses can differ.</p>
   </aside>;
 }

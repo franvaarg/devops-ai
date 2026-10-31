@@ -137,7 +137,7 @@ function DashboardStats({
       borderClasses:
         "hover:border-red-300 dark:hover:border-red-700",
       activeClasses:
-        "border-red-400 bg-red-50 shadow-md shadow-red-100 ring-2 ring-red-100 dark:border-red-700 dark:bg-red-950/40 dark:shadow-red-950/30 dark:ring-red-900/60",
+        "border-red-400 bg-red-50  shadow-red-100 ring-2 ring-red-100 dark:border-red-700 dark:bg-red-950/40 dark:shadow-red-950/30 dark:ring-red-900/60",
     },
     {
       severity: "high",
@@ -150,7 +150,7 @@ function DashboardStats({
       borderClasses:
         "hover:border-orange-300 dark:hover:border-orange-700",
       activeClasses:
-        "border-orange-400 bg-orange-50 shadow-md shadow-orange-100 ring-2 ring-orange-100 dark:border-orange-700 dark:bg-orange-950/40 dark:shadow-orange-950/30 dark:ring-orange-900/60",
+        "border-orange-400 bg-orange-50  shadow-orange-100 ring-2 ring-orange-100 dark:border-orange-700 dark:bg-orange-950/40 dark:shadow-orange-950/30 dark:ring-orange-900/60",
     },
     {
       severity: "medium",
@@ -163,7 +163,7 @@ function DashboardStats({
       borderClasses:
         "hover:border-amber-300 dark:hover:border-amber-700",
       activeClasses:
-        "border-amber-400 bg-amber-50 shadow-md shadow-amber-100 ring-2 ring-amber-100 dark:border-amber-700 dark:bg-amber-950/40 dark:shadow-amber-950/30 dark:ring-amber-900/60",
+        "border-amber-400 bg-amber-50  shadow-amber-100 ring-2 ring-amber-100 dark:border-amber-700 dark:bg-amber-950/40 dark:shadow-amber-950/30 dark:ring-amber-900/60",
     },
     {
       severity: "low",
@@ -176,7 +176,7 @@ function DashboardStats({
       borderClasses:
         "hover:border-emerald-300 dark:hover:border-emerald-700",
       activeClasses:
-        "border-emerald-400 bg-emerald-50 shadow-md shadow-emerald-100 ring-2 ring-emerald-100 dark:border-emerald-700 dark:bg-emerald-950/40 dark:shadow-emerald-950/30 dark:ring-emerald-900/60",
+        "border-emerald-400 bg-emerald-50   ring-2 ring-emerald-100 dark:border-emerald-700 dark:bg-emerald-950/40  dark:ring-emerald-900/60",
     },
   ];
 
@@ -192,7 +192,7 @@ function DashboardStats({
             </p>
           </div>
 
-          <h2 className="mt-3 text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">
+          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-3xl">
             Analysis Dashboard
           </h2>
 
@@ -202,7 +202,7 @@ function DashboardStats({
           </p>
         </div>
 
-        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:shadow-black/20">
+        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:shadow-black/20">
           <span
             className={`h-2 w-2 rounded-full ${
               loading

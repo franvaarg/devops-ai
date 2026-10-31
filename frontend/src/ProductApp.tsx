@@ -98,7 +98,7 @@ export default function ProductApp() {
 
   if (isLoading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
+      <main className="session-state flex min-h-screen items-center justify-center bg-slate-950 text-white">
         <div className="text-center">
           <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent" />
 
@@ -110,7 +110,7 @@ export default function ProductApp() {
     );
   }
 
-  if (sessionError) return <main className="p-8"><p role="alert">We could not reach your workspace. Your session has been kept.</p><button className="mt-4 rounded-xl border px-4 py-2" onClick={() => location.reload()}>Retry connection</button></main>;
+  if (sessionError) return <main className="session-state p-8"><p role="alert">We could not reach your workspace. Your session has been kept.</p><button className="mt-4 rounded-xl border px-4 py-2" onClick={() => location.reload()}>Retry connection</button></main>;
 
   if (!isAuthenticated && !showAuth) return <Landing onStart={() => { window.location.hash = "login"; setShowAuth(true); }} />;
 

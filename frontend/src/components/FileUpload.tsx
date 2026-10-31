@@ -36,22 +36,7 @@ function FileUpload({
 
   return (
     <div
-      className="
-        mt-4
-        rounded-2xl
-        border
-        border-dashed
-        border-emerald-300
-        bg-emerald-50/60
-        p-4
-        transition
-        hover:border-emerald-400
-        hover:bg-emerald-50
-        dark:border-emerald-700
-        dark:bg-emerald-950/20
-        dark:hover:border-emerald-500
-        dark:hover:bg-emerald-950/30
-      "
+      className="file-upload mt-4 rounded-md border border-dashed border-emerald-300 bg-emerald-50/60 p-4 transition hover:border-emerald-400 hover:bg-emerald-50 dark:border-emerald-700 dark:bg-emerald-950/20 dark:hover:border-emerald-500 dark:hover:bg-emerald-950/30"
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -72,29 +57,7 @@ function FileUpload({
           type="file"
           accept=".log,.txt"
           onChange={handleFileChange}
-          className="
-            block
-            w-full
-            cursor-pointer
-            text-sm
-            text-slate-600
-            dark:text-slate-300
-            file:mr-4
-            file:cursor-pointer
-            file:rounded-xl
-            file:border-0
-            file:bg-slate-900
-            file:px-4
-            file:py-2.5
-            file:text-sm
-            file:font-semibold
-            file:text-white
-            file:transition
-            hover:file:bg-slate-700
-            dark:file:bg-emerald-700
-            dark:hover:file:bg-emerald-500
-            sm:w-auto
-          "
+          className="block w-full cursor-pointer text-sm text-slate-600 dark:text-slate-300 file:mr-4 file:cursor-pointer file:rounded-xl file:border-0 file:bg-slate-900 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-white file:transition hover:file:bg-slate-700 dark:file:bg-emerald-700 dark:hover:file:bg-emerald-500 sm:w-auto"
         />
       </div>
     </div>

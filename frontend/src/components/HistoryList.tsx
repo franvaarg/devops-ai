@@ -1,4 +1,6 @@
 import { useState } from "react";
+import AnalysisPanel from "./AnalysisPanel";
+import { StatusBadge } from "./ui/Workspace";
 
 import type { HistoryItem } from "../services/api";
 
@@ -104,45 +106,6 @@ function EmptyIcon({
   );
 }
 
-function getSeverityClasses(severity: string) {
-  switch (severity.toLowerCase()) {
-    case "critical":
-      return {
-        badge:
-          "border-red-200 bg-red-50 text-red-700 dark:border-red-900/70 dark:bg-red-950/50 dark:text-red-300",
-        accent: "bg-red-500",
-      };
-
-    case "high":
-      return {
-        badge:
-          "border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-900/70 dark:bg-orange-950/50 dark:text-orange-300",
-        accent: "bg-orange-500",
-      };
-
-    case "medium":
-      return {
-        badge:
-          "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/70 dark:bg-amber-950/50 dark:text-amber-300",
-        accent: "bg-amber-500",
-      };
-
-    case "low":
-      return {
-        badge:
-          "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/70 dark:bg-emerald-950/50 dark:text-emerald-300",
-        accent: "bg-emerald-500",
-      };
-
-    default:
-      return {
-        badge:
-          "border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300",
-        accent: "bg-slate-400",
-      };
-  }
-}
-
 function formatDate(dateValue: string) {
   const date = new Date(dateValue);
 
@@ -219,11 +182,11 @@ function HistoryList({
 
   if (loading) {
     return (
-      <div className="mt-6 grid gap-4">
+      <div className="mt-6 grid gap-4" role="status" aria-label="Loading analysis history">
         {[1, 2, 3].map((item) => (
           <div
             key={item}
-            className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/20"
+            className="rounded-lg border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/20"
           >
             <div className="flex items-center justify-between gap-4">
               <div className="h-7 w-24 animate-pulse rounded-full bg-slate-200 dark:bg-slate-700" />
@@ -241,12 +204,12 @@ function HistoryList({
 
   if (history.length === 0 && hasActiveFilters) {
     return (
-      <div className="mt-6 rounded-3xl border border-dashed border-teal-300 bg-teal-50/60 p-10 text-center dark:border-teal-900 dark:bg-teal-950/20">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-teal-600 shadow-sm dark:bg-slate-900 dark:text-teal-300 dark:shadow-black/20">
+      <div className="mt-6 rounded-lg border border-dashed border-teal-300 bg-teal-50/60 p-10 text-center dark:border-teal-900 dark:bg-teal-950/20">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-md bg-white text-teal-600 dark:bg-slate-900 dark:text-teal-300 dark:shadow-black/20">
           <EmptyIcon />
         </div>
 
-        <p className="mt-5 font-black text-slate-800 dark:text-slate-100">
+        <p className="mt-5 font-semibold text-slate-800 dark:text-slate-100">
           No analyses match your search
         </p>
 
@@ -260,12 +223,12 @@ function HistoryList({
 
   if (history.length === 0) {
     return (
-      <div className="mt-6 rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-slate-700 dark:bg-slate-900">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-300">
+      <div className="mt-6 rounded-lg border border-dashed border-slate-300 bg-white p-10 text-center dark:border-slate-700 dark:bg-slate-900">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-md bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-300">
           <EmptyIcon />
         </div>
 
-        <p className="mt-5 font-black text-slate-800 dark:text-slate-100">
+        <p className="mt-5 font-semibold text-slate-800 dark:text-slate-100">
           No saved analyses yet
         </p>
 
@@ -278,7 +241,7 @@ function HistoryList({
   }
 
   return (
-    <div className="mt-6 grid gap-5">
+    <div className="history-list mt-5 grid gap-2">
       {history.map((item) => {
         const isExpanded =
           expandedId === item.id;
@@ -292,37 +255,22 @@ function HistoryList({
         const isExporting =
           exportingId === item.id;
 
-        const severityClasses =
-          getSeverityClasses(item.severity);
 
         return (
           <article
             key={item.id}
-            className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:border-slate-300 hover:shadow-xl hover:shadow-slate-200/50 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700 dark:hover:shadow-black/30"
+            className="history-row group relative overflow-hidden rounded-lg border border-slate-200 bg-white transition duration-300 hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700 dark:hover:shadow-black/30"
           >
-            <div
-              className={`absolute inset-y-0 left-0 w-1 ${severityClasses.accent}`}
-            />
-
             <button
               type="button"
               onClick={() =>
                 toggleAnalysis(item.id)
               }
               aria-expanded={isExpanded}
-              className="w-full p-5 pl-6 text-left sm:p-6 sm:pl-7"
+              className="history-row-toggle w-full text-left" aria-controls={isExpanded ? `saved-analysis-${item.id}` : undefined}
             >
               <div className="flex flex-wrap items-center justify-between gap-4">
-                <span
-                  className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] ${severityClasses.badge}`}
-                >
-                  <span
-                    className={`h-2 w-2 rounded-full ${severityClasses.accent}`}
-                  />
-
-                  {item.severity}
-                </span>
-
+                <StatusBadge value={item.severity} />
                 <div className="flex items-center gap-3">
                   <time className="text-xs font-semibold text-slate-500 dark:text-slate-400 sm:text-sm">
                     {formatDate(item.createdAt)}
@@ -340,11 +288,11 @@ function HistoryList({
                 </div>
               </div>
 
-              <p className="mt-5 line-clamp-3 text-base font-medium leading-7 text-slate-800 dark:text-slate-100">
+              <p className="mt-3 line-clamp-3 text-sm font-medium leading-6 text-slate-800 dark:text-slate-100">
                 {item.summary}
               </p>
 
-              <p className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-emerald-700 dark:text-emerald-300">
+              <p className="mt-2 inline-flex items-center gap-2 text-sm font-bold text-emerald-700 dark:text-emerald-300">
                 {isExpanded
                   ? "Hide details"
                   : "View full analysis"}
@@ -354,98 +302,22 @@ function HistoryList({
             </button>
 
             {isExpanded && (
-              <div className="border-t border-slate-200 bg-slate-50/70 p-5 dark:border-slate-800 dark:bg-slate-950/40 sm:p-7">
+              <div id={`saved-analysis-${item.id}`} className="history-details border-t border-slate-200 bg-slate-50/70 p-5 dark:border-slate-800 dark:bg-slate-950/40 sm:p-7">
                 <div className="grid gap-5 break-words [overflow-wrap:anywhere]">
-                  <section className="rounded-2xl border bg-white p-5 dark:bg-slate-900">
-                    <p className="font-bold">{item.actionability || 'Actionability not assessed'} · {item.confidence || 'Low'} confidence</p>
-                    <p className="mt-2">False-positive risk: {item.falsePositiveRisk || 'Not assessed'}</p>
-                    <p className="mt-2">{item.noiseAssessment || 'This older result predates noise assessment.'}</p>
-                    {item.operationalContext && <p className="mt-3 text-sm">User-reported context: {item.operationalContext}</p>}
-                    {item.inputSignals && <p className="mt-3 text-sm">Excerpt checks at submission: {item.inputSignals.duplicateLineCount} exact repeated lines; {item.inputSignals.olderThanSevenDaysCount} timestamps older than seven days; {item.inputSignals.futureTimestampCount} future timestamps. Age and repetition alone do not establish noise.</p>}
-                    <p className="mt-3 text-xs">Hypotheses based on the submitted excerpt. Verify before changing production.</p>
-                  </section>
-                  <section className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-                    <h3 className="text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-                      Observed Evidence
-                    </h3>
-                    {item.evidence?.length ? (
-                      <ul className="mt-3 list-disc space-y-2 pl-5 leading-7 text-slate-800 dark:text-slate-100">
-                        {item.evidence.map((evidence, index) => (
-                          <li key={`${item.id}-evidence-${index}`}>{evidence}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="mt-3 text-slate-600 dark:text-slate-400">No supporting evidence was recorded.</p>
-                    )}
-                  </section>
-
-                  <section className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-                    <h3 className="text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-                      Likely Root Cause · {item.confidence || "Low"} confidence
-                    </h3>
-
-                    <p className="mt-3 leading-7 text-slate-800 dark:text-slate-100">
-                      {item.rootCause ||
-                        "No root cause available."}
-                    </p>
-                  </section>
-
-                  {([['Unknown / missing information', item.missingInformation], ['Verification steps', item.verificationSteps]] as const).map(([title, items]) => <section key={title} className="rounded-2xl border bg-white p-5 dark:bg-slate-900"><h3 className="font-bold">{title}</h3>{items?.length ? <ul className="mt-3 list-disc pl-5">{items.map((text, index) => <li key={index}>{text}</li>)}</ul> : <p className="mt-3">Not separately recorded in this older analysis. Verify before applying changes.</p>}</section>)}
-                  <section className="rounded-2xl border border-teal-200 bg-teal-50/50 p-5 dark:border-teal-900 dark:bg-teal-950/20">
-                    <h3 className="text-xs font-black uppercase tracking-[0.16em] text-teal-700 dark:text-teal-300">
-                      Recommendation
-                    </h3>
-
-                    <p className="mt-3 leading-7 text-slate-800 dark:text-slate-100">
-                      {item.recommendation ||
-                        "No recommendation available."}
-                    </p>
-                  </section>
-
-                  <section className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-5 dark:border-emerald-900 dark:bg-emerald-950/20">
-                    <h3 className="text-xs font-black uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-300">
-                      Suggested Steps
-                    </h3>
-
-                    {item.steps?.length > 0 ? (
-                      <ol className="mt-4 grid gap-3">
-                        {item.steps.map(
-                          (step, index) => (
-                            <li
-                              key={`${item.id}-step-${index}`}
-                              className="flex gap-3 text-slate-800 dark:text-slate-100"
-                            >
-                              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-700 text-xs font-black text-white">
-                                {index + 1}
-                              </span>
-
-                              <span className="pt-0.5 leading-7">
-                                {step}
-                              </span>
-                            </li>
-                          )
-                        )}
-                      </ol>
-                    ) : (
-                      <p className="mt-3 text-slate-600 dark:text-slate-400">
-                        No troubleshooting steps
-                        available.
-                      </p>
-                    )}
-                  </section>
+                  <AnalysisPanel {...item} />
 
                   <section>
                     <div className="flex items-center justify-between gap-4">
-                      <h3 className="text-xs font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+                      <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
                         Stored log excerpt
                       </h3>
 
-                      <span className="rounded-full bg-slate-200 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                      <span className="rounded-full bg-slate-200 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                         Stored input
                       </span>
                     </div>
 
-                    <pre className="mt-3 max-h-96 overflow-auto whitespace-pre-wrap break-words rounded-2xl border border-slate-800 bg-slate-950 p-5 text-sm leading-6 text-slate-200 shadow-inner">
+                    <pre className="mt-3 max-h-96 overflow-auto whitespace-pre-wrap break-words rounded-md border border-slate-800 bg-slate-950 p-5 text-sm leading-6 text-slate-200">
                       {item.originalLog ||
                         "Original log unavailable."}
                     </pre>
@@ -453,14 +325,14 @@ function HistoryList({
 
                   <div className="border-t border-slate-200 pt-5 dark:border-slate-800">
                     {isConfirmingDelete ? (
-                      <div className="rounded-2xl border border-red-200 bg-red-50 p-5 dark:border-red-900 dark:bg-red-950/30">
+                      <div className="rounded-md border border-red-200 bg-red-50 p-5 dark:border-red-900 dark:bg-red-950/30">
                         <div className="flex items-start gap-3">
                           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-300">
                             <TrashIcon />
                           </div>
 
                           <div>
-                            <p className="font-black text-red-900 dark:text-red-200">
+                            <p className="font-semibold text-red-900 dark:text-red-200">
                               Delete this analysis?
                             </p>
 
@@ -489,7 +361,7 @@ function HistoryList({
                               )
                             }
                             disabled={isDeleting}
-                            className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             <TrashIcon />
 
@@ -510,7 +382,7 @@ function HistoryList({
                             isExporting ||
                             deletingId !== null
                           }
-                          className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition duration-200 hover:bg-emerald-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-bold text-white transition duration-200 hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           <DownloadIcon />
 

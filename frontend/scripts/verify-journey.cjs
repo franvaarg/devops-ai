@@ -76,9 +76,10 @@ const AxeBuilder = require(process.env.AXE_MODULE || require.resolve('@axe-core/
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
     await page.getByRole('button',{name:/View full analysis/}).click();
     await checkAccessibility('workspace');
+    await page.getByRole('button',{name:/Light Mode/}).click();
+    await checkAccessibility('workspace-light');
     await page.getByRole('button',{name:/Dark Mode/}).click();
     await checkAccessibility('workspace-dark');
-    await page.getByRole('button',{name:/Light Mode/}).click();
     const downloadPromise = page.waitForEvent('download');
     await page.getByRole('button',{name:'Export PDF',exact:true}).click();
     const download = await downloadPromise;

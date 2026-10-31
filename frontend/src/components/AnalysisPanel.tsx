@@ -1,5 +1,10 @@
-import type { ReactNode } from "react";
-import type { InputSignals } from '../services/api';
+import {
+  DecisionMetrics,
+  EvidencePanel as AnalysisSection,
+  StatusBadge,
+  WorkspaceBar,
+} from "./ui/Workspace";
+import type { InputSignals } from "../services/api";
 
 type AnalysisPanelProps = {
   missingInformation?: string[];
@@ -18,47 +23,14 @@ type AnalysisPanelProps = {
   steps: string[];
 };
 
-function getSeverityClasses(severity: string) {
-  switch (severity.toLowerCase()) {
-    case "critical":
-      return "border-red-200 bg-red-50 text-red-700 ring-red-200 dark:border-red-900/70 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900/70";
-
-    case "high":
-      return "border-orange-200 bg-orange-50 text-orange-700 ring-orange-200 dark:border-orange-900/70 dark:bg-orange-950/40 dark:text-orange-300 dark:ring-orange-900/70";
-
-    case "medium":
-      return "border-amber-200 bg-amber-50 text-amber-700 ring-amber-200 dark:border-amber-900/70 dark:bg-amber-950/40 dark:text-amber-300 dark:ring-amber-900/70";
-
-    case "low":
-      return "border-emerald-200 bg-emerald-50 text-emerald-700 ring-emerald-200 dark:border-emerald-900/70 dark:bg-emerald-950/40 dark:text-emerald-300 dark:ring-emerald-900/70";
-
-    default:
-      return "border-slate-200 bg-slate-50 text-slate-700 ring-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700";
-  }
-}
-
-function AnalysisSection({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5 dark:border-slate-800 dark:bg-slate-950/50">
-      <h3 className="text-xs font-black uppercase tracking-[0.16em] text-teal-700 dark:text-teal-400">
-        {title}
-      </h3>
-
-      <div className="mt-3 break-words [overflow-wrap:anywhere] leading-7 text-slate-700 dark:text-slate-300">
-        {children}
-      </div>
-    </div>
-  );
-}
-
 function AnalysisPanel({
-  missingInformation, verificationSteps, actionability, falsePositiveRisk, noiseAssessment, operationalContext, inputSignals,
+  missingInformation,
+  verificationSteps,
+  actionability,
+  falsePositiveRisk,
+  noiseAssessment,
+  operationalContext,
+  inputSignals,
   severity,
   summary,
   evidence,
@@ -69,75 +41,76 @@ function AnalysisPanel({
 }: AnalysisPanelProps) {
   const hasAnalysis = Boolean(
     severity ||
-      summary ||
-      evidence.length > 0 ||
-      rootCause ||
-      confidence ||
-      recommendation ||
-      steps.length > 0
+    summary ||
+    evidence.length > 0 ||
+    rootCause ||
+    confidence ||
+    recommendation ||
+    steps.length > 0,
   );
 
-  if (!hasAnalysis) {
+  if (!hasAnalysis)
     return (
-      <section className="mt-10 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex flex-col items-center px-6 py-12 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-100 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              className="h-6 w-6"
-              aria-hidden="true"
-            >
-              <path d="M9.5 3h5l.7 2.1 2 .8 2-1 2.5 4.3-1.8 1.4.1 2.2 1.7 1.5-2.5 4.3-2.1-.9-1.9 1.1-.3 2.2h-5l-.4-2.2-1.9-1.1-2.1.9L3 14.3l1.7-1.5.1-2.2L3 9.2 5.5 4.9l2 1 2-.8L9.5 3Z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-          </div>
-
-          <h2 className="mt-4 text-xl font-bold text-slate-900 dark:text-white">
-            Incident assessment
-          </h2>
-
-          <p className="mt-2 max-w-md text-sm leading-6 text-slate-500 dark:text-slate-400">
-            Your next AI-generated diagnosis will appear
-            here after you analyze a log.
+      <section className="assessment-empty" aria-label="Incident assessment">
+        <WorkspaceBar label="Assessment" detail="AWAITING INPUT" />
+        <div>
+          <span className="section-kicker">Evidence before certainty</span>
+          <h2>Incident assessment</h2>
+          <p>
+            Your next AI-generated diagnosis will appear here after you analyze
+            a log.
+          </p>
+          <p className="text-sm">
+            Severity · Confidence · Source evidence · Recommended checks
           </p>
         </div>
       </section>
     );
-  }
 
   return (
-    <section className="mt-10 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg shadow-slate-200/50 dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/20">
-      <div className="border-b border-slate-200 bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-5 dark:border-slate-800 dark:from-emerald-950/50 dark:to-teal-950/40">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-400">
-              Incident assessment
-            </p>
-
-            <h2 className="mt-1 text-2xl font-black text-slate-950 dark:text-white">
-              Incident assessment
-            </h2>
-          </div>
-
-          <span
-            className={`inline-flex rounded-full border px-3 py-1.5 text-xs font-black uppercase tracking-wide ring-1 ring-inset ${getSeverityClasses(
-              severity
-            )}`}
-          >
-            {severity || "Unknown"}
-          </span>
+    <section
+      className="assessment-result"
+      aria-label="Incident assessment result"
+    >
+      <WorkspaceBar label="Incident assessment" detail="REVIEW REQUIRED" />
+      <div className="assessment-heading">
+        <div>
+          <span className="section-kicker">Analysis / decision support</span>
+          <h2>Incident assessment</h2>
         </div>
+        <StatusBadge value={severity} />
       </div>
+      <div className="assessment-body">
+        <DecisionMetrics
+          actionability={actionability}
+          severity={severity}
+          confidence={confidence}
+          risk={falsePositiveRisk}
+        />
+        <p className="assessment-disclaimer">
+          Assessment of the submitted excerpt only. Confidence is qualitative.
+          Verify impact and recommendations before making production changes.
+        </p>
+        {inputSignals && (
+          <p className="text-sm">
+            Excerpt checks: {inputSignals.lineCount} nonempty lines ·{" "}
+            {inputSignals.duplicateLineCount} exact repeats ·{" "}
+            {inputSignals.olderThanSevenDaysCount} timestamps older than seven
+            days at submission · {inputSignals.futureTimestampCount} future
+            timestamps. Only full timestamps with timezone are checked.
+            Repetition or age alone does not establish noise or current service
+            health.
+          </p>
+        )}
 
-      <div className="grid gap-4 p-6">
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">{[['Actionability', actionability || 'Not assessed'], ['Severity', severity], ['Confidence', confidence], ['False-positive risk', falsePositiveRisk || 'Not assessed']].map(([label, value]) => <div key={label} className="rounded-xl border border-slate-200 p-4 dark:border-slate-700"><p className="text-xs text-slate-500 dark:text-slate-400">{label}</p><p className="mt-2 font-bold">{value}</p></div>)}</div>
-        <p className="text-xs text-slate-500 dark:text-slate-400">Assessment of the submitted excerpt only. Confidence is qualitative. Verify impact and recommendations before making production changes.</p>
-        {inputSignals && <p className="text-sm">Excerpt checks: {inputSignals.lineCount} nonempty lines · {inputSignals.duplicateLineCount} exact repeats · {inputSignals.olderThanSevenDaysCount} timestamps older than seven days at submission · {inputSignals.futureTimestampCount} future timestamps. Only full timestamps with timezone are checked. Repetition or age alone does not establish noise or current service health.</p>}
-
-        {operationalContext && <details className="rounded-xl border p-4"><summary className="cursor-pointer font-semibold">User-reported operational context</summary><p className="mt-3 break-words">{operationalContext}</p></details>}
+        {operationalContext && (
+          <details className="rounded-xl border p-4">
+            <summary className="cursor-pointer font-semibold">
+              User-reported operational context
+            </summary>
+            <p className="mt-3 break-words">{operationalContext}</p>
+          </details>
+        )}
         <AnalysisSection title="Summary">
           <p>{summary || "No summary available."}</p>
         </AnalysisSection>
@@ -154,21 +127,42 @@ function AnalysisPanel({
           )}
         </AnalysisSection>
 
-        <AnalysisSection title={`Likely Root Cause · ${confidence || "Low"} confidence`}>
+        <AnalysisSection
+          title={`Likely Root Cause · ${confidence || "Low"} confidence`}
+        >
           <p>{rootCause || "No root cause available."}</p>
         </AnalysisSection>
 
         <AnalysisSection title="Unknown / missing information">
-          {missingInformation?.length ? <ul className="list-disc pl-5">{missingInformation.map((item, i) => <li key={i}>{item}</li>)}</ul> : <p>No additional missing information was recorded. This does not establish that the diagnosis is complete.</p>}
+          {missingInformation?.length ? (
+            <ul className="list-disc pl-5">
+              {missingInformation.map((item, i) => (
+                <li key={i}>{item}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>
+              No additional missing information was recorded. This does not
+              establish that the diagnosis is complete.
+            </p>
+          )}
         </AnalysisSection>
         <AnalysisSection title="Verification steps">
-          {verificationSteps?.length ? <ol className="list-decimal pl-5">{verificationSteps.map((item, i) => <li key={i}>{item}</li>)}</ol> : <p>This older analysis has no separate verification steps. Confirm impact and cause before applying changes.</p>}
+          {verificationSteps?.length ? (
+            <ol className="list-decimal pl-5">
+              {verificationSteps.map((item, i) => (
+                <li key={i}>{item}</li>
+              ))}
+            </ol>
+          ) : (
+            <p>
+              This older analysis has no separate verification steps. Confirm
+              impact and cause before applying changes.
+            </p>
+          )}
         </AnalysisSection>
         <AnalysisSection title="Recommendation">
-          <p>
-            {recommendation ||
-              "No recommendation available."}
-          </p>
+          <p>{recommendation || "No recommendation available."}</p>
         </AnalysisSection>
 
         <AnalysisSection title="Suggested Steps">
@@ -179,7 +173,7 @@ function AnalysisPanel({
                   key={`${step}-${index}`}
                   className="flex gap-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
                 >
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-black text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300">
                     {index + 1}
                   </span>
 
@@ -195,7 +189,12 @@ function AnalysisPanel({
             </p>
           )}
         </AnalysisSection>
-        <AnalysisSection title="Noise and legacy-log assessment"><p>{noiseAssessment || 'This older analysis predates noise assessment. Reanalyze the relevant log window to assess actionability and false-positive risk.'}</p></AnalysisSection>
+        <AnalysisSection title="Noise and legacy-log assessment">
+          <p>
+            {noiseAssessment ||
+              "This older analysis predates noise assessment. Reanalyze the relevant log window to assess actionability and false-positive risk."}
+          </p>
+        </AnalysisSection>
       </div>
     </section>
   );

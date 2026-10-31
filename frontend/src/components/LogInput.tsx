@@ -5,7 +5,7 @@ type LogInputProps = {
 
 function LogInput({ log, setLog }: LogInputProps) {
   return (
-    <div>
+    <div className="log-editor">
       <div className="mb-2 flex items-center justify-between gap-3">
         <label
           htmlFor="log-input"
@@ -20,42 +20,13 @@ function LogInput({ log, setLog }: LogInputProps) {
       </div>
 
       <div
-        className="
-          overflow-hidden
-          rounded-2xl
-          border
-          border-slate-300
-          bg-white
-          shadow-inner
-          transition
-          focus-within:border-emerald-500
-          focus-within:ring-4
-          focus-within:ring-emerald-100
-          dark:border-slate-700
-          dark:bg-slate-950
-          dark:focus-within:ring-emerald-900/40
-        "
+        className="overflow-hidden rounded-md border border-slate-300 bg-white transition focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-100 dark:border-slate-700 dark:bg-slate-950 dark:focus-within:ring-emerald-900/40"
       >
         <div
-          className="
-            flex
-            items-center
-            gap-2
-            border-b
-            border-slate-300
-            bg-slate-100
-            px-4
-            py-3
-            dark:border-slate-800
-            dark:bg-slate-900
-          "
+          className="flex items-center gap-2 border-b border-slate-300 bg-slate-100 px-4 py-3 dark:border-slate-800 dark:bg-slate-900"
         >
-          <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
-          <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-          <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
-
           <span className="ml-2 font-mono text-xs text-slate-600 dark:text-slate-400">
-            system.log
+            system.log / UTF-8
           </span>
         </div>
 
@@ -65,23 +36,7 @@ function LogInput({ log, setLog }: LogInputProps) {
           onChange={(event) => setLog(event.target.value)}
           placeholder="Paste your Docker, Kubernetes, PostgreSQL, Nginx, or application logs here..."
           rows={14}
-          className="
-            block
-            w-full
-            resize-y
-            border-0
-            bg-white
-            p-5
-            font-mono
-            text-sm
-            leading-6
-            text-slate-900
-            outline-none
-            placeholder:text-slate-400
-            dark:bg-slate-950
-            dark:text-slate-100
-            dark:placeholder:text-slate-500
-          "
+          className="block w-full resize-y border-0 bg-white p-5 font-mono text-sm leading-6 text-slate-900 outline-none placeholder:text-slate-400 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-400"
         />
       </div>
     </div>

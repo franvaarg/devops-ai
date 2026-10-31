@@ -42,12 +42,12 @@ function ResetPassword({ token, onComplete }: ResetPasswordProps) {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-950 px-4 text-slate-100">
-      <section className="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900 p-8 shadow-2xl">
+    <main className="auth-shell reset-shell flex min-h-screen items-center justify-center bg-slate-950 px-4 text-slate-100">
+      <section className="w-full max-w-md rounded-lg border border-slate-800 bg-slate-900 p-8">
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-400">
           KANYI
         </p>
-        <h1 className="mt-3 text-3xl font-black">Choose a new password</h1>
+        <h1 className="mt-3 text-3xl font-semibold">Choose a new password</h1>
         <p className="mt-3 text-sm leading-6 text-slate-400">
           Your reset link is single-use and expires after one hour.
         </p>
@@ -56,7 +56,7 @@ function ResetPassword({ token, onComplete }: ResetPasswordProps) {
           <button
             type="button"
             onClick={onComplete}
-            className="mt-8 w-full rounded-2xl bg-emerald-700 px-5 py-4 text-sm font-black text-white"
+            className="mt-8 w-full rounded-md bg-emerald-700 px-5 py-4 text-sm font-semibold text-white"
           >
             Back to Sign In
           </button>
@@ -71,7 +71,7 @@ function ResetPassword({ token, onComplete }: ResetPasswordProps) {
               onChange={(event) => setPassword(event.target.value)}
               placeholder="10+ characters; avoid common passwords"
               disabled={isSubmitting}
-              className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3.5 outline-none focus:border-emerald-400"
+              className="w-full rounded-md border border-slate-700 bg-slate-950 px-4 py-3.5 outline-none focus:border-emerald-400"
             />
             <label htmlFor="reset-password-confirm" className="block text-sm font-semibold">Confirm new password</label>
             <input
@@ -82,12 +82,12 @@ function ResetPassword({ token, onComplete }: ResetPasswordProps) {
               onChange={(event) => setConfirmPassword(event.target.value)}
               placeholder="Confirm new password"
               disabled={isSubmitting}
-              className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3.5 outline-none focus:border-emerald-400"
+              className="w-full rounded-md border border-slate-700 bg-slate-950 px-4 py-3.5 outline-none focus:border-emerald-400"
             />
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full rounded-2xl bg-emerald-700 px-5 py-4 text-sm font-black text-white disabled:opacity-60"
+              className="w-full rounded-md bg-emerald-700 px-5 py-4 text-sm font-semibold text-white disabled:opacity-60"
             >
               {isSubmitting ? "Resetting password..." : "Reset password"}
             </button>

@@ -18,25 +18,27 @@ createRoot(document.getElementById("root")!).render(
           duration: 3500,
 
           style: {
-            borderRadius: "18px",
-            padding: "16px",
+            borderRadius: "4px",
+            padding: "12px 16px",
             fontWeight: 600,
-            border: "1px solid #e2e8f0",
+            border: "1px solid var(--line)",
+            background: "var(--panel)",
+            color: "var(--ink)",
           },
 
           success: {
             style: {
-              background: "#ecfdf5",
-              color: "#065f46",
-              border: "1px solid #6ee7b7",
+              background: "#18302b",
+              color: "#a6ede5",
+              border: "1px solid #33574e",
             },
           },
 
           error: {
             style: {
-              background: "#fef2f2",
-              color: "#991b1b",
-              border: "1px solid #fca5a5",
+              background: "#301e22",
+              color: "#ffb2b2",
+              border: "1px solid #704344",
             },
           },
         }}

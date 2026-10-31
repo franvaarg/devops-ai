@@ -332,36 +332,11 @@ function Auth({
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 px-4 py-10 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100 sm:px-6">
-      <div
-        className="pointer-events-none absolute left-0 top-0 h-[30rem] w-[30rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-200/40 blur-3xl dark:bg-emerald-900/20"
-        aria-hidden="true"
-      />
-
-      <div
-        className="pointer-events-none absolute bottom-0 right-0 h-[30rem] w-[30rem] translate-x-1/2 translate-y-1/2 rounded-full bg-teal-200/40 blur-3xl dark:bg-teal-900/20"
-        aria-hidden="true"
-      />
-
-      <div className="relative grid w-full max-w-5xl overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl shadow-slate-200/70 transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/40 lg:grid-cols-[1.05fr_0.95fr]">
-        <section className="relative hidden overflow-hidden bg-slate-950 p-12 text-white lg:flex lg:flex-col lg:justify-between">
-          <div
-            className="pointer-events-none absolute inset-0 bg-gradient-to-br from-emerald-500/25 via-transparent to-teal-500/20"
-            aria-hidden="true"
-          />
-
-          <div
-            className="pointer-events-none absolute -right-20 top-20 h-64 w-64 rounded-full border border-emerald-400/20"
-            aria-hidden="true"
-          />
-
-          <div
-            className="pointer-events-none absolute -right-6 top-36 h-40 w-40 rounded-full border border-teal-400/20"
-            aria-hidden="true"
-          />
-
+    <main className="auth-shell relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 px-4 py-10 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100 sm:px-6">
+      <div className="relative grid w-full max-w-5xl overflow-hidden rounded-lg border border-slate-200 bg-white transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/40 lg:grid-cols-[1.05fr_0.95fr]">
+        <section className="auth-story relative hidden overflow-hidden bg-slate-950 p-12 text-white lg:flex lg:flex-col lg:justify-between">
           <div className="relative">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-400/15 text-emerald-300 ring-1 ring-emerald-300/20">
+            <div className="flex h-14 w-14 items-center justify-center rounded-md bg-emerald-400/15 text-emerald-300 ring-1 ring-emerald-300/20">
               <ShieldIcon />
             </div>
 
@@ -369,7 +344,7 @@ function Auth({
               Incident intelligence
             </p>
 
-            <h1 className="mt-4 max-w-md text-4xl font-black tracking-tight">
+            <h1 className="mt-4 max-w-md text-4xl font-semibold tracking-tight">
               Find what needs attention.
             </h1>
 
@@ -382,7 +357,7 @@ function Auth({
           </div>
 
           <div className="relative space-y-4">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur">
+            <div className="rounded-md border border-white/10 bg-white/5 p-5">
               <p className="text-sm font-bold text-white">
                 Your incident history
               </p>
@@ -393,7 +368,7 @@ function Auth({
               </p>
             </div>
 
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-400">
 
               Evidence · Severity · Next actions
             </p>
@@ -403,7 +378,7 @@ function Auth({
         <section className="p-6 sm:p-10 lg:p-12">
           <div className="mx-auto max-w-md">
             <div className="lg:hidden">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
+              <div className="flex h-12 w-12 items-center justify-center rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
                 <ShieldIcon />
               </div>
             </div>
@@ -412,7 +387,7 @@ function Auth({
               KANYI
             </p>
 
-            <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950 dark:text-white">
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">
               {isLogin
                 ? "Welcome back"
                 : isForgot
@@ -428,15 +403,16 @@ function Auth({
                   : "Start with 50 free analyses per month. No card required."}
             </p>
 
-            <div className="mt-8 grid grid-cols-2 rounded-2xl bg-slate-100 p-1 dark:bg-slate-800">
+            <div className="mt-8 grid grid-cols-2 rounded-md bg-slate-100 p-1 dark:bg-slate-800">
               <button
                 type="button"
                 onClick={() =>
                   changeMode("login")
                 }
+                aria-pressed={isLogin}
                 className={`rounded-xl px-4 py-3 text-sm font-bold transition ${
                   isLogin
-                    ? "bg-white text-slate-950 shadow-sm dark:bg-slate-700 dark:text-white"
+                    ? "bg-white text-slate-950  dark:bg-slate-700 dark:text-white"
                     : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
                 }`}
               >
@@ -448,9 +424,10 @@ function Auth({
                 onClick={() =>
                   changeMode("register")
                 }
+                aria-pressed={mode === "register"}
                 className={`rounded-xl px-4 py-3 text-sm font-bold transition ${
-                  !isLogin
-                    ? "bg-white text-slate-950 shadow-sm dark:bg-slate-700 dark:text-white"
+                  mode === "register"
+                    ? "bg-white text-slate-950  dark:bg-slate-700 dark:text-white"
                     : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
                 }`}
               >
@@ -488,7 +465,7 @@ function Auth({
                       }
                       placeholder="Your full name"
                       disabled={isSubmitting}
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-emerald-400 dark:focus:bg-slate-950"
+                      className="w-full rounded-md border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-emerald-400 dark:focus:bg-slate-950"
                     />
                   </div>
                 </div>
@@ -519,7 +496,7 @@ function Auth({
                     }
                     placeholder="you@example.com"
                     disabled={isSubmitting}
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-emerald-400 dark:focus:bg-slate-950"
+                    className="w-full rounded-md border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-emerald-400 dark:focus:bg-slate-950"
                   />
                 </div>
               </div>
@@ -553,7 +530,7 @@ function Auth({
                     }
                     placeholder="10+ characters; avoid common passwords"
                     disabled={isSubmitting}
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-emerald-400 dark:focus:bg-slate-950"
+                    className="w-full rounded-md border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-emerald-400 dark:focus:bg-slate-950"
                   />
                 </div>
               </div>}
@@ -584,7 +561,7 @@ function Auth({
                       }
                       placeholder="Repeat your password"
                       disabled={isSubmitting}
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-emerald-400 dark:focus:bg-slate-950"
+                      className="w-full rounded-md border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-emerald-400 dark:focus:bg-slate-950"
                     />
                   </div>
                 </div>
@@ -593,7 +570,7 @@ function Auth({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-700 to-teal-700 px-5 py-4 text-sm font-black text-white shadow-lg shadow-emerald-600/20 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-emerald-600/25 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+                className="flex w-full items-center justify-center gap-2 rounded-md bg-emerald-700 px-5 py-4 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
               >
                 {isSubmitting && (
                   <SpinnerIcon />
