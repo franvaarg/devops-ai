@@ -23,6 +23,6 @@ export default function PublicDemo() {
     </div>
     <button aria-expanded={expanded} aria-controls="demo-evidence" onClick={() => setExpanded(value => !value)}>{expanded ? 'Hide source evidence' : 'Inspect source evidence'}</button>
     {expanded && <div id="demo-evidence" className="mt-3"><pre>{example.evidence}</pre><p className="fine">This excerpt is copied directly from the selected synthetic log.</p></div>}
-    <p className="fine">Prepared examples demonstrate the workflow. No AI call, upload or account is used here. Real analyses can differ.</p>
+    <p className="fine">Prepared synthetic examples, not live AI analysis. This free demo runs locally in your browser without login, uploads, backend requests, or payments. Real analyses can differ.</p>
   </aside>;
 }

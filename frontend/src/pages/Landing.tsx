@@ -22,6 +22,9 @@ const questions = [
 export default function Landing({ onStart }: { onStart?: () => void }) {
   const accessLabel = earlyAccessEnabled ? 'Request Early Access' : 'Early access opening soon';
   const visibleQuestions = questions.map(([question, answer], index) => {
+    if (marketingOnly && index === 1) return [question, 'This free demo runs entirely in your browser with prepared synthetic examples. No backend or monitoring connection is required.'];
+    if (marketingOnly && index === 4) return [question, 'This demo accepts no logs or uploads. Choose a synthetic scenario to explore the workflow without providing personal information.'];
+    if (marketingOnly && index === 5) return [question, 'No logs are submitted or stored by this demo. It makes no backend, Gemini, or payment requests. The application data-handling details above describe the future product workflow.'];
     if (!earlyAccessEnabled && index === 0) return [question, 'Early access is not open yet. Explore the synthetic demo to see the individual-account incident triage workflow. This site is not accepting access requests.'];
     if (!earlyAccessEnabled && index === 2) return [question, 'KANYI currently uses individual accounts. Shared workspaces and team permissions are not available.'];
     if (!earlyAccessEnabled && index === 4) return [question, 'The application supports a relevant text excerpt up to 16 KiB, pasted directly or uploaded as a .log or .txt file, with optional operational context. Remove credentials and personal data before submission. The synthetic demo does not accept your logs.'];
@@ -33,21 +36,25 @@ export default function Landing({ onStart }: { onStart?: () => void }) {
     <div className="nav-shell"><nav aria-label="Main navigation">
       <a className="brand" href="#top" aria-label="KANYI home"><span className="brand-mark" aria-hidden="true">K</span>KANYI</a>
       <div className="nav-sections"><a href="#demo">Product</a><a href="#how">How it works</a><a href="#data">Data handling</a></div>
-      <div className="nav-actions">{onStart && <button className="sign-in" onClick={onStart}>Sign in</button>}<a className="button primary" href="#early-access" onClick={() => trackEvent('access_cta_clicked')}>{accessLabel}<span aria-hidden="true"> ↗</span></a></div>
+      <div className="nav-actions">{!marketingOnly && onStart && <button className="sign-in" onClick={onStart}>Sign in</button>}<a className="button primary" href="#early-access" onClick={() => trackEvent('access_cta_clicked')}>{accessLabel}<span aria-hidden="true"> ↗</span></a></div>
     </nav></div>
     <section className="hero" id="main-content" aria-labelledby="hero-title">
       <div className="hero-copy"><p className="eyebrow"><span className="status-dot" aria-hidden="true" /> AI-Powered Incident Triage</p>
         <h1 id="hero-title">Turn application logs into <em>actionable incident insights.</em></h1>
         <p className="intro">Review potential root causes, assess severity, inspect supporting evidence, and get structured troubleshooting recommendations from a log excerpt.</p>
         <div className="hero-actions"><a className="button primary" href="#early-access" onClick={() => trackEvent('access_cta_clicked')}>{accessLabel}<span aria-hidden="true"> ↗</span></a><a className="button secondary" href="#demo" onClick={() => trackEvent('demo_opened')}>Explore the Demo<span aria-hidden="true"> ↓</span></a></div>
-        <p className="hero-note">Explore synthetic examples. No account required.</p>
+        <p className="hero-note">Free synthetic demo. No login, credit card, or personal information required.</p>
         <div className="hero-signals"><span>Potential causes</span><span>Source evidence</span><span>Next checks</span></div>
       </div>
       <div className="hero-product"><div className="product-bar"><span><i aria-hidden="true" /> KANYI / incident assessment</span><span>EXAMPLE</span></div><PublicDemo /></div>
     </section>
     <div className="audience-strip"><p>Built for investigations across engineering, DevOps, and technical support.</p><span>Human judgment stays in the loop.</span></div>
     <section id="how" aria-labelledby="how-title"><div className="section-heading"><div><p className="eyebrow">The workflow</p><h2 id="how-title">From a log excerpt<br />to a clearer next step.</h2></div><p>A focused workflow for the moment you have logs, but need a structured way to investigate.</p></div>
-      <div className="three-cols workflow-cards">{steps.map(([number, title, body]) => <article key={number}><span className="step-number">{number}</span><h3>{title}</h3><p>{body}</p></article>)}</div>
+      <div className="three-cols workflow-cards">{(marketingOnly ? [
+        ['01', 'Choose a synthetic scenario', 'Explore prepared examples of failing orders, recovered retries, and missing context. No uploads or real log processing are available in this demo.'],
+        ['02', 'Review the assessment', 'Compare severity, confidence, potential causes, and recommendations. These are prepared illustrations, not live AI analysis.'],
+        ['03', 'Inspect the evidence', 'Open the source evidence and compare it with the selected synthetic log. Use the next checks to understand evidence-based troubleshooting.'],
+      ] : steps).map(([number, title, body]) => <article key={number}><span className="step-number">{number}</span><h3>{title}</h3><p>{body}</p></article>)}</div>
     </section>
     <section className="use-cases" aria-labelledby="use-cases-title"><p className="eyebrow">Where KANYI fits</p><h2 id="use-cases-title">For the questions behind the error.</h2><div className="three-cols">
       {[

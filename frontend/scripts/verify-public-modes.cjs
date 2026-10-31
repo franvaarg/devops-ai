@@ -55,6 +55,21 @@ function serve(dir) {
       await page.keyboard.press('Enter'); assert.equal(new URL(page.url()).hash, '#main-content');
       await page.locator('.hero-actions').getByRole('link', { name: 'Explore the Demo' }).click();
       assert.equal(new URL(page.url()).hash, '#demo');
+      for (const [value, severity, confidence, recommendation] of [
+        ['0', 'High', 'Medium', 'Check database health'],
+        ['1', 'Low', 'Low', 'Confirm retries'],
+        ['2', 'Medium', 'Low', 'Collect adjacent timestamps'],
+      ]) {
+        await page.getByLabel('Explore a scenario').selectOption(value);
+        const cards = page.locator('.decision-grid > div');
+        assert.match(await cards.nth(1).innerText(), new RegExp(severity));
+        assert.match(await cards.nth(2).innerText(), new RegExp(confidence));
+        await page.locator('#demo').getByText(new RegExp(recommendation)).waitFor();
+        await page.getByRole('button', { name: 'Inspect source evidence' }).click();
+        const evidence = await page.locator('#demo-evidence pre').innerText();
+        assert.ok((await page.locator('#demo > pre').innerText()).includes(evidence));
+        await page.getByRole('button', { name: 'Hide source evidence' }).click();
+      }
       await page.getByLabel('Explore a scenario').selectOption('1'); await page.getByText('Likely Noise', { exact: true }).waitFor();
       await page.getByRole('button', { name: 'Inspect source evidence' }).click();
       await page.getByText('This excerpt is copied directly from the selected synthetic log.', { exact: true }).waitFor();
@@ -72,14 +87,22 @@ function serve(dir) {
       await page.screenshot({ path: path.join(reportDir, `marketing-${width}.png`), fullPage: true });
       if (width === 1440) { await page.goto(marketing.origin); await page.screenshot({ path: path.join(reportDir, 'marketing-hero.png') }); }
       // Reset, billing-return and auth URLs cannot mount product screens.
-      for (const suffix of ['/reset-password?token=synthetic-reset-token', '/?billing=success#login']) {
+      for (const suffix of ['/#login', '/login', '/register', '/forgot-password', '/reset-password?token=synthetic-reset-token', '/dashboard', '/history', '/account', '/billing', '/pricing', '/?billing=success#login', '/unknown#register']) {
         await page.goto(marketing.origin + suffix); await page.getByRole('heading', { name: /Turn application logs/ }).waitFor();
-        assert.equal(await page.locator('form').count(), 0);
+        assert.equal(await page.locator('form,input[type=file]').count(), 0);
+        await page.waitForURL(marketing.origin + '/');
+        await page.reload();
+        await page.getByRole('heading', { name: /Turn application logs/ }).waitFor();
       }
+      await page.evaluate(() => { location.hash = 'login'; });
+      await page.waitForURL(marketing.origin + '/');
+      await page.getByRole('link', { name: 'Data handling', exact: true }).click();
+      await page.goBack(); await page.waitForURL(marketing.origin + '/');
+      await page.goForward(); await page.waitForURL(marketing.origin + '/#data');
       await page.evaluate(() => localStorage.removeItem('token'));
       await page.reload(); await page.getByRole('heading', { name: /Turn application logs/ }).waitFor();
       assert.deepEqual(apiCalls, []); assert.deepEqual(errors, []);
-      report.marketing.push({ width, apiCalls: 0, staleSessionIgnoredAndPreserved: true, cleanVisitor: true, consentDoesNotEnableAnalytics: true, intakeTrueOverridden: true, noFormOrAuthOrBilling: true, demoAndEvidence: true, navigationAndBack: true, resetAndBillingLinksStayPublic: true, overflow: false, axeViolations: 0, keyboard: true, reducedMotion: true });
+      report.marketing.push({ width, apiCalls: 0, staleSessionIgnoredAndPreserved: true, cleanVisitor: true, consentDoesNotEnableAnalytics: true, intakeClosed: true, noFormOrAuthOrBilling: true, demoAndEvidence: true, navigationAndBack: true, resetAndBillingLinksStayPublic: true, overflow: false, axeViolations: 0, keyboard: true, reducedMotion: true });
       await context.close();
     }
     // Default/product mode: disabled intake never appears operational. Session

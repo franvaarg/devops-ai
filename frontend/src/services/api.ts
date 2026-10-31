@@ -92,6 +92,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 // One bounded attempt. Mutating requests are never automatically replayed.
 async function request(url: string, init: RequestInit = {}): Promise<Response> {
+  if (marketingOnly) throw new ApiError('The synthetic demo does not connect to product services.', 0, 'MARKETING_ONLY');
   const timeout = url.endsWith('/api/analyze') ? 65000 : 30000;
   try {
     return await fetch(url, { ...init, signal: init.signal ?? AbortSignal.timeout(timeout), cache: 'no-store' });

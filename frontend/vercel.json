@@ -32,5 +32,6 @@
         }
       ]
     }
-  ]
+  ],
+  "buildCommand": "node scripts/build-vercel.cjs"
 }
