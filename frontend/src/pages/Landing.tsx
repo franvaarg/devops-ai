@@ -22,7 +22,7 @@ const questions = [
 
 export default function Landing({ onStart }: { onStart?: () => void }) {
   const accessLabel = marketingOnly ? 'Try the Free Demo' : earlyAccessEnabled ? 'Request Early Access' : 'Early access opening soon';
-  const accessTarget = marketingOnly ? '#demo' : '#early-access';
+  const accessTarget = marketingOnly ? '/demo' : '#early-access';
   const visibleQuestions = marketingOnly ? [
     ['How do I try the demo?', 'Choose any of the three synthetic scenarios and inspect the assessment and source evidence. The demo is free and available immediately.'],
     ['Is this live AI analysis?', 'No. These are prepared synthetic examples that run locally in your browser. No Gemini, backend, authentication, payment, or analytics requests are made.'],
@@ -39,7 +39,7 @@ export default function Landing({ onStart }: { onStart?: () => void }) {
     <a className="skip-link" href="#main-content">Skip to content</a>
     <div className="nav-shell"><nav aria-label="Main navigation">
       <a className="brand" href="#top" aria-label="KANYI home"><span className="brand-mark" aria-hidden="true">K</span>KANYI</a>
-      <div className="nav-sections"><a href="#demo">{marketingOnly ? 'Free demo' : 'Product'}</a><a href="#how">How it works</a><a href="#data">Data handling</a></div>
+      <div className="nav-sections"><a href={marketingOnly ? '/demo' : '#demo'}>{marketingOnly ? 'Free demo' : 'Product'}</a><a href="#how">How it works</a><a href="#data">Data handling</a></div>
       <div className="nav-actions">{!marketingOnly && onStart && <button className="sign-in" onClick={onStart}>Sign in</button>}<a className="button primary" href={accessTarget} onClick={() => trackEvent('access_cta_clicked')}>{accessLabel}<span aria-hidden="true"> ↗</span></a></div>
     </nav></div>
     <section className="hero" id="main-content" aria-labelledby="hero-title">

@@ -2,12 +2,14 @@ type AnalyzeButtonProps = {
   onAnalyze: () => void;
   onClear: () => void;
   isLoading: boolean;
+  label?: string;
 };
 
 function AnalyzeButton({
   onAnalyze,
   onClear,
   isLoading,
+  label = "Assess incident",
 }: AnalyzeButtonProps) {
   return (
     <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
@@ -35,7 +37,7 @@ function AnalyzeButton({
               <path d="m5 12 14 0m-6-6 6 6-6 6" />
             </svg>
 
-            Assess incident
+            {label}
           </>
         )}
       </button>

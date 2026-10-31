@@ -7,6 +7,7 @@ import {
 import type { InputSignals } from "../services/api";
 
 type AnalysisPanelProps = {
+  emptyDescription?: string;
   missingInformation?: string[];
   verificationSteps?: string[];
   inputSignals?: InputSignals;
@@ -24,6 +25,7 @@ type AnalysisPanelProps = {
 };
 
 function AnalysisPanel({
+  emptyDescription = "Your next AI-generated diagnosis will appear here after you analyze a log.",
   missingInformation,
   verificationSteps,
   actionability,
@@ -56,10 +58,7 @@ function AnalysisPanel({
         <div>
           <span className="section-kicker">Evidence before certainty</span>
           <h2>Incident assessment</h2>
-          <p>
-            Your next AI-generated diagnosis will appear here after you analyze
-            a log.
-          </p>
+          <p>{emptyDescription}</p>
           <p className="text-sm">
             Severity · Confidence · Source evidence · Recommended checks
           </p>

@@ -1,9 +1,16 @@
 type LogInputProps = {
   log: string;
   setLog: (value: string) => void;
+  readOnly?: boolean;
+  placeholder?: string;
 };
 
-function LogInput({ log, setLog }: LogInputProps) {
+function LogInput({
+  log,
+  setLog,
+  readOnly = false,
+  placeholder = "Paste your Docker, Kubernetes, PostgreSQL, Nginx, or application logs here...",
+}: LogInputProps) {
   return (
     <div className="log-editor">
       <div className="mb-2 flex items-center justify-between gap-3">
@@ -19,12 +26,8 @@ function LogInput({ log, setLog }: LogInputProps) {
         </span>
       </div>
 
-      <div
-        className="overflow-hidden rounded-md border border-slate-300 bg-white transition focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-100 dark:border-slate-700 dark:bg-slate-950 dark:focus-within:ring-emerald-900/40"
-      >
-        <div
-          className="flex items-center gap-2 border-b border-slate-300 bg-slate-100 px-4 py-3 dark:border-slate-800 dark:bg-slate-900"
-        >
+      <div className="overflow-hidden rounded-md border border-slate-300 bg-white transition focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-100 dark:border-slate-700 dark:bg-slate-950 dark:focus-within:ring-emerald-900/40">
+        <div className="flex items-center gap-2 border-b border-slate-300 bg-slate-100 px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
           <span className="ml-2 font-mono text-xs text-slate-600 dark:text-slate-400">
             system.log / UTF-8
           </span>
@@ -33,8 +36,9 @@ function LogInput({ log, setLog }: LogInputProps) {
         <textarea
           id="log-input"
           value={log}
+          readOnly={readOnly}
           onChange={(event) => setLog(event.target.value)}
-          placeholder="Paste your Docker, Kubernetes, PostgreSQL, Nginx, or application logs here..."
+          placeholder={placeholder}
           rows={14}
           className="block w-full resize-y border-0 bg-white p-5 font-mono text-sm leading-6 text-slate-900 outline-none placeholder:text-slate-400 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-400"
         />

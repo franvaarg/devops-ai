@@ -89,7 +89,7 @@ The early-access landing includes practical use cases, evidence/uncertainty expl
 
 ## Independent public marketing build
 
-`VITE_MARKETING_ONLY=true` renders the informational landing and synthetic demo without mounting authentication, session validation, password reset or the product workspace. Saved auth tokens are ignored and preserved. No product API requests or analytics events are sent, even if an old analytics preference is enabled. Sign-in, paid subscriptions and the request form are absent. The primary CTA is **Try the Free Demo** and the secondary CTA is **Explore How It Works**. Marketing mode contains no early-access, waitlist, tester recruitment, pricing, or subscription calls to action. All three prepared scenarios run locally without live AI analysis.
+`VITE_MARKETING_ONLY=true` renders the informational landing and synthetic demo without mounting authentication, session validation, password reset or the authenticated product. The primary demo entry opens `/demo`, which reuses the actual workspace layout and analysis components with prepared synthetic samples. Saved auth tokens are ignored and preserved. No product API requests or analytics events are sent, even if an old analytics preference is enabled. Sign-in, paid subscriptions and the request form are absent. The primary CTA is **Try the Free Demo** and the secondary CTA is **Explore How It Works**. Marketing mode contains no early-access, waitlist, tester recruitment, pricing, or subscription calls to action. All three prepared scenarios run locally without live AI analysis.
 
 Build-time configuration for this launch:
 

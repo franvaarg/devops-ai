@@ -8,6 +8,7 @@ import LogInput from "../components/LogInput";
 import FileUpload from "../components/FileUpload";
 import AnalyzeButton from "../components/AnalyzeButton";
 import AnalysisPanel from "../components/AnalysisPanel";
+import IncidentWorkspace from "../components/IncidentWorkspace";
 
 import HistoryFilters from "../components/HistoryFilters";
 import HistoryList from "../components/HistoryList";
@@ -461,18 +462,10 @@ function Home() {
         </nav>
         <div className="app-content">
           <Header />
-          <section
-            id="workspace"
-            tabIndex={-1}
-            aria-label="Incident workspace"
-            className="workspace-layout"
-          >
-            <div className="workspace-input">
-              <div className="workspace-bar">
-                <span>01 / Incident input</span>
-                <span>16 KiB MAX</span>
-              </div>
-              <div className="workspace-input-body">
+          <IncidentWorkspace
+            isAnalyzing={isAnalyzing}
+            input={
+              <>
                 {history.length === 0 && (
                   <div className="onboarding-note">
                     <h2>Start with one incident window</h2>
@@ -521,27 +514,20 @@ function Home() {
                   onClear={handleClearAnalysis}
                   isLoading={isAnalyzing}
                 />
-              </div>
-            </div>
-            <div className="workspace-output" aria-busy={isAnalyzing}>
-              {isAnalyzing && (
-                <p role="status" className="analysis-progress">
-                  Assessing evidence and noise… Your previous result remains
-                  available below.
-                </p>
-              )}
-              <AnalysisPanel
-                {...decision}
-                severity={severity}
-                summary={summary}
-                evidence={evidence}
-                rootCause={rootCause}
-                confidence={confidence}
-                recommendation={recommendation}
-                steps={steps}
-              />
-            </div>
-          </section>
+              </>
+            }
+          >
+            <AnalysisPanel
+              {...decision}
+              severity={severity}
+              summary={summary}
+              evidence={evidence}
+              rootCause={rootCause}
+              confidence={confidence}
+              recommendation={recommendation}
+              steps={steps}
+            />
+          </IncidentWorkspace>
           <section id="history" className="history-workspace">
             <div className="section-title">
               <HistoryIcon />
