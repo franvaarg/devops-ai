@@ -23,4 +23,8 @@ Vercel's repository build command forces `VITE_MARKETING_ONLY=true`, `VITE_EARLY
 
 The review branch push is authorized to trigger the existing Vercel Git integration. No merge or Production promotion is authorized. Deployment status and any deployed-browser evidence are reported in the final task response. The saved Vercel CLI credential returned HTTP 403 for read-only deployment listing; GitHub's Vercel commit status remains available.
 
+The initial implementation commit `0e2b634d60440e4ad7d9efcc9fd8b34d13325a8b` automatically deployed successfully to `https://devops-1l1ulrtc9-franvaargs-projects.vercel.app`. Anonymous Chromium requests redirected to Vercel's own login page, so deployed application restrictions could not be verified. Public access requires the owner to adjust Preview Deployment Protection with suitable Vercel permissions; no production access setting was changed.
+
+GitHub CI for that commit passed backend and browser jobs. The frontend job passed lint, API isolation and typecheck, then failed its existing moderate-level audit on development-only minimatch. A follow-up override updates minimatch to patched 11.0.3 (minimum 11.0.1), with no runtime dependency changes. Installation audit reported zero vulnerabilities; lint, isolation, typecheck and the marketing production build were rerun. The final commit's deployment and CI status are reported in the final response.
+
 Before a public Production release: explicitly authorize promotion, confirm the approved public hostname and marketing build flags on that target, and review operator identity/contact, privacy disclosures and hosting-level logging/analytics. Early-access intake, real analysis, payment processing and backend deployment remain outside this release.
