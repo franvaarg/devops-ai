@@ -39,21 +39,24 @@ function serve(dir) {
       page.on('pageerror', error => errors.push(error.message));
       await page.route('**/*', route => {
         const url = new URL(route.request().url());
-        if (url.origin !== marketing.origin || url.pathname.startsWith('/api/')) { apiCalls.push(url.pathname); return route.abort('failed'); }
+        if (url.origin !== marketing.origin || url.pathname.startsWith('/api/') || ['fetch', 'xhr'].includes(route.request().resourceType())) { apiCalls.push(url.pathname); return route.abort('failed'); }
         return route.continue();
       });
       await page.goto(marketing.origin + '/#login');
       await page.getByRole('heading', { name: /Turn application logs/ }).waitFor();
-      assert.equal(await page.getByRole('heading', { name: 'Early access opening soon' }).count(), 1);
+      assert.doesNotMatch(await page.locator('body').innerText(), /early.access|waitlist|waiting list|tester recruitment|pricing|subscription/i);
+      assert.equal(await page.locator('a,button').filter({ hasText: /sign in|register|forgot password|account|checkout|subscribe/i }).count(), 0);
+      await page.locator('#demo').getByText(/not live AI analysis/).waitFor();
       assert.equal(await page.locator('form,input[type=email],input[type=password],input[type=file]').count(), 0);
       assert.equal(await page.getByRole('button', { name: 'Sign in', exact: true }).count(), 0);
       assert.equal(await page.getByRole('checkbox').count(), 0);
+      assert.equal(await page.locator('a[href="#early-access"]').count(), 0);
       assert.equal(await page.getByText(/We could not reach your workspace/).count(), 0);
       assert.equal(await page.getByText(/Upgrade to Pro/).count(), 0);
       assert.equal(await page.evaluate(() => localStorage.getItem('token')), 'stale-session-token');
       await page.keyboard.press('Tab'); assert.equal(await page.evaluate(() => document.activeElement.textContent), 'Skip to content');
       await page.keyboard.press('Enter'); assert.equal(new URL(page.url()).hash, '#main-content');
-      await page.locator('.hero-actions').getByRole('link', { name: 'Explore the Demo' }).click();
+      await page.locator('.hero-actions').getByRole('link', { name: 'Try the Free Demo' }).click();
       assert.equal(new URL(page.url()).hash, '#demo');
       for (const [value, severity, confidence, recommendation] of [
         ['0', 'High', 'Medium', 'Check database health'],
@@ -65,6 +68,7 @@ function serve(dir) {
         assert.match(await cards.nth(1).innerText(), new RegExp(severity));
         assert.match(await cards.nth(2).innerText(), new RegExp(confidence));
         await page.locator('#demo').getByText(new RegExp(recommendation)).waitFor();
+        await page.locator('#demo').getByText(/Potential cause:/).waitFor();
         await page.getByRole('button', { name: 'Inspect source evidence' }).click();
         const evidence = await page.locator('#demo-evidence pre').innerText();
         assert.ok((await page.locator('#demo > pre').innerText()).includes(evidence));
@@ -74,11 +78,11 @@ function serve(dir) {
       await page.getByRole('button', { name: 'Inspect source evidence' }).click();
       await page.getByText('This excerpt is copied directly from the selected synthetic log.', { exact: true }).waitFor();
       await page.getByLabel('Explore a scenario').selectOption('2'); await page.getByText('Investigate', { exact: true }).waitFor();
-      await page.locator('.hero-actions').getByRole('link', { name: 'Early access opening soon' }).click();
-      assert.equal(new URL(page.url()).hash, '#early-access');
+      await page.locator('.hero-actions').getByRole('link', { name: 'Explore How It Works' }).click();
+      assert.equal(new URL(page.url()).hash, '#how');
       await page.goBack(); assert.equal(new URL(page.url()).hash, '#demo');
       await page.getByRole('link', { name: 'Data handling', exact: true }).click();
-      await page.getByText(/This site’s synthetic demo does not accept or process your logs/).waitFor();
+      await page.getByText(/This synthetic demo does not accept or process your logs/).waitFor();
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
       assert.equal(await page.locator('.hero-actions .primary').evaluate(el => getComputedStyle(el).transitionDuration), '0s');
       const axe = await new AxeBuilder({ page }).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
@@ -87,7 +91,7 @@ function serve(dir) {
       await page.screenshot({ path: path.join(reportDir, `marketing-${width}.png`), fullPage: true });
       if (width === 1440) { await page.goto(marketing.origin); await page.screenshot({ path: path.join(reportDir, 'marketing-hero.png') }); }
       // Reset, billing-return and auth URLs cannot mount product screens.
-      for (const suffix of ['/#login', '/login', '/register', '/forgot-password', '/reset-password?token=synthetic-reset-token', '/dashboard', '/history', '/account', '/billing', '/pricing', '/?billing=success#login', '/unknown#register']) {
+      for (const suffix of ['/#early-access', '/#login', '/login', '/register', '/forgot-password', '/reset-password?token=synthetic-reset-token', '/dashboard', '/history', '/account', '/billing', '/pricing', '/?billing=success#login', '/unknown#register']) {
         await page.goto(marketing.origin + suffix); await page.getByRole('heading', { name: /Turn application logs/ }).waitFor();
         assert.equal(await page.locator('form,input[type=file]').count(), 0);
         await page.waitForURL(marketing.origin + '/');

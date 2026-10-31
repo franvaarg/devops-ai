@@ -19,7 +19,7 @@ export default function PublicDemo() {
     <pre>{example.log}</pre>
     <div aria-live="polite">
       <div className="decision-grid">{[['Actionability', example.action], ['Severity', example.severity], ['Confidence', example.confidence], ['False-positive risk', example.risk]].map(([label, value]) => <div key={label}>{label}<strong>{value}</strong></div>)}</div>
-      <h3>{example.summary}</h3><p>{example.cause}</p><p><strong>Next:</strong> {example.next}</p>
+      <h3>{example.summary}</h3><p><strong>Potential cause:</strong> {example.cause}</p><p><strong>Recommended next step:</strong> {example.next}</p>
     </div>
     <button aria-expanded={expanded} aria-controls="demo-evidence" onClick={() => setExpanded(value => !value)}>{expanded ? 'Hide source evidence' : 'Inspect source evidence'}</button>
     {expanded && <div id="demo-evidence" className="mt-3"><pre>{example.evidence}</pre><p className="fine">This excerpt is copied directly from the selected synthetic log.</p></div>}

@@ -4,7 +4,7 @@ Implemented locally, 2026-10-29. No deployment, production migration, live lead 
 
 ## Workflow and API
 
-The public landing offers a prepared synthetic demo. A request form appears only in product mode with frontend `VITE_EARLY_ACCESS_ENABLED=true`; otherwise it displays an explicit opening-soon state. `POST /api/early-access` accepts JSON:
+The public landing offers a prepared synthetic demo. A request form appears only in product mode with frontend `VITE_EARLY_ACCESS_ENABLED=true`; product mode with intake closed displays an explicit opening-soon state. Marketing-only mode has no early-access messaging or intake section and directs visitors immediately to the free demo. `POST /api/early-access` accepts JSON:
 
 ```json
 {"email":"engineer@example.com","role":"DevOps / SRE","useCase":"Failed deployments","company":"Example","teamSize":"1–5","website":""}
@@ -69,7 +69,7 @@ This is a separate deployment stage from accepting leads or granting product acc
 
 | VITE_MARKETING_ONLY | VITE_EARLY_ACCESS_ENABLED | Public behavior |
 | --- | --- | --- |
-| true | false, missing, or true | Informational landing and synthetic demo; opening-soon state; no form, sign-in, product session validation, password-reset screen, workspace, billing UI, or analytics API events. |
+| true | false, missing, or true | Free interactive synthetic demo; no early-access messaging or recruitment; no form, sign-in, product session validation, password-reset screen, workspace, billing UI, or analytics API events. |
 | false or missing | false or missing | Product mode; sign-in and existing session behavior retained; landing intake closed. |
 | false or missing | true | Product mode with request form; requires the separate working-intake deployment and backend enablement. |
 
@@ -85,7 +85,7 @@ VITE_API_BASE_URL=
 
 Also configure real owner-approved VITE_LEGAL_NAME, VITE_SUPPORT_EMAIL, VITE_PRIVACY_URL and VITE_TERMS_URL where required by the approved disclosure plan. These public values are embedded at build time. No production secrets belong in the frontend. Do not copy example identities or invented policy URLs into hosting configuration. The marketing build suppresses the analytics consent control and all product event calls, including when a saved preference is yes. It does not erase existing auth tokens or product data. Theme preferences can still be saved locally; hosting logs and host-provided analytics are separate operator responsibilities.
 
-The synthetic demo remains prepared examples; it accepts no uploads and makes no AI calls. Application log-processing descriptions remain intact and are explicitly labeled as product-workflow information. The opening-soon section offers no waiting list and promises no contact or invitation. Social preview copy directs visitors to the demo so it remains accurate with intake closed. Sign-in is omitted in this mode because no product destination has been verified; it remains available in the product build. Auth/reset/billing-return URLs on the marketing hostname render the landing rather than product screens. Use a separate confirmed product hostname for actual authentication and recovery links.
+The synthetic demo remains prepared examples; it accepts no uploads and makes no AI calls. Marketing data-handling copy describes the local synthetic demo. Product log-processing disclosures remain available outside marketing mode. No early-access section, waiting list, recruitment or invitation messaging is displayed. Social preview copy directs visitors to the demo so it remains accurate with intake closed. Sign-in is omitted in this mode because no product destination has been verified; it remains available in the product build. Auth/reset/billing-return URLs on the marketing hostname render the landing rather than product screens. Use a separate confirmed product hostname for actual authentication and recovery links.
 
 ### Proposed marketing deployment checklist — requires explicit approval
 
@@ -94,7 +94,7 @@ The synthetic demo remains prepared examples; it accepts no uploads and makes no
 3. Confirm a dedicated marketing hostname and static HTTPS host. Review host analytics and logging; keep unapproved analytics integrations disabled. Confirm separation from existing product auth/reset destinations and avoid replacing a working product origin accidentally.
 4. Set the exact public build variables above plus approved disclosure values. From frontend run npm ci, npm run lint, npm run typecheck and npm run build. Publish only dist after deployment approval. Vercel can use the checked-in frontend/vercel.json; root is frontend, output is dist. No API proxy, backend deployment or migration is needed. Docker build arguments are supported, but the bundled Nginx configuration still references the backend upstream and is not a standalone marketing server configuration. Use static hosting of dist for independence; full Compose unnecessarily starts product services.
 5. Before publishing, confirm the real origin and use absolute HTTPS social-image URLs in index.html; add canonical/og:url for that approved hostname. Check the demo social card. Do not invent a hostname.
-6. Verify the built artifact locally with no working APIs. Check 320/390/768/1440px, keyboard navigation, demo/evidence, opening-soon state, no form/sign-in/billing/analytics requests, and stale-session/auth/reset/billing URLs. Test old analytics consent and an accidentally true intake flag as well.
+6. Verify the built artifact locally with no working APIs. Check 320/390/768/1440px, keyboard navigation, demo/evidence, free-demo and how-it-works CTAs, no early-access messaging, no form/sign-in/billing/analytics requests, and stale-session/auth/reset/billing URLs. Test old analytics consent and an accidentally true intake flag as well.
 7. After explicit deployment approval, publish the reviewed artifact. Verify certificate/redirects, actual response headers, asset/image MIME types and routing. Smoke-test fresh and stale-session browsers while watching for unexpected API calls. These checks have not yet been performed on a deployed host.
 8. Roll back by restoring the previous reviewed static artifact. Do not enable backend intake or billing as part of publishing or rollback. A static-only launch changes no database state.
 9. To collect leads later, separately approve and execute the earlier working-intake checklist, including database TLS/migration/restore, abuse controls, privacy/retention, owner review, real SQL smoke evidence, and coordinated frontend/backend enablement. Product invitations and payment remain separate gates.

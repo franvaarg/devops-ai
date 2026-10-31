@@ -1,0 +1,94 @@
+{
+  "scope": "Built static artifacts; external APIs blocked or explicitly stubbed; no production services",
+  "marketing": [
+    {
+      "width": 320,
+      "apiCalls": 0,
+      "staleSessionIgnoredAndPreserved": true,
+      "cleanVisitor": true,
+      "consentDoesNotEnableAnalytics": true,
+      "intakeClosed": true,
+      "noFormOrAuthOrBilling": true,
+      "demoAndEvidence": true,
+      "navigationAndBack": true,
+      "resetAndBillingLinksStayPublic": true,
+      "overflow": false,
+      "axeViolations": 0,
+      "keyboard": true,
+      "reducedMotion": true
+    },
+    {
+      "width": 390,
+      "apiCalls": 0,
+      "staleSessionIgnoredAndPreserved": true,
+      "cleanVisitor": true,
+      "consentDoesNotEnableAnalytics": true,
+      "intakeClosed": true,
+      "noFormOrAuthOrBilling": true,
+      "demoAndEvidence": true,
+      "navigationAndBack": true,
+      "resetAndBillingLinksStayPublic": true,
+      "overflow": false,
+      "axeViolations": 0,
+      "keyboard": true,
+      "reducedMotion": true
+    },
+    {
+      "width": 768,
+      "apiCalls": 0,
+      "staleSessionIgnoredAndPreserved": true,
+      "cleanVisitor": true,
+      "consentDoesNotEnableAnalytics": true,
+      "intakeClosed": true,
+      "noFormOrAuthOrBilling": true,
+      "demoAndEvidence": true,
+      "navigationAndBack": true,
+      "resetAndBillingLinksStayPublic": true,
+      "overflow": false,
+      "axeViolations": 0,
+      "keyboard": true,
+      "reducedMotion": true
+    },
+    {
+      "width": 1440,
+      "apiCalls": 0,
+      "staleSessionIgnoredAndPreserved": true,
+      "cleanVisitor": true,
+      "consentDoesNotEnableAnalytics": true,
+      "intakeClosed": true,
+      "noFormOrAuthOrBilling": true,
+      "demoAndEvidence": true,
+      "navigationAndBack": true,
+      "resetAndBillingLinksStayPublic": true,
+      "overflow": false,
+      "axeViolations": 0,
+      "keyboard": true,
+      "reducedMotion": true
+    }
+  ],
+  "productDisabled": {
+    "defaultIntakeClosed": true,
+    "noLeadRequest": true,
+    "signInAndBack": true,
+    "existingSessionOutagePreserved": true,
+    "expiredProductSessionCleared": true
+  },
+  "intakeEnabled": {
+    "explicitOptInShowsForm": true,
+    "confirmedSubmission": true
+  },
+  "productRegressions": [
+    {
+      "script": "verify-landing.cjs",
+      "passed": true
+    },
+    {
+      "script": "verify-journey.cjs",
+      "passed": true
+    },
+    {
+      "script": "verify-resilience.cjs",
+      "passed": true
+    }
+  ]
+}

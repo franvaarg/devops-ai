@@ -3,7 +3,7 @@ import Landing from './pages/Landing';
 import { marketingOnly } from './config/publicMode';
 
 const ProductApp = lazy(() => import('./ProductApp'));
-const publicAnchors = new Set(['', '#top', '#main-content', '#demo', '#how', '#data', '#early-access']);
+const publicAnchors = new Set(['', '#top', '#main-content', '#demo', '#how', '#data']);
 
 function MarketingApp() {
   useEffect(() => {

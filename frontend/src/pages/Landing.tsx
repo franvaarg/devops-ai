@@ -20,11 +20,14 @@ const questions = [
 ];
 
 export default function Landing({ onStart }: { onStart?: () => void }) {
-  const accessLabel = earlyAccessEnabled ? 'Request Early Access' : 'Early access opening soon';
-  const visibleQuestions = questions.map(([question, answer], index) => {
-    if (marketingOnly && index === 1) return [question, 'This free demo runs entirely in your browser with prepared synthetic examples. No backend or monitoring connection is required.'];
-    if (marketingOnly && index === 4) return [question, 'This demo accepts no logs or uploads. Choose a synthetic scenario to explore the workflow without providing personal information.'];
-    if (marketingOnly && index === 5) return [question, 'No logs are submitted or stored by this demo. It makes no backend, Gemini, or payment requests. The application data-handling details above describe the future product workflow.'];
+  const accessLabel = marketingOnly ? 'Try the Free Demo' : earlyAccessEnabled ? 'Request Early Access' : 'Early access opening soon';
+  const accessTarget = marketingOnly ? '#demo' : '#early-access';
+  const visibleQuestions = marketingOnly ? [
+    ['How do I try the demo?', 'Choose any of the three synthetic scenarios and inspect the assessment and source evidence. The demo is free and available immediately.'],
+    ['Is this live AI analysis?', 'No. These are prepared synthetic examples that run locally in your browser. No Gemini, backend, authentication, payment, or analytics requests are made.'],
+    ['Can I use my own logs?', 'This demo accepts no uploads or real logs. No personal information or backend connection is required.'],
+    ['What does confidence mean?', 'Confidence is qualitative and reflects the context available in each example. Potential causes are hypotheses; recommended next steps need human verification.'],
+  ] : questions.map(([question, answer], index) => {
     if (!earlyAccessEnabled && index === 0) return [question, 'Early access is not open yet. Explore the synthetic demo to see the individual-account incident triage workflow. This site is not accepting access requests.'];
     if (!earlyAccessEnabled && index === 2) return [question, 'KANYI currently uses individual accounts. Shared workspaces and team permissions are not available.'];
     if (!earlyAccessEnabled && index === 4) return [question, 'The application supports a relevant text excerpt up to 16 KiB, pasted directly or uploaded as a .log or .txt file, with optional operational context. Remove credentials and personal data before submission. The synthetic demo does not accept your logs.'];
@@ -35,14 +38,14 @@ export default function Landing({ onStart }: { onStart?: () => void }) {
     <a className="skip-link" href="#main-content">Skip to content</a>
     <div className="nav-shell"><nav aria-label="Main navigation">
       <a className="brand" href="#top" aria-label="KANYI home"><span className="brand-mark" aria-hidden="true">K</span>KANYI</a>
-      <div className="nav-sections"><a href="#demo">Product</a><a href="#how">How it works</a><a href="#data">Data handling</a></div>
-      <div className="nav-actions">{!marketingOnly && onStart && <button className="sign-in" onClick={onStart}>Sign in</button>}<a className="button primary" href="#early-access" onClick={() => trackEvent('access_cta_clicked')}>{accessLabel}<span aria-hidden="true"> ↗</span></a></div>
+      <div className="nav-sections"><a href="#demo">{marketingOnly ? 'Free demo' : 'Product'}</a><a href="#how">How it works</a><a href="#data">Data handling</a></div>
+      <div className="nav-actions">{!marketingOnly && onStart && <button className="sign-in" onClick={onStart}>Sign in</button>}<a className="button primary" href={accessTarget} onClick={() => trackEvent('access_cta_clicked')}>{accessLabel}<span aria-hidden="true"> ↗</span></a></div>
     </nav></div>
     <section className="hero" id="main-content" aria-labelledby="hero-title">
       <div className="hero-copy"><p className="eyebrow"><span className="status-dot" aria-hidden="true" /> AI-Powered Incident Triage</p>
         <h1 id="hero-title">Turn application logs into <em>actionable incident insights.</em></h1>
         <p className="intro">Review potential root causes, assess severity, inspect supporting evidence, and get structured troubleshooting recommendations from a log excerpt.</p>
-        <div className="hero-actions"><a className="button primary" href="#early-access" onClick={() => trackEvent('access_cta_clicked')}>{accessLabel}<span aria-hidden="true"> ↗</span></a><a className="button secondary" href="#demo" onClick={() => trackEvent('demo_opened')}>Explore the Demo<span aria-hidden="true"> ↓</span></a></div>
+        <div className="hero-actions"><a className="button primary" href={accessTarget} onClick={() => trackEvent('access_cta_clicked')}>{accessLabel}<span aria-hidden="true"> ↗</span></a><a className="button secondary" href={marketingOnly ? '#how' : '#demo'} onClick={() => trackEvent('demo_opened')}>{marketingOnly ? 'Explore How It Works' : 'Explore the Demo'}<span aria-hidden="true"> ↓</span></a></div>
         <p className="hero-note">Free synthetic demo. No login, credit card, or personal information required.</p>
         <div className="hero-signals"><span>Potential causes</span><span>Source evidence</span><span>Next checks</span></div>
       </div>
@@ -62,23 +65,28 @@ export default function Landing({ onStart }: { onStart?: () => void }) {
         ['Failed deployments', 'What should I check first?', 'Review startup and deployment logs for possible configuration or dependency issues. Verify current impact separately.'],
         ['Support escalations', 'What can we establish?', 'Turn a supplied log excerpt into an assessment of potential causes, supporting evidence, and missing context.'],
       ].map(([label, title, body]) => <article key={label}><p className="card-label">{label}</p><h3>{title}</h3><p>{body}</p></article>)}
-      </div><p className="section-note">A focused tool for individual accounts. Shared workspaces and native monitoring integrations are not available.</p>
+      </div><p className="section-note">{marketingOnly ? 'Explore three prepared incident scenarios, inspect the evidence, and compare the recommended next checks.' : 'A focused tool for individual accounts. Shared workspaces and native monitoring integrations are not available.'}</p>
     </section>
     <section className="evidence-section" aria-labelledby="evidence-title"><div><p className="eyebrow">Evidence before certainty</p><h2 id="evidence-title">See the reasoning.<br />Keep your judgment.</h2><p className="intro">An error line is a starting point. KANYI helps structure the investigation without treating every warning as an outage.</p><a className="text-link" href="#demo">Inspect the example evidence <span aria-hidden="true">↗</span></a></div><div className="evidence-list">{[
       ['Evidence you can inspect', 'Review source excerpts alongside the assessment. Matching evidence to a log does not establish that the diagnosis is correct.'],
       ['Uncertainty made explicit', 'Potential causes remain hypotheses. Confidence is qualitative, and missing context can change the conclusion.'],
       ['Checks for a human to verify', 'Review troubleshooting recommendations against your environment. KANYI does not execute fixes or monitor current system health.'],
     ].map(([title, body], index) => <article key={title}><span aria-hidden="true">0{index + 1}</span><div><h3>{title}</h3><p>{body}</p></div></article>)}</div></section>
-    <section id="data" className="data-section" aria-labelledby="data-title"><div><p className="eyebrow">Transparent data handling</p><h2 id="data-title">Know where your logs go.</h2><p>{marketingOnly ? 'The following describes the application workflow. This site’s synthetic demo does not accept or process your logs.' : 'Review your organization’s data requirements before submitting an excerpt.'}</p></div><div className="data-grid">
+    {marketingOnly ? <section id="data" className="data-section" aria-labelledby="data-title"><div><p className="eyebrow">Transparent demo experience</p><h2 id="data-title">Synthetic examples.<br />Local exploration.</h2><p>This synthetic demo does not accept or process your logs.</p></div><div className="data-grid">
+      <article><h3>Prepared examples</h3><p>Every scenario uses synthetic logs and a prepared assessment. The demo does not perform live AI analysis.</p></article>
+      <article><h3>Runs in your browser</h3><p>Scenario selection and evidence inspection run locally. No backend connection or analytics requests are needed.</p></article>
+      <article><h3>Free to explore</h3><p>No login, credit card, or personal information is required. Choose a scenario and start exploring.</p></article>
+    </div></section> :
+    <section id="data" className="data-section" aria-labelledby="data-title"><div><p className="eyebrow">Transparent data handling</p><h2 id="data-title">Know where your logs go.</h2><p>Review your organization’s data requirements before submitting an excerpt.</p></div><div className="data-grid">
       <article><h3>Before submission</h3><p>Remove credentials and personal data yourself. KANYI attempts to redact common secrets, but redaction is incomplete.</p></article>
       <article><h3>Processing and storage</h3><p>Redacted logs and context are sent to Google Gemini. Inputs and results are stored in KANYI’s database until you delete the analysis.</p></article>
       <article><h3>Deletion boundaries</h3><p>Analysis deletion removes the live database record. Provider and backup retention follow the operator’s policies and configuration.</p></article>
-    </div></section>
-    {earlyAccessEnabled ? <section id="early-access" className="access-section" aria-labelledby="access-title"><div><p className="eyebrow">Request early access</p><h2 id="access-title">Bring your investigation<br />into focus.</h2><p className="intro">Tell us how you investigate incidents. We’ll review your request and contact you about early-access availability.</p><ul className="access-benefits"><li>Evaluate the individual-account workflow</li><li>Share the use cases that matter to your team</li><li>No production logs or password needed to request access</li></ul><p className="section-note">An access request does not guarantee an invitation.</p></div><EarlyAccessForm /></section> : <section id="early-access" className="access-section" aria-labelledby="access-title">
+    </div></section>}
+    {!marketingOnly && (earlyAccessEnabled ? <section id="early-access" className="access-section" aria-labelledby="access-title"><div><p className="eyebrow">Request early access</p><h2 id="access-title">Bring your investigation<br />into focus.</h2><p className="intro">Tell us how you investigate incidents. We’ll review your request and contact you about early-access availability.</p><ul className="access-benefits"><li>Evaluate the individual-account workflow</li><li>Share the use cases that matter to your team</li><li>No production logs or password needed to request access</li></ul><p className="section-note">An access request does not guarantee an invitation.</p></div><EarlyAccessForm /></section> : <section id="early-access" className="access-section" aria-labelledby="access-title">
       <div><p className="eyebrow">Early access</p><h2 id="access-title">Bring your investigation<br />into focus.</h2><p className="intro">Explore the synthetic demo to see KANYI’s approach to incident triage.</p></div>
       <div className="access-confirmation"><h3>Early access opening soon</h3><p>We’re not accepting access requests yet. There is no signup form or waiting list on this site.</p><a className="button primary" href="#demo">Explore the Demo<span aria-hidden="true"> ↑</span></a></div>
-    </section>}
+    </section>)}
     <section className="faq-section" aria-labelledby="faq-title"><div><p className="eyebrow">A few things to know</p><h2 id="faq-title">Before you get started.</h2></div><div className="faq">{visibleQuestions.map(([question, answer]) => <details key={question}><summary>{question}</summary><p>{answer}</p></details>)}</div></section>
-    <footer><div className="footer-top"><a className="brand" href="#top"><span className="brand-mark" aria-hidden="true">K</span>KANYI</a><p>A clearer next step for your incident investigation.</p><a className="text-link" href="#early-access" onClick={() => trackEvent('access_cta_clicked')}>{accessLabel} <span aria-hidden="true">↗</span></a></div><ProductFooter marketingOnly={marketingOnly} /></footer>
+    <footer><div className="footer-top"><a className="brand" href="#top"><span className="brand-mark" aria-hidden="true">K</span>KANYI</a><p>A clearer next step for your incident investigation.</p><a className="text-link" href={accessTarget} onClick={() => trackEvent('access_cta_clicked')}>{accessLabel} <span aria-hidden="true">↗</span></a></div><ProductFooter marketingOnly={marketingOnly} /></footer>
   </main>;
 }
